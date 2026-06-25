@@ -1,0 +1,4740 @@
+etfs:
+  '159131':
+    name: 港股通信息技术ETF华宝
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.55
+    access: buyable
+  '159201':
+    name: 自由现金流ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159206':
+    name: 卫星ETF永赢
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159227':
+    name: 航空航天ETF华夏
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '159259':
+    name: 成长ETF易方达
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159262':
+    name: 港股通科技ETF广发
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '159263':
+    name: 价值ETF易方达
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '159326':
+    name: 电网设备ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159338':
+    name: 中证A500ETF国泰
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159363':
+    name: 创业板人工智能ETF华宝
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159387':
+    name: 创业板新能源ETF国泰
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159399':
+    name: 现金流ETF国泰
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159506':
+    name: 港股通创新药医疗ETF富国
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '159509':
+    name: 纳指科技ETF景顺
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '159516':
+    name: 半导体设备ETF国泰
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.65
+    access: buyable
+  '159530':
+    name: 机器人ETF易方达
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.55
+    access: buyable
+  '159566':
+    name: 储能电池ETF易方达
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '159570':
+    name: 港股通创新药ETF汇添富
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '159605':
+    name: 中概互联ETF广发
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '159611':
+    name: 电力ETF广发
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '159636':
+    name: 港股通科技30ETF工银
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '159659':
+    name: 纳斯达克100ETF招商
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159687':
+    name: 亚太精选ETF南方
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159691':
+    name: 港股红利ETF工银
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '159732':
+    name: 消费电子ETF华夏
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.2
+    access: buyable
+  '159755':
+    name: 电池ETF广发
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '159781':
+    name: 科创创业ETF易方达
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159783':
+    name: 科创创业50ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159792':
+    name: 港股通互联网ETF富国
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '159819':
+    name: AI ETF
+    type: 行业A
+    sector: AI算力
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.62
+    access: buyable
+  '159851':
+    name: 金融科技ETF华宝
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159852':
+    name: 软件ETF嘉实
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.55
+    access: buyable
+  '159869':
+    name: 游戏ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159870':
+    name: 化工ETF鹏华
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '159892':
+    name: 恒生医药ETF华夏
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '159898':
+    name: 医疗器械ETF
+    type: 行业A
+    sector: 医药器械
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '159901':
+    name: 深证100ETF易方达
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159915':
+    name: 创业板ETF
+    type: 宽基A
+    sector: 成长股
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.33
+    access: chuangyeban
+  '159920':
+    name: 恒生ETF
+    type: 跨境QDII
+    sector: 港股综合
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.24
+    access: qdii
+  '159928':
+    name: 消费ETF汇添富
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.2
+    access: buyable
+  '159941':
+    name: 纳指100ETF
+    type: 跨境QDII
+    sector: 美股科技100
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.38
+    access: qdii
+  '159949':
+    name: 创业板50ETF华安
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159967':
+    name: 创业板成长ETF华夏
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '159980':
+    name: 有色ETF
+    type: 商品
+    sector: 有色金属
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '159981':
+    name: 能源化工ETF
+    type: 商品
+    sector: 能源化工
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.3
+    access: buyable
+  '159985':
+    name: 豆粕ETF
+    type: 商品
+    sector: 农产品
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.25
+    access: buyable
+  '159992':
+    name: 创新药ETF
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '159995':
+    name: 芯片ETF
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.72
+    access: buyable
+  '159996':
+    name: 家电ETF
+    type: 行业A
+    sector: 家电
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.18
+    access: buyable
+  '167301':
+    name: 保险ETF
+    type: 行业A
+    sector: 保险
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '510050':
+    name: 上证50ETF
+    type: 宽基A
+    sector: 大盘蓝筹
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '510210':
+    name: 上证指数ETF富国
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '510300':
+    name: 沪深300ETF
+    type: 宽基A
+    sector: 全市场
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.18
+    access: buyable
+  '510500':
+    name: 中证500ETF
+    type: 宽基A
+    sector: 中盘成长
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '510880':
+    name: 红利ETF
+    type: 策略
+    sector: 高股息
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '511010':
+    name: 国债ETF
+    type: 债券
+    sector: 利率债
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.01
+    access: buyable
+  '511220':
+    name: 城投债ETF
+    type: 债券
+    sector: 信用债
+    fee: 0.002
+    leverage: 1
+    risk_level: 0.05
+    access: buyable
+  '511380':
+    name: 可转债ETF
+    type: 债券
+    sector: 可转债
+    fee: 0.003
+    leverage: 1
+    risk_level: 0.2
+    access: buyable
+  '511880':
+    name: 银华日利
+    type: 货币
+    sector: 货币基金
+    fee: 0.003
+    leverage: 1
+    risk_level: 0
+    access: buyable
+  '511990':
+    name: 华宝添益
+    type: 货币
+    sector: 货币基金
+    fee: 0.003
+    leverage: 1
+    risk_level: 0
+    access: buyable
+  '512000':
+    name: 券商ETF华宝
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '512010':
+    name: 医药ETF易方达
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '512040':
+    name: 价值100ETF富国
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '512070':
+    name: 证券保险ETF易方达
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '512100':
+    name: 中证1000ETF
+    type: 策略
+    sector: 小盘价值
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '512170':
+    name: 医疗ETF
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.3
+    access: buyable
+  '512400':
+    name: 有色金属ETF南方
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '512480':
+    name: 半导体ETF
+    type: 行业A
+    sector: 半导体设备
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.7
+    access: buyable
+  '512660':
+    name: 军工ETF
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '512670':
+    name: 国防ETF
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '512690':
+    name: 酒ETF
+    type: 行业A
+    sector: 白酒消费
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '512710':
+    name: 军工龙头ETF富国
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: buyable
+  '512800':
+    name: 银行ETF华宝
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '512880':
+    name: 证券ETF
+    type: 行业A
+    sector: 券商
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.45
+    access: buyable
+  '512890':
+    name: 红利低波ETF华泰柏瑞
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '512950':
+    name: 央企ETF
+    type: 策略
+    sector: 央企改革
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.15
+    access: buyable
+  '512980':
+    name: 传媒ETF广发
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '513050':
+    name: 中概互联ETF
+    type: 跨境QDII
+    sector: 中概互联网
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.5
+    access: qdii
+  '513060':
+    name: 恒生医疗ETF
+    type: 跨境QDII
+    sector: 港股医药
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513090':
+    name: 香港证券ETF易方达
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '513100':
+    name: 纳指ETF
+    type: 跨境QDII
+    sector: 美股科技
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.36
+    access: qdii
+  '513120':
+    name: 港股创新药ETF广发
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.32
+    access: buyable
+  '513130':
+    name: 恒生科技ETF华泰柏瑞
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513180':
+    name: 恒生科技ETF
+    type: 跨境QDII
+    sector: 港股科技
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.48
+    access: qdii
+  '513190':
+    name: 港股通金融ETF华夏
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '513300':
+    name: 纳斯达克ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '513310':
+    name: 中韩半导体ETF华泰柏瑞
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.65
+    access: buyable
+  '513330':
+    name: 恒生互联网ETF华夏
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513350':
+    name: 标普油气ETF富国
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '513400':
+    name: 道琼斯ETF鹏华
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '513500':
+    name: 标普500ETF
+    type: 跨境QDII
+    sector: 美股综合
+    fee: 0.006
+    leverage: 1
+    risk_level: 0.28
+    access: qdii
+  '513520':
+    name: 日经ETF华夏
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513630':
+    name: 港股低波红利ETF摩根
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '513750':
+    name: 港股通非银ETF广发
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513770':
+    name: 港股互联网ETF华宝
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513880':
+    name: 日经225ETF华安
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '513910':
+    name: 港股通央企红利ETF华夏
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '513980':
+    name: 港股科技ETF景顺
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.35
+    access: qdii
+  '515000':
+    name: 科技ETF华宝
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '515030':
+    name: 新能源车ETF华夏
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '515050':
+    name: 5G ETF
+    type: 行业A
+    sector: 5G/PCB
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.5
+    access: buyable
+  '515080':
+    name: 中证红利ETF
+    type: 策略
+    sector: 红利价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.1
+    access: buyable
+  '515170':
+    name: 食品饮料ETF
+    type: 行业A
+    sector: 食品饮料
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.2
+    access: buyable
+  '515180':
+    name: 红利ETF易方达
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '515220':
+    name: 煤炭ETF国泰
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '515450':
+    name: 红利低波50ETF南方
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.12
+    access: buyable
+  '515790':
+    name: 光伏ETF华泰柏瑞
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '515800':
+    name: 中证800ETF汇添富
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '515880':
+    name: 通信ETF
+    type: 行业A
+    sector: 通信/光模块
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.55
+    access: buyable
+  '516150':
+    name: 稀土ETF嘉实
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '516160':
+    name: 新能源ETF
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.4
+    access: buyable
+  '516510':
+    name: 云计算ETF
+    type: 行业A
+    sector: 云计算/算力
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.55
+    access: buyable
+  '517520':
+    name: 黄金股ETF永赢
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '518600':
+    name: 金ETF广发
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '518880':
+    name: 黄金ETF
+    type: 商品
+    sector: 贵金属
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.18
+    access: buyable
+  '560280':
+    name: 工程机械ETF广发
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '560860':
+    name: 工业有色ETF万家
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '562390':
+    name: 中药ETF
+    type: 行业A
+    sector: 中药
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.25
+    access: buyable
+  '562500':
+    name: 机器人ETF
+    type: 行业A
+    sector: 机器人/智造
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.5
+    access: buyable
+  '562550':
+    name: 绿电ETF华夏
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '562800':
+    name: 稀有金属ETF嘉实
+    type: 商品
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.28
+    access: buyable
+  '563230':
+    name: 卫星ETF富国
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '563300':
+    name: 中证红利低波
+    type: 策略
+    sector: 红利+低波
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.1
+    access: buyable
+  '563360':
+    name: A500ETF华泰柏瑞
+    type: 行业A
+    sector: 其他
+    fee: 0.005
+    leverage: 1
+    risk_level: 0.22
+    access: buyable
+  '588000':
+    name: 科创50ETF
+    type: 宽基A
+    sector: 硬科技
+    fee: 0.0015
+    leverage: 1
+    risk_level: 0.51
+    access: kechuang
+  L2X科创:
+    name: 科创50(2x模拟)
+    type: 杠杆多
+    sector: 硬科技杠杆
+    fee: 0.01
+    leverage: 2
+    risk_level: 0.85
+    access: fake
+  L2X纳指:
+    name: 纳指(2x模拟)
+    type: 杠杆多
+    sector: 美股杠杆
+    fee: 0.01
+    leverage: 2
+    risk_level: 0.75
+    access: fake
+  L2X芯片:
+    name: 芯片ETF(2x模拟)
+    type: 杠杆多
+    sector: 半导体杠杆
+    fee: 0.01
+    leverage: 2
+    risk_level: 0.9
+    access: fake
+  S科创:
+    name: 科创50(空模拟)
+    type: 杠杆空
+    sector: 硬科技做空
+    fee: 0.012
+    leverage: -1
+    risk_level: 0.85
+    access: fake
+  S芯片:
+    name: 芯片ETF(空模拟)
+    type: 杠杆空
+    sector: 半导体做空
+    fee: 0.012
+    leverage: -1
+    risk_level: 0.9
+    access: fake
+  '159001':
+    name: 保证金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159007':
+    name: 华泰养殖
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159022':
+    name: AI双创
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159029':
+    name: 有色广发
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159032':
+    name: 有色易
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159033':
+    name: 粮食基金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159036':
+    name: 软件开发
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159046':
+    name: 绿电TH
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159048':
+    name: 机器人DC
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159050':
+    name: 机器人GF
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159052':
+    name: 电池嘉实
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159053':
+    name: 稀有金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159055':
+    name: 稀金属FG
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159100':
+    name: 巴西
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159101':
+    name: 港科ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159102':
+    name: 港生物
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159105':
+    name: 恒生生科
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159107':
+    name: 创软件
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159109':
+    name: 恒生50
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159120':
+    name: 港科30
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159125':
+    name: 港科技E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159128':
+    name: 港科技TH
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159129':
+    name: 化工基金
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159133':
+    name: 化工TH
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159137':
+    name: 港医疗
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159139':
+    name: 华泰AI
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159140':
+    name: 创智能E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159141':
+    name: 创人工智
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159142':
+    name: 双创AI
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159146':
+    name: 电力
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159147':
+    name: 电池50
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159148':
+    name: 油气富国
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159152':
+    name: H科技PA
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159155':
+    name: 电池DC
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159157':
+    name: 有色TH
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159158':
+    name: 景顺电力
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159167':
+    name: 香港医疗
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159168':
+    name: 工业有色
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159170':
+    name: 港互联网
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159175':
+    name: 电池E
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159181':
+    name: 油气E
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159185':
+    name: HK信息
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159189':
+    name: 石油然气
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159193':
+    name: 电池银华
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159196':
+    name: 港信息E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159202':
+    name: 恒指互联
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159205':
+    name: 创业东财
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159207':
+    name: 高股息
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159208':
+    name: 航天航空
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159209':
+    name: 红利质量
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159212':
+    name: 深100NF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159213':
+    name: 机器人TF
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159217':
+    name: 港创新药
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159218':
+    name: 卫星产业
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159220':
+    name: 港红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159221':
+    name: 现金流基
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159222':
+    name: 现金流E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159223':
+    name: 现金流MW
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159229':
+    name: 现金流GF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159230':
+    name: 通航
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159232':
+    name: 现金流NF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159233':
+    name: 现金流PA
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159235':
+    name: 现金流DC
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159241':
+    name: 航空TH
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159242':
+    name: 创业AIDC
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159243':
+    name: 创业智能
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159246':
+    name: 创AI富国
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159247':
+    name: 创业板TF
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159248':
+    name: AI万家
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159251':
+    name: 港科技WJ
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159256':
+    name: 创业软件
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159258':
+    name: 机器人NF
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159265':
+    name: 香港消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159266':
+    name: HK红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159267':
+    name: 航天ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159268':
+    name: HK消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159269':
+    name: 港科技NF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159270':
+    name: 创200NF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159272':
+    name: 机器人FG
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159273':
+    name: 云计算TF
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159278':
+    name: 机器人PH
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159279':
+    name: AI创业
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159281':
+    name: 港红利TH
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159283':
+    name: 航空NF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159285':
+    name: 港消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159286':
+    name: 港股新药
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159297':
+    name: 创新药港
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159299':
+    name: 科技金融
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159300':
+    name: 300ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159301':
+    name: 公用事业
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159305':
+    name: 电池储能
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159307':
+    name: 100红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159309':
+    name: 油气资源
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159310':
+    name: 芯片产业
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159316':
+    name: 创新药E
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159320':
+    name: 电网ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159321':
+    name: 黄金产业
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159323':
+    name: 港股汽车
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159325':
+    name: 半导体NF
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159327':
+    name: 半导材料
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159329':
+    name: 沙特ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159330':
+    name: 300基金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159337':
+    name: 500基金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159339':
+    name: A500
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159350':
+    name: 深证50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159351':
+    name: A500中证
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159352':
+    name: A500基金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159353':
+    name: 景顺A500
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159356':
+    name: A500万家
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159357':
+    name: A500博时
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159358':
+    name: A500DC
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159359':
+    name: ZZA500
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159360':
+    name: A500天弘
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159361':
+    name: A500E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159362':
+    name: A500指数
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159366':
+    name: 医疗港股
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159367':
+    name: 创50华夏
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159368':
+    name: 创新能源
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159369':
+    name: 创50E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159373':
+    name: 创50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159375':
+    name: 创50国泰
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159378':
+    name: 通用航空
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159381':
+    name: 创AI
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159382':
+    name: AI创业板
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159388':
+    name: 创业AI
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159390':
+    name: A50国联
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159393':
+    name: 300万家
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159501':
+    name: 纳指基金
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159502':
+    name: 标普生科
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159507':
+    name: 电信ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159511':
+    name: 通信指数
+    type: 行业A
+    sector: 通信/5G
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.48
+    access: buyable
+  '159513':
+    name: 纳指大成
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159518':
+    name: 标普油气
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159519':
+    name: 港股国企
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '159526':
+    name: 机器人
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159529':
+    name: 标普消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159531':
+    name: 中证2000
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159532':
+    name: 2000E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159540':
+    name: 信创E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159541':
+    name: 创业板综
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159545':
+    name: 港股红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159546':
+    name: 集成电路
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159547':
+    name: 低波红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159551':
+    name: 机器人业
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159552':
+    name: 2000增强
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159557':
+    name: 港股医疗
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159558':
+    name: 半导体E
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159559':
+    name: 机器人基
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159560':
+    name: 芯片50
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159561':
+    name: 德国ETF
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159562':
+    name: 黄金股
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159565':
+    name: 汽零ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159567':
+    name: HK创新药
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159568':
+    name: 港股互联
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159569':
+    name: 香港红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159572':
+    name: 创200易
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159573':
+    name: 创业200
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159577':
+    name: 美国50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159581':
+    name: 红利基金
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159582':
+    name: 半导体
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159583':
+    name: 通信设备
+    type: 行业A
+    sector: 通信/5G
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.48
+    access: buyable
+  '159587':
+    name: 粮食50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159588':
+    name: 油气基金
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159590':
+    name: 软件50
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159591':
+    name: 中证A50
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159592':
+    name: 中证50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159593':
+    name: A50指数
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159595':
+    name: A50基金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159596':
+    name: A50华宝
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159597':
+    name: 创成长E
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159599':
+    name: 芯片指数
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159601':
+    name: A50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159602':
+    name: 中国A50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159603':
+    name: 双创天弘
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159607':
+    name: 中概互联
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159608':
+    name: 稀有金属
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159609':
+    name: 光伏龙头
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159612':
+    name: 国泰标普
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159615':
+    name: 生科ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159622':
+    name: 创新药AH
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159625':
+    name: 绿色电力
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159628':
+    name: 国证2000
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159629':
+    name: 1000ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159632':
+    name: 纳斯达克
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159633':
+    name: ZZ1000
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159635':
+    name: 基建50
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '159638':
+    name: 高端装备
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159647':
+    name: 中药ETF
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159652':
+    name: 有色基金
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159655':
+    name: 标普ETF
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159656':
+    name: 300成长
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159660':
+    name: 纳指100
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159663':
+    name: 机床
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159665':
+    name: 芯片龙头
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159666':
+    name: 交通运输
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159667':
+    name: 工业母机
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159671':
+    name: 稀金属
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159673':
+    name: PH300ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159676':
+    name: 创业板增
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159680':
+    name: 1000指增
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159681':
+    name: 创50ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159682':
+    name: 创业五零
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159688':
+    name: 恒生互联
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159690':
+    name: 矿业ETF
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159692':
+    name: 证券30
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159695':
+    name: 通信ETF
+    type: 行业A
+    sector: 通信/5G
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.48
+    access: buyable
+  '159696':
+    name: 纳100ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159697':
+    name: 油气ETF
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159698':
+    name: 粮食ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159699':
+    name: 恒生消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159707':
+    name: 地产ETF
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '159708':
+    name: 红利ETF
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159712':
+    name: 港股通50
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159713':
+    name: 稀土ETF
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159715':
+    name: 稀土
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159718':
+    name: 港股医药
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159726':
+    name: 恒生红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159731':
+    name: 石化ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159735':
+    name: 港股消费
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159736':
+    name: 饮食ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159738':
+    name: 云50ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159739':
+    name: 大数据
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159740':
+    name: 恒生科技
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159741':
+    name: 港股科技
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159742':
+    name: 恒指科技
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159745':
+    name: 建材ETF
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159747':
+    name: 香港科技
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159748':
+    name: AH创新药
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159750':
+    name: 科技HK50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159751':
+    name: 港科技
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159757':
+    name: 电池30
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159758':
+    name: 红利50
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159761':
+    name: 新材ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159766':
+    name: 旅游ETF
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159768':
+    name: 地产龙头
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '159770':
+    name: 机器人AI
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159773':
+    name: 创科技
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159775':
+    name: 电池新能
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159779':
+    name: 消电50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159780':
+    name: 双创ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159782':
+    name: 双创50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159790':
+    name: 碳中和
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159796':
+    name: 电池
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159801':
+    name: 芯片基金
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159805':
+    name: 传媒ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159806':
+    name: 新能车
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159807':
+    name: 科技50
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159811':
+    name: 5G50ETF
+    type: 行业A
+    sector: 通信/5G
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.48
+    access: buyable
+  '159812':
+    name: 黄金基金
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159813':
+    name: 芯片
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '159814':
+    name: 创业大盘
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159825':
+    name: 农业ETF
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159828':
+    name: 医疗ETF
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159830':
+    name: 上海金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159831':
+    name: 黄金
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159834':
+    name: 金ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159835':
+    name: 创新药业
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159837':
+    name: 生物科技
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159839':
+    name: 生物药
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159840':
+    name: 锂电池50
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159841':
+    name: 证券ETF
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159842':
+    name: 券商ETF
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159845':
+    name: 中证1000
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159847':
+    name: 中证医疗
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159855':
+    name: 影视ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159857':
+    name: 光伏ETF
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159859':
+    name: 生物药30
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159864':
+    name: 光伏50
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159865':
+    name: 养殖ETF
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159866':
+    name: 日经ETF
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '159867':
+    name: 畜牧ETF
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '159871':
+    name: 有色金属
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159875':
+    name: 新能源
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '159876':
+    name: 有色
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159880':
+    name: 有色50
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159883':
+    name: 医疗器械
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159887':
+    name: 银行ETF
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159890':
+    name: 云ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159899':
+    name: 软件龙头
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159903':
+    name: 深成ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159905':
+    name: 深红利
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '159907':
+    name: 2000ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159908':
+    name: 创业板BS
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159919':
+    name: 沪深300
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159922':
+    name: 500ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159925':
+    name: 南方300
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159929':
+    name: 医药ETF
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159930':
+    name: 能源ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159934':
+    name: 黄金ETF
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159937':
+    name: 黄金9999
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '159938':
+    name: 医药
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '159939':
+    name: 信息技术
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '159943':
+    name: 深证ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159948':
+    name: 创业板EF
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159952':
+    name: 创业ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159957':
+    name: 创业板HX
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159968':
+    name: ZZ500ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159971':
+    name: 创业100
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159977':
+    name: 创业板TH
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159982':
+    name: 中证500
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159993':
+    name: 龙头券商
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159994':
+    name: 5GETF
+    type: 行业A
+    sector: 通信/5G
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.48
+    access: buyable
+  '159997':
+    name: 电子ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '159998':
+    name: 计算机
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '510100':
+    name: 上证50ETF易方达
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510150':
+    name: 消费ETF招商
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '510170':
+    name: 大宗商品ETF国联安
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '510180':
+    name: 上证180ETF华安
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510230':
+    name: 金融ETF国泰
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510310':
+    name: 沪深300ETF易方达
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510320':
+    name: 沪深300ETF中金
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510330':
+    name: 沪深300ETF华夏
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510350':
+    name: 沪深300ETF工银
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510360':
+    name: 沪深300ETF广发
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510510':
+    name: 中证500ETF广发
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510580':
+    name: 中证500ETF易方达
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510630':
+    name: 消费ETF华夏
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '510720':
+    name: 红利国企ETF国泰
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '510760':
+    name: 上证指数ETF国泰
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '510900':
+    name: 恒生中国企业ETF易方达
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '510980':
+    name: 上证指数ETF汇添富
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '511660':
+    name: 货币ETF建信
+    type: 货币
+    sector: 货币
+    fee: 0.003
+    leverage: 1.0
+    risk_level: 0.0
+    access: buyable
+  '511700':
+    name: 货币ETF平安
+    type: 货币
+    sector: 货币
+    fee: 0.003
+    leverage: 1.0
+    risk_level: 0.0
+    access: buyable
+  '511850':
+    name: 招商财富宝ETF
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '511900':
+    name: 富国货币ETF
+    type: 货币
+    sector: 货币
+    fee: 0.003
+    leverage: 1.0
+    risk_level: 0.0
+    access: buyable
+  '512020':
+    name: A500ETF鹏华
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512050':
+    name: A500ETF华夏
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512080':
+    name: A500ETF中金
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512090':
+    name: MSCIA股ETF易方达
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512140':
+    name: 电力ETF华安
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '512200':
+    name: 房地产ETF南方
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '512220':
+    name: TMTETF景顺
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512290':
+    name: 生物医药ETF国泰
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '512460':
+    name: 电池ETF华夏
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '512500':
+    name: 中证500ETF华夏
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512560':
+    name: 军工ETF易方达
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: buyable
+  '512570':
+    name: 证券ETF易方达
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512630':
+    name: 卫星ETF广发
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512680':
+    name: 军工ETF广发
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: buyable
+  '512700':
+    name: 银行ETF南方
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512720':
+    name: 计算机ETF国泰
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '512730':
+    name: 银行ETF鹏华
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512760':
+    name: 芯片ETF国泰
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '512810':
+    name: 军工ETF华宝
+    type: 行业A
+    sector: 军工
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: buyable
+  '512820':
+    name: 银行ETF汇添富
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512900':
+    name: 证券ETF南方
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '512930':
+    name: AI人工智能ETF平安
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '512940':
+    name: 有色ETF华安
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '513000':
+    name: 日经225ETF易方达
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513010':
+    name: 恒生科技ETF易方达
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513020':
+    name: 港股科技ETF国泰
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513030':
+    name: 德国ETF华安
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513040':
+    name: 港股通互联网ETF易方达
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513070':
+    name: 港股通消费ETF易方达
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '513080':
+    name: 法国ETF华安
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513110':
+    name: 纳指ETF华泰柏瑞
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513140':
+    name: 港股通金融ETF华泰柏瑞
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513150':
+    name: 港股通科技ETF华泰柏瑞
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513160':
+    name: 港股科技ETF银华
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513200':
+    name: 港股通医药ETF易方达
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '513220':
+    name: 中概互联ETF招商
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513230':
+    name: 港股通消费ETF华夏
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '513260':
+    name: 恒生科技ETF汇添富
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513280':
+    name: 恒生生物科技ETF汇添富
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513290':
+    name: 纳指生物科技ETF汇添富
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513360':
+    name: 教育ETF博时
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513380':
+    name: 恒生科技ETF广发
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513390':
+    name: 纳指100ETF博时
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513530':
+    name: 港股通红利ETF华泰柏瑞
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '513550':
+    name: 港股通50ETF华泰柏瑞
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513560':
+    name: 香港科技ETF兴银
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513580':
+    name: 恒生科技ETF华安
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513600':
+    name: 恒生指数ETF南方
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513620':
+    name: 港股医疗ETF银华
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '513650':
+    name: 标普500ETF南方
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513660':
+    name: 恒生ETF华夏
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513690':
+    name: 港股红利ETF博时
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '513700':
+    name: 港股通医药ETF鹏华
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '513720':
+    name: 港股互联网ETF国泰
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513730':
+    name: 东南亚科技ETF华泰柏瑞
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513780':
+    name: 港股创新药ETF景顺
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '513800':
+    name: 日本东证指数ETF南方
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513820':
+    name: 港股通红利ETF汇添富
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '513850':
+    name: 美国50ETF易方达
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '513860':
+    name: 港股通科技ETF海富通
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513870':
+    name: 纳指ETF富国
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513890':
+    name: 恒生科技ETF摩根
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513900':
+    name: 港股通100ETF华安
+    type: 跨境QDII
+    sector: 跨境
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.35
+    access: qdii
+  '513920':
+    name: 港股通央企红利ETF华安
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '513950':
+    name: 恒生红利ETF富国
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '513970':
+    name: 恒生消费ETF景顺
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '515010':
+    name: 证券ETF华夏
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515020':
+    name: 银行ETF华夏
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515060':
+    name: 房地产ETF华夏
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '515070':
+    name: 人工智能ETF华夏
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '515100':
+    name: 红利低波100ETF景顺
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '515120':
+    name: 创新药ETF广发
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '515210':
+    name: 钢铁ETF国泰
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '515230':
+    name: 软件ETF国泰
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '515250':
+    name: 智能汽车ETF富国
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515260':
+    name: 电子ETF华宝
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515290':
+    name: 银行ETF天弘
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515300':
+    name: 300红利低波ETF嘉实
+    type: 策略
+    sector: 红利/价值
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.12
+    access: buyable
+  '515310':
+    name: 沪深300ETF汇添富
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515330':
+    name: 沪深300ETF天弘
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515370':
+    name: 光伏ETF华夏
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '515390':
+    name: 沪深300ETF华安
+    type: 宽基A
+    sector: 宽基
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515400':
+    name: 大数据ETF富国
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '515560':
+    name: 证券ETF建信
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515580':
+    name: 科技100ETF华泰柏瑞
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515630':
+    name: 证券保险ETF鹏华
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515650':
+    name: 消费50ETF富国
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '515700':
+    name: 新能源车ETF平安
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '515710':
+    name: 食品饮料ETF华宝
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '515750':
+    name: 科技50ETF富国
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515810':
+    name: 中证800ETF易方达
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515850':
+    name: 证券ETF富国
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515970':
+    name: 工程机械ETF华夏
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '515980':
+    name: 人工智能ETF华富
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '516000':
+    name: 大数据ETF华夏
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '516010':
+    name: 游戏ETF国泰
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516020':
+    name: 化工ETF华宝
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516080':
+    name: 创新药ETF易方达
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '516090':
+    name: 新能源ETF易方达
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '516100':
+    name: 金融科技ETF华夏
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516110':
+    name: 汽车ETF国泰
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516120':
+    name: 化工ETF富国
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516190':
+    name: 传媒ETF华夏
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516210':
+    name: 银行ETF华安
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516220':
+    name: 化工ETF国泰
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516290':
+    name: 光伏ETF汇添富
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '516310':
+    name: 银行ETF易方达
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516350':
+    name: 芯片ETF易方达
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '516370':
+    name: 电力ETF汇添富
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '516460':
+    name: 现金流ETF800鹏华
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516520':
+    name: 智能驾驶ETF华泰柏瑞
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516570':
+    name: 化工行业ETF易方达
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516620':
+    name: 影视ETF国泰
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516630':
+    name: 云计算ETF华夏
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '516640':
+    name: 芯片ETF富国
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '516650':
+    name: 有色金属ETF华夏
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516670':
+    name: 畜牧养殖ETF招商
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '516770':
+    name: 游戏ETF华泰柏瑞
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516780':
+    name: 稀土ETF华泰柏瑞
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '516810':
+    name: 农业ETF华夏
+    type: 行业A
+    sector: 消费
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.2
+    access: buyable
+  '516820':
+    name: 医疗创新ETF平安
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '516850':
+    name: 新能源ETF华夏
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '516860':
+    name: 金融科技ETF博时
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '516880':
+    name: 光伏ETF银华
+    type: 行业A
+    sector: 新能源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.4
+    access: buyable
+  '516920':
+    name: 芯片ETF汇添富
+    type: 行业A
+    sector: 半导体
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.65
+    access: buyable
+  '516970':
+    name: 基建ETF广发
+    type: 行业A
+    sector: 基建/地产
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.25
+    access: buyable
+  '517120':
+    name: 创新药ETF华泰柏瑞
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '517130':
+    name: 云计算ETF嘉实
+    type: 行业A
+    sector: AI/科技
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.55
+    access: buyable
+  '517380':
+    name: 创新药ETF天弘
+    type: 行业A
+    sector: 医药
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.32
+    access: buyable
+  '517400':
+    name: 黄金股ETF国泰
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '517900':
+    name: 银行AH优选ETF招商
+    type: 行业A
+    sector: 金融
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '518660':
+    name: 黄金ETF工银
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '518680':
+    name: 金ETF富国
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '518800':
+    name: 黄金ETF国泰
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '518850':
+    name: 黄金ETF华夏
+    type: 行业A
+    sector: 周期/资源
+    fee: 0.005
+    leverage: 1.0
+    risk_level: 0.28
+    access: buyable
+  '518860':
+    name: 上海金ETF建信
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+  '518890':
+    name: 上海金ETF中银
+    type: 行业A
+    sector: 综合
+    fee: 0.0015
+    leverage: 1.0
+    risk_level: 0.22
+    access: buyable
+_meta:
+  count: 592
+  generated: '2026-06-25'

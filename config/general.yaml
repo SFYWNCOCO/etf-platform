@@ -1,0 +1,53 @@
+budget: 1000
+max_positions: 5
+min_position: 100
+access_levels:
+  buyable: 普通A股账户直接可买
+  kechuang: 需科创板权限(2年+50万)
+  chuangyeban: 需创业板权限(2年+10万)
+  qdii: 需QDII额度/港股通(有外汇额度限制)
+  fake: 大陆未发行(模拟)
+alert_thresholds:
+  premium:
+    normal: 0.02
+    watch: 0.05
+    warn: 0.1
+    danger: 0.2
+  volume_diverg:
+    normal: 0.1
+    watch: 0.2
+    warn: 0.3
+    danger: 0.5
+  news_density:
+    normal: 2.0
+    watch: 3.0
+    warn: 5.0
+    danger: 10.0
+scoring_params:
+  BASE_MULT: 35
+  BASE_RISK: 0.2
+  RISK_TILT_MULT: 200
+  ALPHA_BONUS_BASE: 100
+  ALPHA_BIAS: 0.5
+  ALPHA_SLOPE: 0.5
+  RISK_DEDUCT_BASE: 80
+  RISK_DEDUCT_INTERCEPT: 1.8
+  RISK_DEDUCT_SLOPE: 1.2
+  VULN_PENALTY_MULT: 5
+  TYPE_GROWTH_MULT: 30
+  TYPE_QDII_MULT: 20
+  TYPE_DEF_BOND_MULT: 20
+  TYPE_DEF_STRATEGY_MULT: 12
+  TYPE_DEF_COMMODITY_MULT: 8
+  VOLATILITY_IMPACT_THRESH: 0.01
+  VOLATILITY_MULT: 100
+  VOLATILITY_BIAS: 0.3
+  LEV_AGGRESSIVE_PENALTY: 0.5
+  LEV_DEFENSIVE_PENALTY: 0.2
+  LEV_SHORT_AGGRESSIVE_PENALTY: 0.3
+  LEV_SHORT_DEFENSIVE_PENALTY: 0.1
+  DEF_TYPE_LIMIT: 2
+  GROW_TYPE_LIMIT: 3
+  BALANCED_TYPE_LIMIT: 2
+  MOMENTUM_WEIGHT: 6
+  MOMENTUM_CAP: 40
