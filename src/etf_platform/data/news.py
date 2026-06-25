@@ -1,27 +1,30 @@
-"""News sources for ETF catalysts and events."""
+"""News sources for ETF catalysts and events.
+Primary: Sina Finance news API (free, no auth, stable).
+Backup: Simple HTTP fetch of financial news sites.
+"""
 import json
 import urllib.request
 import urllib.parse
 import time
+import re
 from typing import Optional, List
 from .base import NewsSource, NewsItem, DataHealth, SourceStatus
 
 
-class EastMoneyNewsSource(NewsSource):
-    """Primary news source: EastMoney news search API (free, no auth)."""
+class SinaNewsSource(NewsSource):
+    """Primary news source: Sina Finance roll news API (free, stable)."""
 
-    name = "eastmoney_news"
+    name = "sina_news"
+
+    # Sina category IDs for finance news
+    # lid=2509 = 全部财经, lid=2510 = 国内财经, lid=2511 = 国际财经
+    BASE_URL = "https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&num={limit}"
 
     def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
-        url = (
-            f"https://searchapi.eastmoney.com/bussiness/Web/GetCMSSearchResult"
-            f"?type=8196&pageindex=1&pagesize={limit}"
-            f"&keyword={urllib.parse.quote(keyword)}"
-        )
+        url = self.BASE_URL.format(limit=limit * 2)  # Fetch more, filter by keyword
         try:
             req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0",
-                "Referer": "https://so.eastmoney.com/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             })
             with urllib.request.urlopen(req, timeout=10) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -29,77 +32,107 @@ class EastMoneyNewsSource(NewsSource):
             return []
 
         items = []
-        for item in data.get("Data", []):
-            try:
-                items.append(NewsItem(
-                    title=item.get("Title", ""),
-                    url=item.get("Url", ""),
-                    source="东方财富",
-                    time=item.get("Date", ""),
-                    summary=item.get("Summary", ""),
-                    relevance=0.7,
-                ))
-            except Exception:
+        news_list = data.get("result", {}).get("data", [])
+        kw_lower = keyword.lower()
+
+        for item in news_list:
+            title = str(item.get("title", "") or "")
+            summary = str(item.get("summary", "") or "")
+            keywords = str(item.get("keywords", "") or "")
+            combined = (title + summary + keywords).lower()
+
+            # Filter by keyword in title or summary (client-side since API is unfiltered)
+            if kw_lower not in title.lower() and kw_lower not in summary.lower():
                 continue
+
+            try:
+                ctime = int(item.get("ctime", 0))
+                time_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(ctime)) if ctime else ""
+            except Exception:
+                time_str = ""
+
+            items.append(NewsItem(
+                title=title,
+                url=str(item.get("url", "") or item.get("wapurl", "") or ""),
+                source=str(item.get("media_name", "新浪财经")),
+                time=time_str,
+                summary=summary,
+                relevance=0.8,
+            ))
+            if len(items) >= limit:
+                break
+
         return items
 
     def health(self) -> DataHealth:
         t0 = time.time()
         try:
-            news = self.get_news("ETF", limit=1)
+            # Test the API endpoint directly (return raw items, ignore keyword filtering)
+            import urllib.request, json
+            url = self.BASE_URL.format(limit=1)
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            })
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            items = data.get("result", {}).get("data", [])
             latency = (time.time() - t0) * 1000
-            if len(news) > 0:
+            if items and len(items) > 0:
                 return DataHealth(self.name, SourceStatus.HEALTHY, latency)
-            return DataHealth(self.name, SourceStatus.DEGRADED, latency,
-                            error="No results")
+            return DataHealth(self.name, SourceStatus.DEGRADED, latency, error="API returned no data")
         except Exception as e:
             latency = (time.time() - t0) * 1000
             return DataHealth(self.name, SourceStatus.FAILED, latency, error=str(e))
 
 
 class BackupNewsSource(NewsSource):
-    """Backup news source: uses Baidu search (no API key needed).
-    NOTE: This is a simple HTTP fallback, not a browser-based scraper.
-    """
+    """Backup: direct fetch of financial news pages."""
 
     name = "backup_news"
 
     def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
-        # Simple RSS-style fallback using Baidu
-        url = f"https://www.baidu.com/s?wd={urllib.parse.quote(keyword)}&tn=news"
-        try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                html = resp.read().decode("utf-8", errors="replace")
-        except Exception:
-            return []
+        # Try multiple sources as fallback
+        sources = [
+            ("finance", f"https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2510&num={limit}"),
+            ("finance_intl", f"https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2511&num={limit}"),
+        ]
 
-        # Simple HTML parsing - extract news-like links
-        items = []
-        import re
-        # Look for <a> tags with news-like content
-        for match in re.finditer(r'<a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>', html, re.IGNORECASE):
-            url, title = match.group(1), match.group(2)
-            title = re.sub(r'<[^>]+>', "", title).strip()
-            if len(title) > 10 and keyword[:2] in title:
-                items.append(NewsItem(
-                    title=title,
-                    url=url,
-                    source="百度搜索(备选)",
-                    relevance=0.4,
-                ))
-                if len(items) >= limit:
-                    break
-        return items
+        for src_name, url in sources:
+            try:
+                req = urllib.request.Request(url, headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                })
+                with urllib.request.urlopen(req, timeout=8) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+
+                items = []
+                kw_lower = keyword.lower()
+                for item in data.get("result", {}).get("data", []):
+                    title = str(item.get("title", "") or "")
+                    if kw_lower not in title.lower():
+                        continue
+                    items.append(NewsItem(
+                        title=title,
+                        url=str(item.get("url", "") or ""),
+                        source=src_name,
+                        time=str(item.get("ctime", "")),
+                        summary=str(item.get("summary", "") or ""),
+                        relevance=0.5,
+                    ))
+                    if len(items) >= limit:
+                        break
+                if items:
+                    return items
+            except Exception:
+                continue
+        return []
 
     def health(self) -> DataHealth:
         t0 = time.time()
         try:
-            news = self.get_news("ETF", limit=1)
+            items = self.get_news("ETF", limit=1)
             latency = (time.time() - t0) * 1000
-            status = SourceStatus.HEALTHY if len(news) > 0 else SourceStatus.DEGRADED
+            status = SourceStatus.HEALTHY if len(items) > 0 else SourceStatus.DEGRADED
             return DataHealth(self.name, status, latency)
         except Exception as e:
             latency = (time.time() - t0) * 1000

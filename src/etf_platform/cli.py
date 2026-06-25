@@ -1,4 +1,4 @@
-"""CLI entry point for ETF platform."""
+﻿"""CLI entry point for ETF platform."""
 import sys
 import json
 from pathlib import Path
@@ -8,9 +8,9 @@ from .pipeline import run_full, batch_full, format_full
 def _print_health_table(health_results):
     """Print health check results as a table."""
     print(f"\n{'='*55}")
-    print(f"  ETF 数据源健康检查")
+    print(f"  ETF \u6570\u636e\u6e90\u5065\u5eb7\u68c0\u67e5")
     print(f"{'='*55}")
-    print(f"  {'源名称':<20} {'状态':<12} {'延迟':<8}")
+    print(f"  {'源\u540d\u79f0':<20} {'状\u6001':<12} {'延\u8fdf':<8}")
     print(f"  {'-'*40}")
     for h in health_results:
         icon = {"healthy": "\u2705", "degraded": "\u26a0\ufe0f", "failed": "\u274c"}
@@ -25,7 +25,7 @@ def _print_health_table(health_results):
 def app():
     """CLI dispatcher."""
     args = sys.argv[1:] if len(sys.argv) > 1 else []
-    
+
     if not args or args[0] in ("-h", "--help"):
         print("Usage:")
         print("  etf run <CODE>           Single ETF 11-layer penetration (JSON)")
@@ -33,11 +33,12 @@ def app():
         print("  etf batch [--limit=N]    Batch analysis")
         print("  etf check                Data source health check")
         print("  etf price <CODE>         Live price from best available source")
+        print("  etf news [keyword]       Latest finance news")
         print("  etf --help               This help")
         return
-    
+
     cmd = args[0]
-    
+
     if cmd == "run":
         code = args[1] if len(args) > 1 else ""
         if not code:
@@ -45,7 +46,7 @@ def app():
             return
         result = run_full(code)
         print(json.dumps(result, ensure_ascii=False, indent=2))
-    
+
     elif cmd == "report":
         code = args[1] if len(args) > 1 else ""
         if not code:
@@ -53,7 +54,7 @@ def app():
             return
         result = run_full(code)
         print(format_full(result))
-    
+
     elif cmd == "batch":
         limit = 50
         for a in args[1:]:
@@ -61,7 +62,6 @@ def app():
                 limit = int(a.split("=")[1])
         results = batch_full(limit=limit)
         print(f"\nBatch complete: {len(results)} ETFs analyzed")
-        # Print summary
         for r in results[:10]:
             code = r.get("etf_code", "?")
             s = r.get("layer_scores", {})
@@ -69,16 +69,15 @@ def app():
             print(f"  {code}: avg={total:.1f} | {s.get('L10_Demand','?')}/{s.get('L11_SectorRisk','?')}")
         if len(results) > 10:
             print(f"  ... ({len(results)-10} more)")
-    
+
     elif cmd == "check":
         from .data.manager import check_all_sources
         health_results = check_all_sources()
         _print_health_table(health_results)
-        # Summary
         healthy = sum(1 for h in health_results if h.status.value == "healthy")
         failed = sum(1 for h in health_results if h.status.value == "failed")
         print(f"  {healthy} healthy, {failed} failed\n")
-    
+
     elif cmd == "price":
         code = args[1] if len(args) > 1 else ""
         if not code:
@@ -92,12 +91,21 @@ def app():
             print(f"  \u6210\u4ea4\u989d: {price.amount/1e8:.2f}\u4ebf  |  \u6362\u624b\u7387: {price.turnover_rate:.2f}%")
             print(f"  \u6765\u6e90: {source}\n")
         else:
-            print(f"  \u274c No price data available for {code}\n")
-    
+            print(f"  No price data available for {code}\n")
+
+    elif cmd == "news":
+        keyword = args[1] if len(args) > 1 else ""
+        if not keyword:
+            keyword = "ETF"
+        from .data.manager import get_news
+        items = get_news(keyword, limit=10)
+        print(f"\n  {len(items)} news results for: {keyword}\n")
+        for item in items:
+            print(f"  * {item.title}")
+            if item.source:
+                print(f"    Source: {item.source} | {item.time}")
+            print()
+
     else:
         print(f"Unknown command: {cmd}")
         print("Use: etf --help")
-
-
-if __name__ == "__main__":
-    app()

@@ -5,7 +5,7 @@ from .base import PriceSource, NewsSource, PriceSnapshot, NewsItem, DataHealth, 
 from .eastmoney import EastMoneySource
 from .sina import SinaSource
 from .akshare_source import AKShareSource
-from .news import EastMoneyNewsSource, BackupNewsSource
+from .news import SinaNewsSource, BackupNewsSource
 
 # Priority order for price sources
 _PRICE_SOURCES: List[PriceSource] = [
@@ -16,7 +16,7 @@ _PRICE_SOURCES: List[PriceSource] = [
 
 # News sources
 _NEWS_SOURCES: List[NewsSource] = [
-    EastMoneyNewsSource(),  # Primary
+    SinaNewsSource(),       # Primary: Sina Finance
     BackupNewsSource(),     # Fallback
 ]
 
