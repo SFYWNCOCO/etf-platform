@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "etf-platform"
+version = "0.1.0"
+description = "ETF L1-L11 penetration platform"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+etf = "etf_platform.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["etf_platform*"]
