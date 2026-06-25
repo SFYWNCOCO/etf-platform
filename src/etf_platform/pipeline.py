@@ -38,6 +38,8 @@ def batch_full(limit: int = 50, sort_by: str = "score", codes: list = None, live
     enriched = []
     for r in results:
         try:
+            code = r.get("code", "")
+            r["etf_code"] = code
             r = add_demand_layers(r)
             if live:
                 try:
