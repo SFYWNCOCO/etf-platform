@@ -3,48 +3,83 @@ import time
 import json
 from typing import List, Dict, Optional
 
-# Default weights for composite scoring
-# Higher weight = more important
-DEFAULT_WEIGHTS = {
-    "供给侧安全": {
-        "L3_Material": 0.10,
-        "L4_SupplyChain": 0.10,
-        "L5_Tech": 0.05,
-        "L6_Politics": 0.10,
-        "L7_Irreplaceable": 0.05,
-    },
-    "资金面": {
-        "L8_CapitalFlow": 0.20,
-    },
-    "前瞻信号": {
-        "L9_Signals": 0.10,
-    },
-    "需求面": {
-        "L10_Demand": 0.15,
-        "L11_SectorRisk": 0.15,
-    },
+# Layer categories for auto-weighting
+LAYER_CATEGORIES = {
+    "供给侧": ["L3_Material", "L4_SupplyChain", "L5_Tech", "L6_Politics", "L7_Irreplaceable"],
+    "资金面": ["L8_CapitalFlow"],
+    "信号面": ["L9_Signals"],
+    "需求面": ["L10_Demand", "L11_SectorRisk"],
 }
 
-# Risk profile presets
+# Risk profile category weights (auto-distributed among layers in each category)
+CATEGORY_WEIGHTS = {
+    "保守": {"供给侧": 0.45, "资金面": 0.10, "信号面": 0.05, "需求面": 0.40},
+    "均衡": {"供给侧": 0.35, "资金面": 0.25, "信号面": 0.10, "需求面": 0.30},
+    "进取": {"供给侧": 0.20, "资金面": 0.40, "信号面": 0.20, "需求面": 0.20},
+}
+
+
+def _compute_auto_weights(results: list, profile: str = "均衡") -> Dict[str, float]:
+    """Compute layer weights automatically based on score variance.
+    Higher variance = more discriminating power = higher weight.
+    """
+    import statistics
+
+    # Collect scores for each layer across all ETFs
+    layer_scores = {}
+    for r in results:
+        scores = r.get("layer_scores", {}) if isinstance(r, dict) else {}
+        for layer, score in scores.items():
+            if isinstance(score, (int, float)):
+                if layer not in layer_scores:
+                    layer_scores[layer] = []
+                layer_scores[layer].append(score)
+
+    # Get category weight for this profile
+    cat_weights = CATEGORY_WEIGHTS.get(profile, CATEGORY_WEIGHTS["均衡"])
+
+    # Build flat weight dict
+    weights = {}
+    for cat, layers in LAYER_CATEGORIES.items():
+        cat_w = cat_weights.get(cat, 0)
+        # Get variance for each layer in this category
+        vars_in_cat = []
+        for layer in layers:
+            scores = layer_scores.get(layer, [])
+            if len(scores) > 1 and max(scores) > min(scores):
+                # Use coefficient of variation (std/mean) for scale-invariant variance
+                mean = statistics.mean(scores)
+                if mean > 0:
+                    cv = statistics.stdev(scores) / mean
+                    vars_in_cat.append((layer, cv))
+                else:
+                    vars_in_cat.append((layer, 0.1))
+            else:
+                vars_in_cat.append((layer, 0.1))
+
+        # Distribute category weight proportionally to variance
+        total_var = sum(v for _, v in vars_in_cat)
+        if total_var > 0:
+            for layer, v in vars_in_cat:
+                weights[layer] = round(cat_w * (v / total_var), 3)
+        else:
+            # Equal distribution
+            for layer in layers:
+                weights[layer] = round(cat_w / len(layers), 3)
+
+    # Normalize to sum = 1.0
+    total = sum(weights.values())
+    if total > 0:
+        weights = {k: round(v / total, 3) for k, v in weights.items()}
+
+    return weights
+
+
+# Risk profile presets (kept for backward compat)
 RISK_PROFILES = {
-    "保守": {k: v * 0.6 for k, v in DEFAULT_WEIGHTS["供给侧安全"].items()} | {
-        "L8_CapitalFlow": 0.10,
-        "L9_Signals": 0.05,
-        "L10_Demand": 0.25,
-        "L11_SectorRisk": 0.25,
-    },
-    "均衡": {k: v for k, v in DEFAULT_WEIGHTS["供给侧安全"].items()} | {
-        "L8_CapitalFlow": 0.20,
-        "L9_Signals": 0.10,
-        "L10_Demand": 0.15,
-        "L11_SectorRisk": 0.15,
-    },
-    "进取": {k: v * 0.5 for k, v in DEFAULT_WEIGHTS["供给侧安全"].items()} | {
-        "L8_CapitalFlow": 0.35,
-        "L9_Signals": 0.20,
-        "L10_Demand": 0.10,
-        "L11_SectorRisk": 0.10,
-    },
+    "保守": {"L3_Material": 0.09, "L4_SupplyChain": 0.09, "L5_Tech": 0.03, "L6_Politics": 0.12, "L7_Irreplaceable": 0.12, "L8_CapitalFlow": 0.10, "L9_Signals": 0.05, "L10_Demand": 0.20, "L11_SectorRisk": 0.20},
+    "均衡": {"L3_Material": 0.07, "L4_SupplyChain": 0.07, "L5_Tech": 0.04, "L6_Politics": 0.09, "L7_Irreplaceable": 0.08, "L8_CapitalFlow": 0.25, "L9_Signals": 0.10, "L10_Demand": 0.15, "L11_SectorRisk": 0.15},
+    "进取": {"L3_Material": 0.04, "L4_SupplyChain": 0.04, "L5_Tech": 0.04, "L6_Politics": 0.04, "L7_Irreplaceable": 0.04, "L8_CapitalFlow": 0.40, "L9_Signals": 0.20, "L10_Demand": 0.10, "L11_SectorRisk": 0.10},
 }
 
 
