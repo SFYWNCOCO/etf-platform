@@ -25,23 +25,31 @@ def _print_screen_results(results):
     if not results:
         print("\n  No results.\n")
         return
-    print(f"\n  {'='*60}")
+    print(f"\n  {'='*70}")
     print(f"  ETF \u63a8\u8350\u6392\u540d")
-    print(f"  {'='*60}")
-    print(f"  {'#':<3} {'\u4ee3\u7801':<8} {'\u540d\u79f0':<24} {'\u884c\u4e1a':<12} {'\u603b\u5206':<6} {'\u98ce\u9669':<6}")
-    print(f"  {'-'*60}")
+    print(f"  {'='*70}")
+    print(f"  {'#':<3} {'\u4ee3\u7801':<8} {'\u540d\u79f0':<22} {'\u884c\u4e1a':<12} {'\u603b\u5206':<6} {'\u98ce\u9669':<5} {'\u8d8b\u52bf':<14}")
+    print(f"  {'-'*70}")
+    ticons = {"oversold":"\U0001f7e2\u8d85\u5356","weak":"\U0001f7e1\u56de\u8c03","neutral":"\u26aa\u4e2d\u6027","strong":"\U0001f7e1\u58ee\u6001","overbought":"\U0001f534\u8d85\u4e70","plunging":"\U0001f534\u6025\u8dcc","surging":"\U0001f7e2\u6025\u6da8"}
     for r in results:
-        rl = r.get('risk_level', 0)
+        rl = r.get("risk_level", 0)
         risk_icon = "\U0001f7e2" if rl < 0.3 else ("\U0001f7e1" if rl < 0.6 else "\U0001f534")
-        print(f"  {r['rank']:<3} {r['code']:<8} {r['name'][:22]:<24} {r['sector'][:10]:<12} {r['composite_score']:<6.1f} {risk_icon}{rl:.2f}")
-    print(f"  {'='*60}")
+        trend = r.get("trend", {})
+        sig = trend.get("signal", "")
+        tag = ticons.get(sig, "")
+        chg = trend.get("change_20d", 0)
+        trend_str = f"{tag} {chg:+.1f}%" if tag else ""
+        c = r["code"]
+        n = r["name"][:20]
+        sec = r["sector"][:10]
+        sc = r["composite_score"]
+        print(f"  {r['rank']:<3} {c:<8} {n:<22} {sec:<12} {sc:<6.1f} {risk_icon}{rl:.2f} {trend_str:<14}")
+    print(f"  {'='*70}")
     print(f"  \u6838\u5fc3\u7406\u7531:")
     for r in results[:5]:
         print(f"  #{r['rank']} {r['name']}")
         print(f"      {r['reason']}")
     print()
-
-
 def app():
     args = sys.argv[1:] if len(sys.argv) > 1 else []
     
