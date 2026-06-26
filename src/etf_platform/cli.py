@@ -363,7 +363,7 @@ def app():
             print("  进攻推荐: %s" % m["recommended"]["offensive"])
             print("")
         else:
-            print("  No health data for %s" % code)
+            print("  ⚠️ %s 暂无生态健康数据, 可用 etf report %s" % (code, code))
 
 
     elif cmd == "holdings":
@@ -385,7 +385,7 @@ def app():
                     print("  %-14s %-8s %.1f%% %-16s %s" % (s["stock"],s["code"],s["weight"]*100,s["chain"][:16],s["tech"][:24]))
                 print("")
             else:
-                print("  No holdings data for %s" % code)
+                print("  ⚠️ %s 暂无持仓数据, 可用 etf report %s" % (code, code))
                 print("  Covered ETFs:", ", ".join(list_covered_etfs()))
         else:
             print("  Covered ETFs: %s" % ", ".join(list_covered_etfs()))
@@ -419,7 +419,7 @@ def app():
                         print("    • %s (%s)" % (sc["scene"], sc["probability"]))
                 print("")
             else:
-                print("  No chain data for %s" % code)
+                print("  ⚠️ %s 暂无供应链数据, 可用 etf analyse %s" % (code, code))
         else:
             print("")
             print("  [供应链风险排名]")
@@ -445,7 +445,7 @@ def app():
         print("  ETF系统状态")
         print("  %s" % ("="*40))
         print("  ETF数量: %d" % len(etfs))
-        print("  数据源: %d healthy, %d failed" % (healthy, failed))
+        print("  数据源: %s healthy, %s failed (8s timeout)" % (str(healthy), str(failed)))
         print("  版本: 0.2.0 (integrated)")
         print("  模块: penetration + rotation + demand + analyst")
         for h in health:
