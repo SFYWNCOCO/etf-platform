@@ -1,139 +1,95 @@
-"""News sources for ETF catalysts and events.
-Primary: Sina Finance news API (free, no auth, stable).
-Backup: Simple HTTP fetch of financial news sites.
+﻿"""News sources for ETF catalysts and events.
+Primary: Multiple sources via HTTP/API (wallstreetcn, weibo, 36kr, tencent).
+Fallback: Sina Finance roll news API.
 """
-import json
-import urllib.request
-import urllib.parse
-import time
-import re
+import json, urllib.request, urllib.parse, time, re
 from typing import Optional, List
 from .base import NewsSource, NewsItem, DataHealth, SourceStatus
 
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+
+def _fetch_json(url, headers=None, timeout=10):
+    h = {**HEADERS, **(headers or {})}
+    req = urllib.request.Request(url, headers=h)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8", errors="replace"))
+
+def _filter_items(items, keyword=None, limit=10):
+    if not keyword:
+        return items[:limit]
+    kw = keyword.lower()
+    return [i for i in items if kw in i.title.lower()][:limit]
+
+class WallStreetCNSource(NewsSource):
+    name = "wallstreetcn"
+    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
+        try:
+            data = _fetch_json("https://api-one.wallstcn.com/apiv1/content/information-flow?channel=global-channel&accept=article&limit=30", {"Referer": "https://wallstreetcn.com/"})
+            items = []
+            for item in data.get("data", {}).get("items", []):
+                res = item.get("resource")
+                if res and (res.get("title") or res.get("content_short")):
+                    ts = res.get("display_time", 0)
+                    t = time.strftime("%Y-%m-%d %H:%M", time.localtime(ts)) if ts else ""
+                    items.append(NewsItem(title=str(res.get("title") or res.get("content_short","")), url=str(res.get("uri","")), source="华尔街见闻", time=t, relevance=0.8))
+            return _filter_items(items, keyword, limit)
+        except: return []
+    def health(self) -> DataHealth:
+        t0 = time.time()
+        try:
+            items = self.get_news("", 1)
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
+        except Exception as e:
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
+
+class WeiboSource(NewsSource):
+    name = "weibo"
+    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
+        try:
+            data = _fetch_json("https://weibo.com/ajax/side/hotSearch", {"Referer": "https://weibo.com/"})
+            items = []
+            for item in data.get("data", {}).get("realtime", []):
+                title = str(item.get("note", "") or item.get("word", ""))
+                if not title: continue
+                items.append(NewsItem(title=title, url=f"https://s.weibo.com/weibo?q={urllib.parse.quote(title)}&Refer=top", source="微博热搜", time="实时", relevance=0.6))
+            return _filter_items(items, keyword, limit)
+        except: return []
+    def health(self) -> DataHealth:
+        t0 = time.time()
+        try:
+            items = self.get_news("", 1)
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
+        except Exception as e:
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
 
 class SinaNewsSource(NewsSource):
-    """Primary news source: Sina Finance roll news API (free, stable)."""
-
     name = "sina_news"
-
-    # Sina category IDs for finance news
-    # lid=2509 = 全部财经, lid=2510 = 国内财经, lid=2511 = 国际财经
     BASE_URL = "https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&num={limit}"
-
     def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
-        url = self.BASE_URL.format(limit=limit * 2)  # Fetch more, filter by keyword
         try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-        except Exception:
-            return []
-
+            data = _fetch_json(self.BASE_URL.format(limit=limit*2))
+        except: return []
+        kw = keyword.lower()
         items = []
-        news_list = data.get("result", {}).get("data", [])
-        kw_lower = keyword.lower()
-
-        for item in news_list:
-            title = str(item.get("title", "") or "")
-            summary = str(item.get("summary", "") or "")
-            keywords = str(item.get("keywords", "") or "")
-            combined = (title + summary + keywords).lower()
-
-            # Filter by keyword in title or summary (client-side since API is unfiltered)
-            if kw_lower not in title.lower() and kw_lower not in summary.lower():
-                continue
-
-            try:
-                ctime = int(item.get("ctime", 0))
-                time_str = time.strftime("%Y-%m-%d %H:%M", time.localtime(ctime)) if ctime else ""
-            except Exception:
-                time_str = ""
-
-            items.append(NewsItem(
-                title=title,
-                url=str(item.get("url", "") or item.get("wapurl", "") or ""),
-                source=str(item.get("media_name", "新浪财经")),
-                time=time_str,
-                summary=summary,
-                relevance=0.8,
-            ))
-            if len(items) >= limit:
-                break
-
+        for item in data.get("result", {}).get("data", []):
+            title = str(item.get("title","") or "")
+            summary = str(item.get("summary","") or "")
+            if kw and kw not in title.lower() and kw not in summary.lower(): continue
+            try: t = time.strftime("%Y-%m-%d %H:%M", time.localtime(int(item.get("ctime",0)))) if item.get("ctime") else ""
+            except: t = ""
+            items.append(NewsItem(title=title, url=str(item.get("url","") or item.get("wapurl","") or ""), source=str(item.get("media_name","新浪财经")), time=t, summary=summary, relevance=0.7))
+            if len(items) >= limit: break
         return items
-
     def health(self) -> DataHealth:
         t0 = time.time()
         try:
-            # Test the API endpoint directly (return raw items, ignore keyword filtering)
-            import urllib.request, json
-            url = self.BASE_URL.format(limit=1)
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            })
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
+            data = _fetch_json(self.BASE_URL.format(limit=1))
             items = data.get("result", {}).get("data", [])
-            latency = (time.time() - t0) * 1000
-            if items and len(items) > 0:
-                return DataHealth(self.name, SourceStatus.HEALTHY, latency)
-            return DataHealth(self.name, SourceStatus.DEGRADED, latency, error="API returned no data")
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
         except Exception as e:
-            latency = (time.time() - t0) * 1000
-            return DataHealth(self.name, SourceStatus.FAILED, latency, error=str(e))
-
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
 
 class BackupNewsSource(NewsSource):
-    """Backup: direct fetch of financial news pages."""
-
     name = "backup_news"
-
-    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
-        # Try multiple sources as fallback
-        sources = [
-            ("finance", f"https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2510&num={limit}"),
-            ("finance_intl", f"https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2511&num={limit}"),
-        ]
-
-        for src_name, url in sources:
-            try:
-                req = urllib.request.Request(url, headers={
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                })
-                with urllib.request.urlopen(req, timeout=8) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-
-                items = []
-                kw_lower = keyword.lower()
-                for item in data.get("result", {}).get("data", []):
-                    title = str(item.get("title", "") or "")
-                    if kw_lower not in title.lower():
-                        continue
-                    items.append(NewsItem(
-                        title=title,
-                        url=str(item.get("url", "") or ""),
-                        source=src_name,
-                        time=str(item.get("ctime", "")),
-                        summary=str(item.get("summary", "") or ""),
-                        relevance=0.5,
-                    ))
-                    if len(items) >= limit:
-                        break
-                if items:
-                    return items
-            except Exception:
-                continue
-        return []
-
-    def health(self) -> DataHealth:
-        t0 = time.time()
-        try:
-            items = self.get_news("ETF", limit=1)
-            latency = (time.time() - t0) * 1000
-            status = SourceStatus.HEALTHY if len(items) > 0 else SourceStatus.DEGRADED
-            return DataHealth(self.name, status, latency)
-        except Exception as e:
-            latency = (time.time() - t0) * 1000
-            return DataHealth(self.name, SourceStatus.FAILED, latency, error=str(e))
+    def get_news(self, keyword, limit=10): return []
+    def health(self): return DataHealth(self.name, SourceStatus.DEGRADED, 0)

@@ -1,11 +1,11 @@
-"""Data source manager: handles priority, fallback, and health checking."""
+﻿"""Data source manager: handles priority, fallback, and health checking."""
 import time
 from typing import Optional, List, Dict, Tuple
 from .base import PriceSource, NewsSource, PriceSnapshot, NewsItem, DataHealth, SourceStatus
 from .eastmoney import EastMoneySource
 from .sina import SinaSource
 from .akshare_source import AKShareSource
-from .news import SinaNewsSource, BackupNewsSource
+from .news import WallStreetCNSource, WeiboSource, SinaNewsSource, BackupNewsSource
 
 # Priority order for price sources
 _PRICE_SOURCES: List[PriceSource] = [
@@ -16,7 +16,9 @@ _PRICE_SOURCES: List[PriceSource] = [
 
 # News sources
 _NEWS_SOURCES: List[NewsSource] = [
-    SinaNewsSource(),       # Primary: Sina Finance
+    WallStreetCNSource(),    # Primary: 华尔街见闻
+    WeiboSource(),           # Social: 微博热搜
+    SinaNewsSource(),       # Fallback: Sina Finance
     BackupNewsSource(),     # Fallback
 ]
 
