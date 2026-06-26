@@ -237,17 +237,22 @@ def app():
         if not code:
             print("Error: need ETF code")
             return
-        from .data.valuation import get_valuation
-        v = get_valuation(code)
-        if v:
+        from .data.valuation import get_fund_snapshot
+        v = get_fund_snapshot(code)
+        if v and v.nav > 0:
             print(f"\n  {v.name} ({v.code})")
-            print(f"  单位净值: {v.nav:.4f}")
-            print(f"  市场价:   {v.market_price:.4f}")
+            print(f"  类型:     {v.fund_type}")
+            print(f"  NAV:      {v.nav:.4f}")
+            print(f"  市价:     {v.market_price:.4f}")
             print(f"  折价率:   {v.premium_pct:+.2f}%")
             print(f"  日回报:   {v.daily_return:+.2f}%")
-            print(f"  类型:     {v.fund_type}\n")
+            if v.change_1m != 0:
+                print(f"  阶段涨幅: 1月{v.change_1m:+.1f}%  3月{v.change_3m:+.1f}%")
+            if v.tracking_index:
+                print(f"  跟踪标的: {v.tracking_index}")
+            print()
         else:
-            print(f"  No valuation data for {code}\n")
+            print(f"  No data for {code}\n")
     
     else:
         print(f"Unknown command: {cmd}")
