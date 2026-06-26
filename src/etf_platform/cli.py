@@ -122,14 +122,24 @@ def app():
         print("Usage:")
         print("  etf run <CODE>           Single ETF 11-layer penetration (JSON)")
         print("  etf report <CODE>        Full formatted report")
-        print("  etf batch [--limit=N]    Batch analysis")
-        print("  etf check                Data source health check")
-        print("  etf price <CODE>         Live price from best available source")
+        print("")
+        print("  etf analyse <CODE>       Deep analysis (7 modules)")
+        print("  etf patrol               Daily patrol (scan+rotation+prices)")
+        print("  etf portfolio [--profile=] [--budget=N]  Portfolio allocation")
+        print("  etf chain [CODE]         Supply chain risk analysis")
+        print("  etf health <CODE>        ETF ecosystem health score")
+        print("  etf holdings <CODE>      Top-10 holdings penetration")
+        print("  etf insight [--json]     Decision history analysis")
+        print("  etf rotation             Sector rotation snapshot")
+        print("  etf screen [--top=N]     Market scan & ranking [--profile=均衡]")
+        print("  etf recommend            Quick top-5 recommendation")
+        print("  etf compare <A> <B>      Side-by-side comparison")
+        print("  etf price <CODE>         Live price")
+        print("  etf valu <CODE>          NAV & premium data")
         print("  etf news [keyword]       Latest finance news")
-        print("  etf screen [--top=N] [--profile=均衡]  Full market scan & ranking")
-        print("  etf recommend              Quick top-5 recommendation")
-        print("  etf compare <A> <B>       Side-by-side comparison of two ETFs")
-        print("  etf valu <CODE>            NAV & premium data")
+        print("  etf check                Data source health check")
+        print("  etf status               System status")
+        print("  etf batch [--limit=N]    Batch analysis")
         print("  etf --help               This help")
         return
     
@@ -254,6 +264,194 @@ def app():
         else:
             print(f"  No data for {code}\n")
     
+    elif cmd == "analyse":
+        """全面分析: 穿透+轮动+宏观+建议"""
+        code = args[1] if len(args) > 1 else ""
+        profile = "balanced"
+        for a in args[2:]:
+            if a.startswith("--profile="):
+                profile = a.split("=")[1]
+        if not code:
+            print("Error: need ETF code")
+            return
+        from .analyst import analyse as _analyse
+        r = _analyse(code, profile=profile)
+        layers = r.get("layer_scores", {})
+        print("")
+        print("  [深度学习] %s %s" % (code, r.get("name","")))
+        print("  %s" % ("="*50))
+        print("  行业: %s | 类型: %s" % (r.get("sector","?"), r.get("sector_type","?")))
+        print("  综合评分: %.2f/10 | 风险: %s" % (r.get("composite_score",0), r.get("risk_level","?")))
+        print("  供给端: %.1f  资金面: %.1f" % (r.get("supply_score",0), r.get("capital_score",0)))
+        print("  信号面: %.1f  需求端: %.1f" % (r.get("signal_score",0), r.get("demand_score",0)))
+        for k, v in sorted(layers.items()):
+            print("    %s: %s" % (k, v))
+        rs = r.get("rotation_signal")
+        if rs:
+            print("  轮动信号: %s %+.2f%% (%s)" % (rs.get("icon",""), rs.get("change_pct",0), rs.get("signal","?")))
+        print("  建议: %s" % r.get("advice","?"))
+        print("")
+    
+    elif cmd == "patrol":
+        """每日巡逻: 全市场扫描+轮动+行情+建议"""
+        from .analyst import patrol as _patrol
+        print(_patrol())
+    
+    elif cmd == "rotation":
+        """行业轮动快照"""
+        from .analysis.rotation import detect_rotation
+        r = detect_rotation()
+        if r.get("sectors"):
+            print("")
+            print("  %-14s %-8s %-8s %-8s" % ("行业", "涨跌", "信号", "成交额"))
+            print("  %s" % ("-"*40))
+            for sec, info in sorted(r["sectors"].items(), key=lambda x: x[1]["change_pct"], reverse=True):
+                print("  %s %-12s %+.2f%%  %-8s %.2f亿" % (info["icon"], sec, info["change_pct"], info["signal"], info["amount_yi"]))
+            print("")
+            print("  领涨: %s" % r["top_gainers"])
+            if r.get("top_losers"):
+                print("  领跌: %s" % r["top_losers"])
+            print("")
+    
+
+
+    elif cmd == "portfolio":
+        """投资组合分配"""
+        budget = 1000
+        profile = "balanced"
+        codes = []
+        for a in args[1:]:
+            if a.startswith("--budget="):
+                budget = int(a.split("=")[1])
+            elif a.startswith("--profile="):
+                profile = a.split("=")[1]
+            elif not a.startswith("--"):
+                codes.append(a)
+        from .optimize.portfolio import generate_portfolio_report
+        from .analyst import analyse
+        results = {}
+        if codes:
+            for code in codes:
+                r = analyse(code, profile=profile)
+                results[code] = r
+        else:
+            for code in ["512890","159995","159819","518880","159201","511010"]:
+                r = analyse(code, profile=profile)
+                results[code] = r
+        print(generate_portfolio_report(results, budget=budget, profile=profile))
+
+    elif cmd == "health":
+        """ETF生态健康评分"""
+        code = args[1] if len(args) > 1 else ""
+        if not code:
+            print("Usage: etf health <CODE>")
+            return
+        from .analysis.macro import full_eco_report
+        r = full_eco_report(code)
+        h = r["health"]
+        if h:
+            print("")
+            print("  [生态健康] %s" % code)
+            print("  %s" % ("="*45))
+            print("  综合健康: %d分 %s" % (h["score"], h["level"]))
+            print("  模块分解:")
+            for mod, sc in sorted(h["modules"].items()):
+                print("    %s: %.1f" % (mod.replace("_"," "), sc))
+            m = r["macro"]
+            print("  宏观阶段: %s" % m["phase"])
+            print("  防御推荐: %s" % m["recommended"]["defensive"])
+            print("  进攻推荐: %s" % m["recommended"]["offensive"])
+            print("")
+        else:
+            print("  No health data for %s" % code)
+
+
+    elif cmd == "holdings":
+        """持仓穿透数据"""
+        code = args[1] if len(args) > 1 else ""
+        from .analysis.holdings import get_holdings, get_concentration_analysis, list_covered_etfs
+        if code:
+            h = get_holdings(code)
+            ca = get_concentration_analysis(code)
+            if h:
+                print("")
+                print("  [持仓穿透] %s %s" % (code, h["name"]))
+                print("  %s" % ("="*55))
+                print("  前10集中度: %.0f%% | 加权进口依赖: %.1f%%" % (ca["top10_weight"]*100, ca["weighted_import_dep"]*100))
+                print("  风险: %s" % ca["risk_summary"])
+                print("  持仓明细:")
+                print("  %-14s %-8s %-6s %-16s %s" % ("股票","代码","权重","链位置","技术等级"))
+                for s in h["top10"]:
+                    print("  %-14s %-8s %.1f%% %-16s %s" % (s["stock"],s["code"],s["weight"]*100,s["chain"][:16],s["tech"][:24]))
+                print("")
+            else:
+                print("  No holdings data for %s" % code)
+                print("  Covered ETFs:", ", ".join(list_covered_etfs()))
+        else:
+            print("  Covered ETFs: %s" % ", ".join(list_covered_etfs()))
+
+    elif cmd == "insight":
+        """策略决策分析"""
+        from .optimize.decision import print_report, analyze
+        if "--json" in args:
+            import json
+            print(json.dumps(analyze(), ensure_ascii=False, indent=2))
+        else:
+            print_report()
+
+    elif cmd == "chain":
+        """供应链风险分析"""
+        code = args[1] if len(args) > 1 else ""
+        from .analysis.chain import get_chain_report, find_safest_etfs, find_riskiest_etfs
+        if code:
+            r = get_chain_report(code)
+            if r and "risk_level" in r:
+                print("")
+                print("  [供应链风险] %s %s" % (r["code"], r["name"]))
+                print("  %s" % ("="*50))
+                print("  风险等级: %s (%.1f分)" % (r["risk_level"], r["risk_score"]))
+                print("  直接瓶颈: %d  间接链: %d  连锁场景: %d" % (
+                    r["direct_bottlenecks"], r["indirect_chains"], r["cascade_scenarios_count"]))
+                print("  隐藏连接: %s" % r["hidden_link"])
+                if r.get("cascade_scenarios"):
+                    print("  影响场景:")
+                    for sc in r["cascade_scenarios"]:
+                        print("    • %s (%s)" % (sc["scene"], sc["probability"]))
+                print("")
+            else:
+                print("  No chain data for %s" % code)
+        else:
+            print("")
+            print("  [供应链风险排名]")
+            print("  %s" % ("="*50))
+            print("  最脆弱的ETF:")
+            for etf in find_riskiest_etfs(5):
+                rs = etf["risk_score"]
+                risk_icon = "🔴" if rs >= 3.0 else ("🸀" if rs >= 2.0 else "⚪")
+                print("  %s %s %s: %.1f分" % (risk_icon, etf["code"], etf["name"], rs))
+            print("  最安全的ETF:")
+            for etf in find_safest_etfs(5):
+                print("  🟢 %s %s: %.1f分" % (etf["code"], etf["name"], etf["risk_score"]))
+            print("")
+    elif cmd == "status":
+        """系统状态概览"""
+        from .data.manager import check_all_sources
+        from .config_loader import load_etfs
+        etfs = load_etfs()
+        health = check_all_sources()
+        healthy = sum(1 for h in health if h.status.value == "healthy")
+        failed = sum(1 for h in health if h.status.value == "failed")
+        print("")
+        print("  ETF系统状态")
+        print("  %s" % ("="*40))
+        print("  ETF数量: %d" % len(etfs))
+        print("  数据源: %d healthy, %d failed" % (healthy, failed))
+        print("  版本: 0.2.0 (integrated)")
+        print("  模块: penetration + rotation + demand + analyst")
+        for h in health:
+            print("    %s: %s (%dms)" % (h.source_name, h.status.value, h.latency_ms))
+        print("")
+
     else:
         print(f"Unknown command: {cmd}")
         print("Use: etf --help")

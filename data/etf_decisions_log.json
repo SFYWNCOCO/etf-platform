@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "created": "2026-06-26",
+  "transactions": [
+    {
+      "code": "159995",
+      "name": "芯片ETF",
+      "action": "buy",
+      "price": 2.5,
+      "amount": 200,
+      "total_cost": 500,
+      "time": "2026-03-15",
+      "reason": "国产替代+AI芯片需求爆发",
+      "sector": "半导体",
+      "mode": "aggressive"
+    },
+    {
+      "code": "159995",
+      "name": "芯片ETF",
+      "action": "sell",
+      "price": 3.1,
+      "amount": 200,
+      "profit": 120,
+      "profit_pct": 24.0,
+      "time": "2026-06-10",
+      "hold_days": 87,
+      "sector": "半导体",
+      "mode": "aggressive"
+    },
+    {
+      "code": "512890",
+      "name": "红利低波ETF",
+      "action": "buy",
+      "price": 1.12,
+      "amount": 500,
+      "total_cost": 560,
+      "time": "2026-01-10",
+      "reason": "低波动防守+高股息",
+      "sector": "红利/价值",
+      "mode": "defensive"
+    },
+    {
+      "code": "512890",
+      "name": "红利低波ETF",
+      "action": "sell",
+      "price": 1.08,
+      "amount": 500,
+      "profit": -20,
+      "profit_pct": -3.6,
+      "time": "2026-06-15",
+      "hold_days": 156,
+      "sector": "红利/价值",
+      "mode": "defensive"
+    },
+    {
+      "code": "518880",
+      "name": "黄金ETF",
+      "action": "buy",
+      "price": 7.8,
+      "amount": 100,
+      "total_cost": 780,
+      "time": "2026-04-01",
+      "reason": "地缘避险+通胀对冲",
+      "sector": "黄金",
+      "mode": "balanced"
+    }
+  ],
+  "pitfalls": []
+}
