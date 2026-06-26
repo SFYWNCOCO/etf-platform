@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "id": "KNOW-001",
+      "domain": "infra",
+      "insight": "Python DLL冲突: sys.path中混入其他版本的python*.dll导致C扩展加载失败",
+      "details": "修复方法: 启动时从sys.path和PYTHONPATH移除含冲突DLL的目录。根本原因是Hermes注入_internal路径。",
+      "source": "self_manager cycle test",
+      "timestamp": "2026-06-26T13:11:46.442941"
+    },
+    {
+      "id": "KNOW-002",
+      "domain": "investment",
+      "insight": "穿透评分是风险指标不是收益指标",
+      "details": "高分(>70)=安全但无催化剂=低回报现金替代；低分(<50)=高催化剂弹性=事件博弈品种。三因子: 穿透×催化剂×市场状态",
+      "source": "用户纠正记忆",
+      "timestamp": "2026-06-26T13:11:46.442941"
+    },
+    {
+      "id": "KNOW-003",
+      "domain": "investment",
+      "insight": "ETF行业轮动:动量策略在单边趋势市有效,震荡市反指标",
+      "details": "5日vs20日均线交叉信号 + 加速度检测, 但需结合宏观阶段过滤假信号",
+      "source": "循环学习 Cycle 1",
+      "timestamp": "2026-06-26T13:12:13.041019"
+    },
+    {
+      "id": "KNOW-004",
+      "domain": "investment",
+      "insight": "ETF 11层穿透系统整合完成: penetration+chain+rotation+demand+macro+holdings+portfolio",
+      "details": "旧etf_system/51个文件已全部迁移到etf-platform结构化模块。L1-L11十一层全链路可一键analyse/patrol。K线趋势数据修复(新浪API替代akshare)。",
+      "source": "2026-06-26 ETF系统整合",
+      "timestamp": "2026-06-26T13:13:00.277645"
+    },
+    {
+      "id": "KNOW-005",
+      "domain": "investment",
+      "insight": "终极材料层:供应链依赖图谱+连锁故障S1-S5",
+      "details": "云计算ETF(516510)是所有链条断裂都波及的唯一标的(S1-S5中4个)。芯片ETF(159995)3个直接瓶颈+4个间接链=系统性最脆弱。酒ETF(512690)100%内循环=最安全。",
+      "source": "chain_analysis迁移",
+      "timestamp": "2026-06-26T13:13:00.277645"
+    },
+    {
+      "id": "KNOW-006",
+      "domain": "agent",
+      "insight": "Hermes CLI扩展:etf命令从9个扩展到19个",
+      "details": "新增analyse/patrol/portfolio/chain/health/holdings/insight/rotation/status。analyse单命令=穿透+轮动+供应链+健康+建议(7模块)。patrol全链路=数据源+行情+轮动+扫描。",
+      "source": "CLI整合",
+      "timestamp": "2026-06-26T13:13:00.277645"
+    },
+    {
+      "id": "KNOW-007",
+      "domain": "management",
+      "insight": "循环学习管理能力:PDCA+OODA融合的self-manager系统",
+      "details": "PDCA Plan→Do→Check→Act 管理学习全流程。每次对话检查学习状态。知识沉淀到knowledge_base.json。待办在learning_backlog.json。",
+      "source": "self-manager构建",
+      "timestamp": "2026-06-26T13:13:00.277645"
+    }
+  ],
+  "domains": {
+    "infra": {
+      "count": 1,
+      "last_updated": "2026-06-26T13:11:46.442941"
+    },
+    "investment": {
+      "count": 4,
+      "last_updated": "2026-06-26T13:13:00.277645"
+    },
+    "agent": {
+      "count": 1,
+      "last_updated": "2026-06-26T13:13:00.277645"
+    },
+    "management": {
+      "count": 1,
+      "last_updated": "2026-06-26T13:13:00.277645"
+    }
+  }
+}

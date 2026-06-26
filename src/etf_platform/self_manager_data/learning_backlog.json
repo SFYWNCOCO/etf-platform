@@ -1,0 +1,81 @@
+{
+  "version": "1.0",
+  "items": [
+    {
+      "id": "LRN-001",
+      "topic": "ETF行业轮动策略回测验证",
+      "priority": "high",
+      "status": "completed",
+      "category": "investment",
+      "cycles": 3,
+      "notes": "用rotation_detector跑历史数据验证动量策略有效性",
+      "completed_at": "2026-06-26T13:12:13.041019"
+    },
+    {
+      "id": "LRN-002",
+      "topic": "供应链断层概率模型(S1-S5)量化",
+      "priority": "high",
+      "status": "pending",
+      "category": "investment",
+      "cycles": 3,
+      "notes": "给chain_analysis的连锁故障场景加概率权重和敏感度分析"
+    },
+    {
+      "id": "LRN-003",
+      "topic": "Python socket模块DLL冲突根因和永久修复",
+      "priority": "medium",
+      "status": "pending",
+      "category": "infra",
+      "cycles": 1,
+      "notes": "fix_run.py是临时方案，需要深入理解C扩展加载机制"
+    },
+    {
+      "id": "LRN-004",
+      "topic": "Hermes Agent delegate_task背景模式最佳实践",
+      "priority": "medium",
+      "status": "pending",
+      "category": "agent",
+      "cycles": 2,
+      "notes": "研究background notification + context_from + workdir的组合用法"
+    },
+    {
+      "id": "LRN-005",
+      "topic": "L10-L11需求层数据动态更新方案",
+      "priority": "low",
+      "status": "pending",
+      "category": "investment",
+      "cycles": 2,
+      "notes": "当前demand.py是硬编码，需要接入真实社零/PMI数据源"
+    },
+    {
+      "id": "LRN-006",
+      "topic": "Python DLL冲突原理(C扩展加载机制)",
+      "priority": "medium",
+      "status": "pending",
+      "category": "infra",
+      "cycles": 1,
+      "notes": "深入理解python311.dll vs python312.dll冲突",
+      "created": "2026-06-26"
+    },
+    {
+      "id": "LRN-007",
+      "topic": "ETF行业轮动策略回测",
+      "priority": "high",
+      "status": "pending",
+      "category": "investment",
+      "cycles": 3,
+      "notes": "用历史k线验证rotation信号有效性",
+      "created": "2026-06-26"
+    },
+    {
+      "id": "LRN-008",
+      "topic": "每日使用self-manager检查学习循环",
+      "priority": "medium",
+      "status": "pending",
+      "category": "management",
+      "cycles": 1,
+      "notes": "每次对话开始跑status_report,确保循环不中断",
+      "created": "2026-06-26"
+    }
+  ]
+}
