@@ -5,7 +5,7 @@ from .base import PriceSource, NewsSource, PriceSnapshot, NewsItem, DataHealth, 
 from .eastmoney import EastMoneySource
 from .sina import SinaSource
 from .akshare_source import AKShareSource
-from .news import WallStreetCNSource, WeiboSource, SinaNewsSource, BackupNewsSource
+from .news import WallStreetCNSource, WeiboSource, Kr36Source, TencentSource, V2EXSource, SinaNewsSource, BackupNewsSource
 
 # Priority order for price sources
 _PRICE_SOURCES: List[PriceSource] = [
@@ -18,6 +18,9 @@ _PRICE_SOURCES: List[PriceSource] = [
 _NEWS_SOURCES: List[NewsSource] = [
     WallStreetCNSource(),    # Primary: 华尔街见闻
     WeiboSource(),           # Social: 微博热搜
+    Kr36Source(),            # Tech: 36氪
+    TencentSource(),         # General: 腾讯新闻
+    V2EXSource(),            # Tech community: V2EX
     SinaNewsSource(),       # Fallback: Sina Finance
     BackupNewsSource(),     # Fallback
 ]

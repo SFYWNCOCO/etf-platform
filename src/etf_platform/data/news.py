@@ -1,7 +1,4 @@
-﻿"""News sources for ETF catalysts and events.
-Primary: Multiple sources via HTTP/API (wallstreetcn, weibo, 36kr, tencent).
-Fallback: Sina Finance roll news API.
-"""
+﻿"""News sources for ETF catalysts and events."""
 import json, urllib.request, urllib.parse, time, re
 from typing import Optional, List
 from .base import NewsSource, NewsItem, DataHealth, SourceStatus
@@ -14,12 +11,18 @@ def _fetch_json(url, headers=None, timeout=10):
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return json.loads(r.read().decode("utf-8", errors="replace"))
 
+def _fetch_text(url, headers=None, timeout=10):
+    h = {**HEADERS, **(headers or {})}
+    req = urllib.request.Request(url, headers=h)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8", errors="replace")
+
 def _filter_items(items, keyword=None, limit=10):
-    if not keyword:
-        return items[:limit]
+    if not keyword: return items[:limit]
     kw = keyword.lower()
     return [i for i in items if kw in i.title.lower()][:limit]
 
+# ─── 华尔街见闻 (专业金融新闻) ───
 class WallStreetCNSource(NewsSource):
     name = "wallstreetcn"
     def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
@@ -42,6 +45,7 @@ class WallStreetCNSource(NewsSource):
         except Exception as e:
             return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
 
+# ─── 微博热搜 (社会热点) ───
 class WeiboSource(NewsSource):
     name = "weibo"
     def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
@@ -62,6 +66,74 @@ class WeiboSource(NewsSource):
         except Exception as e:
             return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
 
+# ─── 36氪 (科技/创投新闻) ───
+class Kr36Source(NewsSource):
+    name = "36kr"
+    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
+        try:
+            from bs4 import BeautifulSoup
+            html = _fetch_text("https://36kr.com/newsflashes")
+            soup = BeautifulSoup(html, "html.parser")
+            items = []
+            for item in soup.select(".newsflash-item"):
+                el = item.select_one(".item-title")
+                if not el: continue
+                title = el.get_text(strip=True)
+                href = el.get("href", "")
+                if not href.startswith("http"): href = f"https://36kr.com{href}"
+                tm = (item.select_one(".time") or item.select_one("time"))
+                t = tm.get_text(strip=True) if tm else ""
+                items.append(NewsItem(title=title, url=href, source="36氪", time=t, relevance=0.7))
+            return _filter_items(items, keyword, limit)
+        except: return []
+    def health(self) -> DataHealth:
+        t0 = time.time()
+        try:
+            items = self.get_news("", 1)
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
+        except Exception as e:
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
+
+# ─── 腾讯新闻 (综合新闻) ───
+class TencentSource(NewsSource):
+    name = "tencent"
+    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
+        try:
+            data = _fetch_json("https://i.news.qq.com/web_backend/v2/getTagInfo?tagId=aEWqxLtdgmQ%3D", {"Referer": "https://news.qq.com/"})
+            items = []
+            for news in data.get("data", {}).get("tabs", [{}])[0].get("articleList", []):
+                items.append(NewsItem(
+                    title=str(news.get("title","")),
+                    url=str(news.get("url","") or news.get("link_info",{}).get("url","")),
+                    source="腾讯新闻", time=str(news.get("pub_time","") or news.get("publish_time","")), relevance=0.5))
+            return _filter_items(items, keyword, limit)
+        except: return []
+    def health(self) -> DataHealth:
+        t0 = time.time()
+        try:
+            items = self.get_news("", 1)
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
+        except Exception as e:
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
+
+# ─── V2EX (科技社区热点) ───
+class V2EXSource(NewsSource):
+    name = "v2ex"
+    def get_news(self, keyword: str, limit: int = 10) -> List[NewsItem]:
+        try:
+            data = _fetch_json("https://www.v2ex.com/api/topics/hot.json")
+            items = [NewsItem(title=str(t.get("title","")), url=f"https://www.v2ex.com/t/{t.get('id','')}", source="V2EX", time="", relevance=0.4) for t in data if t.get("title")]
+            return _filter_items(items, keyword, limit)
+        except: return []
+    def health(self) -> DataHealth:
+        t0 = time.time()
+        try:
+            items = self.get_news("", 1)
+            return DataHealth(self.name, SourceStatus.HEALTHY if items else SourceStatus.DEGRADED, (time.time()-t0)*1000)
+        except Exception as e:
+            return DataHealth(self.name, SourceStatus.FAILED, (time.time()-t0)*1000, error=str(e))
+
+# ─── 新浪财经 (备选) ───
 class SinaNewsSource(NewsSource):
     name = "sina_news"
     BASE_URL = "https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2509&num={limit}"
