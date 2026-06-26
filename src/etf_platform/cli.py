@@ -50,6 +50,71 @@ def _print_screen_results(results):
         print(f"  #{r['rank']} {r['name']}")
         print(f"      {r['reason']}")
     print()
+def _print_comparison(ra, rb, va, vb):
+    """Side-by-side comparison of two ETFs."""
+    name_a = ra.get("name", ra.get("etf_code", "?"))
+    name_b = rb.get("name", rb.get("etf_code", "?"))
+    code_a = ra.get("etf_code", "?")
+    code_b = rb.get("etf_code", "?")
+    sa = ra.get("layer_scores", {})
+    sb = rb.get("layer_scores", {})
+    
+    print(f"\n  {'='*65}")
+    print(f"  ETF \u5bf9\u6bd4")
+    print(f"  {'='*65}")
+    
+    # Basic info
+    print(f"  {'':<5} {code_a:<20} {code_b:<20}")
+    print(f"  {'\u540d\u79f0':<5} {name_a[:18]:<20} {name_b[:18]:<20}")
+    print(f"  {'\u884c\u4e1a':<5} {ra.get('sector','?')[:16]:<20} {rb.get('sector','?')[:16]:<20}")
+    print()
+    
+    # Layer scores
+    print(f"  {'\u5c42':<15} {code_a:<20} {code_b:<20}")
+    print(f"  {'-'*55}")
+    all_layers = sorted(set(list(sa.keys()) + list(sb.keys())))
+    names = {"L1_ETF":"\u57fa\u7840\u9762","L2_Holdings":"\u6301\u4ed3\u7ed3\u6784","L3_Material":"\u6750\u6599\u5b89\u5168","L4_SupplyChain":"\u4ea7\u80fd\u7269\u6d41","L5_Tech":"\u6280\u672f\u58c1\u5792","L6_Politics":"\u653f\u6cbb\u98ce\u9669","L7_Irreplaceable":"\u4e0d\u53ef\u66ff\u4ee3","L8_CapitalFlow":"\u8d44\u91d1\u9762","L9_Signals":"\u4fe1\u53f7","L10_Demand":"\u6d88\u8d39\u9700\u6c42","L11_SectorRisk":"\u884c\u4e1a\u98ce\u9669"}
+    for layer in all_layers:
+        lname = names.get(layer, layer)
+        va_score = sa.get(layer, "-")
+        vb_score = sb.get(layer, "-")
+        icon_a = "\U0001f7e2" if isinstance(va_score, (int,float)) and va_score >= 7 else ("\U0001f7e1" if isinstance(va_score, (int,float)) and va_score >= 4 else "\U0001f534")
+        icon_b = "\U0001f7e2" if isinstance(vb_score, (int,float)) and vb_score >= 7 else ("\U0001f7e1" if isinstance(vb_score, (int,float)) and vb_score >= 4 else "\U0001f534")
+        print(f"  {lname:<15} {icon_a} {str(va_score):<16} {icon_b} {str(vb_score):<16}")
+    print()
+    
+    # Valuation
+    print(f"  {'\u4f30\u503c':<15} {code_a:<20} {code_b:<20}")
+    print(f"  {'-'*55}")
+    if va:
+        print(f"  {'NAV':<15} {va.nav:<20.4f} ", end="")
+        print(f"{vb.nav:<20.4f}" if vb else "{'N/A':<20}")
+        print(f"  {'\u5e02\u4ef7':<15} {va.market_price:<20.4f} ", end="")
+        print(f"{vb.market_price:<20.4f}" if vb else "{'N/A':<20}")
+        print(f"  {'\u6298\u4ef7\u7387':<15} {va.premium_pct:+.2f}%", end="")
+        print(f"  {vb.premium_pct:+.2f}%" if vb else "{'N/A'}")
+    print()
+    
+    # Trend comparison
+    print(f"  {'\u8d8b\u52bf':<15} {code_a:<20} {code_b:<20}")
+    print(f"  {'-'*55}")
+    def get_trend_simple(code):
+        try:
+            from .data.kline import get_trend
+            return get_trend(code)
+        except:
+            return None
+    ta = get_trend_simple(code_a)
+    tb = get_trend_simple(code_b)
+    t_names = {"oversold":"\u8d85\u5356","weak":"\u56de\u8c03","neutral":"\u4e2d\u6027","strong":"\u58ee\u6001","overbought":"\u8d85\u4e70","plunging":"\u6025\u8dcc","surging":"\u6025\u6da8"}
+    if ta:
+        print(f"  {'\u4fe1\u53f7':<15} {t_names.get(ta.trend_signal,'?'):<20} {t_names.get(tb.trend_signal,'?') if tb else 'N/A':<20}")
+        print(f"  {'20\u65e5\u6da8\u8dcc':<15} {ta.change_20d:+.1f}%", end="")
+        print(f"  {tb.change_20d:+.1f}%" if tb else "{'N/A'}")
+        print(f"  {'\u56de\u64a4':<15} {ta.max_drawdown:.1f}%", end="")
+        print(f"  {tb.max_drawdown:.1f}%" if tb else "{'N/A'}")
+    print()
+
 def app():
     args = sys.argv[1:] if len(sys.argv) > 1 else []
     
@@ -63,6 +128,8 @@ def app():
         print("  etf news [keyword]       Latest finance news")
         print("  etf screen [--top=N] [--profile=均衡]  Full market scan & ranking")
         print("  etf recommend              Quick top-5 recommendation")
+        print("  etf compare <A> <B>       Side-by-side comparison of two ETFs")
+        print("  etf valu <CODE>            NAV & premium data")
         print("  etf --help               This help")
         return
     
@@ -151,6 +218,36 @@ def app():
         from .decision.screener import recommend
         results = recommend()
         _print_screen_results(results)
+    
+    elif cmd == "compare":
+        if len(args) < 3:
+            print("Error: need two ETF codes, e.g. etf compare 159263 159995")
+            return
+        code_a, code_b = args[1], args[2]
+        from .data.valuation import get_valuation
+        from .pipeline import run_full
+        ra = run_full(code_a)
+        rb = run_full(code_b)
+        va = get_valuation(code_a)
+        vb = get_valuation(code_b)
+        _print_comparison(ra, rb, va, vb)
+    
+    elif cmd == "valu":
+        code = args[1] if len(args) > 1 else ""
+        if not code:
+            print("Error: need ETF code")
+            return
+        from .data.valuation import get_valuation
+        v = get_valuation(code)
+        if v:
+            print(f"\n  {v.name} ({v.code})")
+            print(f"  单位净值: {v.nav:.4f}")
+            print(f"  市场价:   {v.market_price:.4f}")
+            print(f"  折价率:   {v.premium_pct:+.2f}%")
+            print(f"  日回报:   {v.daily_return:+.2f}%")
+            print(f"  类型:     {v.fund_type}\n")
+        else:
+            print(f"  No valuation data for {code}\n")
     
     else:
         print(f"Unknown command: {cmd}")
