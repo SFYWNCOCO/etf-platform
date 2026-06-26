@@ -1,4 +1,4 @@
-﻿"""Data sources for ETF platform.
+"""Data sources for ETF platform.
 
 Provides unified interface for price, volume, and news data
 with automatic fallback between providers.

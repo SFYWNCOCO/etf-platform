@@ -1,4 +1,4 @@
-"""Valuation & fundamentals for ETFs.
+﻿"""Valuation & fundamentals for ETFs.
 Sources: fund daily API, K-line data, static index mapping."""
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
@@ -78,7 +78,7 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
             snap.daily_return = float(ret_str.replace("%", ""))
             snap.name = str(r.iloc[1]) if len(r) > 1 else ""
             snap.fund_type = str(r.iloc[2]) if len(r) > 2 else ""
-    except:
+    except Exception:
         pass
     
     # 2. Stage returns from K-line
@@ -89,7 +89,7 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
             snap.change_3m = trend.change_60d
             # approx 6m from available data
             snap.change_6m = round(trend.change_60d * 2.5, 1) if trend.data_days > 120 else trend.change_60d
-    except:
+    except Exception:
         pass
     
     # 3. Static info
@@ -128,5 +128,5 @@ def get_holdings(code: str) -> List[Dict]:
             holdings.append({"code": code, "name": name})
         
         return holdings
-    except:
+    except Exception:
         return []

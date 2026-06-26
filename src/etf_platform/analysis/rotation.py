@@ -1,4 +1,4 @@
-﻿"""Sector rotation detector using Sina Finance API (no akshare dependency).
+"""Sector rotation detector using Sina Finance API (no akshare dependency).
 
 Detects capital flows between sectors by comparing short-term vs medium-term momentum.
 """

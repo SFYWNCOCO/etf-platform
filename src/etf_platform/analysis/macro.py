@@ -1,4 +1,4 @@
-﻿"""macro.py — ETF生态健康 + 宏观环境评分
+"""macro.py — ETF生态健康 + 宏观环境评分
 
 来源: etf_system/eco_monitor.py (6大模块) + money_bond_kb.py
 """

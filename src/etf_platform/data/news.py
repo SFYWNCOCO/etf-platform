@@ -1,4 +1,4 @@
-﻿"""News sources for ETF catalysts and events."""
+"""News sources for ETF catalysts and events."""
 import json, urllib.request, urllib.parse, time, re
 from typing import Optional, List
 from .base import NewsSource, NewsItem, DataHealth, SourceStatus

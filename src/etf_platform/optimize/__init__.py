@@ -1,1 +1,1 @@
-﻿# ETF portfolio optimization package
+# ETF portfolio optimization package

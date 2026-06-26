@@ -1,4 +1,4 @@
-﻿"""optimize/decision.py — 决策分析与策略优化引擎
+"""optimize/decision.py — 决策分析与策略优化引擎
 
 来源: etf_system/strategy_optimizer.py
 分析历史ETF决策→自动优化参数→生成迭代报告。

@@ -1,4 +1,4 @@
-﻿"""L9 Signal enhancer: injects real news into catalyst calendar and adjusts score."""
+"""L9 Signal enhancer: injects real news into catalyst calendar and adjusts score."""
 from etf_platform.data.manager import get_news
 
 

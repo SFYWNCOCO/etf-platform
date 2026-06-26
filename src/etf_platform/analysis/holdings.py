@@ -1,4 +1,4 @@
-﻿"""holdings.py — ETF持仓穿透数据 (手动维护)
+"""holdings.py — ETF持仓穿透数据 (手动维护)
 
 来源: etf_system/holdings_survey.py
 每只ETF的前10大持仓、供应链位置、技术等级、进口依赖度。

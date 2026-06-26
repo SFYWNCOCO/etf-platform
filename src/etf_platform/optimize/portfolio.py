@@ -1,4 +1,4 @@
-﻿"""optimize/portfolio.py — Portfolio allocation based on penetration + rotation + chain analysis.
+"""optimize/portfolio.py — Portfolio allocation based on penetration + rotation + chain analysis.
 
 Simplified cleaner version of etf_system/portfolio.py.
 Uses analyst scores instead of causal model.

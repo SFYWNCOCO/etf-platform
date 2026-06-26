@@ -1,4 +1,4 @@
-﻿"""Data source manager: handles priority, fallback, and health checking."""
+"""Data source manager: handles priority, fallback, and health checking."""
 import time
 from typing import Optional, List, Dict, Tuple
 from .base import PriceSource, NewsSource, PriceSnapshot, NewsItem, DataHealth, SourceStatus

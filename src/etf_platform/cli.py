@@ -1,4 +1,4 @@
-﻿import sys
+import sys
 import json
 from pathlib import Path
 from .pipeline import run_full, batch_full, format_full

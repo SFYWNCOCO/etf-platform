@@ -1,4 +1,4 @@
-﻿"""analyst.py - Unified ETF analysis entry point.
+"""analyst.py - Unified ETF analysis entry point.
 
 Single call performs full analysis: penetration + rotation + macro + advice.
 """

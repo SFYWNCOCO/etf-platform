@@ -1,4 +1,4 @@
-﻿"""kline.py — Fixed: Sina money finance API (no akshare dependency)."""
+"""kline.py — Fixed: Sina money finance API (no akshare dependency)."""
 import sys, os
 sys.path = [p for p in sys.path if "_internal" not in p]
 import urllib.request, json, statistics

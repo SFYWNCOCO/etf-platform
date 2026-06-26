@@ -1,4 +1,4 @@
-﻿"""chain.py — 供应链依赖分析（终极材料层）
+"""chain.py — 供应链依赖分析（终极材料层）
 
 数据来源: etf_system/chain_analysis.py v4
 核心内容: 依赖图谱 × 连锁故障场景 × 交叉依赖热力图 × ETF风险评估

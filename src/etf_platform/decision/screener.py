@@ -1,4 +1,4 @@
-﻿"""ETF screener: scan all buyable ETFs, rank by composite score, output top N."""
+"""ETF screener: scan all buyable ETFs, rank by composite score, output top N."""
 import time
 import json
 from pathlib import Path
