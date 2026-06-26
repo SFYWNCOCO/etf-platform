@@ -81,6 +81,21 @@ def _compute_auto_weights(results: list, profile: str = "均衡") -> Dict[str, f
     return weights
 
 
+
+def _normalize_batch(results: list) -> None:
+    all_layers = set()
+    for r in results:
+        all_layers.update(r["layer_scores"].keys())
+    for layer in all_layers:
+        vals = [float(r["layer_scores"].get(layer, 5.0)) for r in results]
+        mn, mx = min(vals), max(vals)
+        if mx - mn < 0.01:
+            for r in results:
+                r["layer_scores"][layer] = 5.0
+        else:
+            for r in results:
+                raw = float(r["layer_scores"].get(layer, 5.0))
+                r["layer_scores"][layer] = round(max(0, min(10, (raw - mn) / (mx - mn) * 10)), 2)
 def _compute_composite(scores: dict, weights: dict) -> float:
     """Weighted composite, excluding dead layers."""
     total = 0.0
@@ -175,6 +190,8 @@ def screen(limit: int = 523, profile: str = "均衡", top_n: int = 10) -> List[d
     weights = _compute_auto_weights(results, profile)
     print(f"  自动权重: {weights}")
 
+    # Normalize scores across batch
+    _normalize_batch(results)
     # Score and rank
     ranked = []
     for r in results:
