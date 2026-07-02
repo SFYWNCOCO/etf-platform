@@ -42,6 +42,13 @@ def _resolve_profile(profile: str) -> str:
 TREND_ICONS = {"oversold":"🟢超卖","weak":"🟡回调","neutral":"⚪中性","strong":"🟡强势","overbought":"🔴超买","plunging":"🔴急跌","surging":"🟢急涨"}
 LN = {"L3_Material":"材料","L4_SupplyChain":"物流","L5_Tech":"技术","L6_Politics":"政治","L7_Irreplaceable":"替代","L8_CapitalFlow":"资金","L9_Signals":"信号","L10_Demand":"需求","L11_SectorRisk":"行业风险"}
 
+# v5.6: l003 knowledge-base integration
+# Penetration score IS a risk metric, NOT a return metric (per l003 + correction #30)
+# High score (>7) = safe but zero alpha; Low score (<4) = high catalyst elasticity
+NON_INVESTMENT_SECTORS = {"货币基金", "货币", "利率债", "信用债", "债券", "国债"}
+RISK_SAFE_THRESHOLD = 7.0
+RISK_ELASTIC_THRESHOLD = 4.0
+
 
 def _detect_dead_layers(results: list) -> set:
     """Detect layers with zero variance across batch. These should be excluded."""
@@ -481,6 +488,13 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
         composite = _compute_composite(ls, weights)  # trend not yet available at batch stage
         ranked.append({"rank":0,"code":code,"name":r.get("name",""),"sector":r.get("sector",""),"risk_level":rl,"composite_score":composite,"layer_scores":ls,"reason":"","trend":{}, "_news_count": 0})
 
+    # v5.6: Filter non-investment sectors (cash equivalents have no alpha)
+    investable = [r for r in ranked if r.get("sector", "") not in NON_INVESTMENT_SECTORS]
+    skipped = len(ranked) - len(investable)
+    if skipped > 0:
+        print(f"  过滤非投资标的: {skipped}只 (货币基金/债券)")
+    ranked = investable
+    
     ranked.sort(key=lambda x: -x["composite_score"])
     for i, item in enumerate(ranked):
         item["rank"] = i + 1
