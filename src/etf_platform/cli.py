@@ -167,7 +167,10 @@ def app():
         print("  etf news [keyword]       Latest finance news")
         print("  etf check                Data source health check")
         print("  etf status               System status")
+        print("  etf archive [collect|list|show]  Daily data archive")
+        print("  etf events [recent|log]          Market event timeline")
         print("  etf batch [--limit=N]    Batch analysis")
+        print("  etf archive [collect|list|show]  Daily archive for research")
         print("  etf --help               This help")
         return
     
@@ -498,11 +501,40 @@ def app():
         ProfitSignalEngine().run_all()
 
     elif cmd == "events":
-        from .data.events import EVENT_PRESETS, PRESET_COMBOS
-        print("\n  Events:")
-        for pn, evs in EVENT_PRESETS.items():
-            print(f"  [{pn}]: {len(evs)} events")
-        print(f"  Combos: {list(PRESET_COMBOS.keys())}")
+        """Market event timeline — log or query events."""
+        sub = args[1] if len(args) > 1 else "recent"
+        from .archive.collector import log_event, load_events
+        if sub == "log":
+            if len(args) < 3:
+                print("Usage: etf events log <type> <message>")
+                print('Example: etf events log sector_rotation "黄金领涨, AI急跌"')
+            else:
+                etype = args[2]
+                msg = " ".join(args[3:]) if len(args) > 3 else ""
+                log_event(etype, {"message": msg})
+                print(f"  Event logged: {etype}")
+        elif sub in ("recent", "list"):
+            limit = int(args[2]) if len(args) > 2 else 20
+            etype = args[3] if len(args) > 3 else None
+            events = load_events(limit=limit, event_type=etype)
+            if not events:
+                print("\n  No events yet. Run: etf events log type message\n")
+            else:
+                print(f"\n  Event Timeline ({len(events)} events)")
+                print(f"  {'='*55}")
+                for ev in events:
+                    ts = ev.get("timestamp", "")[:16]
+                    et = ev.get("type", "?")
+                    msg = ev.get("message", "")
+                    print(f"  {ts} | {et:<20} | {msg[:60]}")
+        elif sub == "causal":
+            from .data.events import EVENT_PRESETS, PRESET_COMBOS
+            print("\n  Causal Events:")
+            for pn, evs in EVENT_PRESETS.items():
+                print(f"  [{pn}]: {len(evs)} events")
+            print(f"  Combos: {list(PRESET_COMBOS.keys())}")
+        else:
+            print("Usage: etf events [recent|log <type> <msg>|causal]")
 
     elif cmd == "select":
         mode = "balanced"; top_n = 10
@@ -594,6 +626,38 @@ def app():
                 print(f"  - {s['recommendation']}: {s['reason']}")
         else:
             print("  No decision log data yet")
+
+    elif cmd == "archive":
+        """Daily data archive — collect, query, or list."""
+        sub = args[1] if len(args) > 1 else "collect"
+        from .archive.collector import collect_full_snapshot, list_archives, load_day, log_event
+        if sub == "collect":
+            quick = "--quick" in args
+            collect_full_snapshot(quick=quick)
+        elif sub == "list":
+            archives = list_archives()
+            if not archives:
+                print("\n  No archives yet. Run: etf archive collect\n")
+            else:
+                print(f"\n  ETF 数据归档 ({len(archives)} 天)")
+                print(f"  {'='*55}")
+                for a in archives[:20]:
+                    tp = a.get("top_pick", {}) or {}
+                    print(f"  {a['date']} | QVIX:{a.get('qvix_regime','?')[:8]:<8} | {a.get('qvix_50',0):.0f} | Top:{tp.get('code','?')} {tp.get('name','?')[:12]}")
+        elif sub == "show":
+            date_str = args[2] if len(args) > 2 else ""
+            if not date_str:
+                print("Usage: etf archive show YYYY-MM-DD")
+            else:
+                day = load_day(date_str)
+                if not day:
+                    print(f"  No archive for {date_str}")
+                else:
+                    import json as _json
+                    print(_json.dumps(day, ensure_ascii=False, indent=2))
+        else:
+            print("Usage: etf archive [collect|list|show YYYY-MM-DD]")
+
 
     else:
         print(f"Unknown command: {cmd}")

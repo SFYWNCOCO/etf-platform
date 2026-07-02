@@ -36,3 +36,4 @@ data/screener_cache/
 data/*_latest.json
 data/*patrol*.md
 logs/
+data/archive/
