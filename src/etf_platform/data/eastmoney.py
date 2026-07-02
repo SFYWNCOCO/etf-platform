@@ -1,15 +1,30 @@
 """Price source: wraps existing working ETFDataFetcher from etf_system."""
+import importlib
 import sys
-import os
 import time
 from pathlib import Path
 from typing import Optional, List, Dict
 from .base import PriceSource, PriceSnapshot, DataHealth, SourceStatus
 
-# Resolve etf_system path dynamically from this file's location
-_ETFDIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "etf_system"
-if str(_ETFDIR) not in sys.path:
-    sys.path.insert(0, str(_ETFDIR))
+_ETFDIR = None
+
+
+def _resolve_etf_system():
+    global _ETFDIR
+    if _ETFDIR is not None:
+        return _ETFDIR
+
+    candidates = [
+        Path(__file__).resolve().parent.parent.parent.parent.parent / "etf_system",
+        Path(__file__).resolve().parent.parent.parent.parent / "etf_system",
+    ]
+    for c in candidates:
+        if c.exists():
+            _ETFDIR = c
+            if str(_ETFDIR) not in sys.path:
+                sys.path.insert(0, str(_ETFDIR))
+            return _ETFDIR
+    return None
 
 
 class EastMoneySource(PriceSource):
@@ -19,16 +34,29 @@ class EastMoneySource(PriceSource):
 
     def __init__(self):
         self._fetcher = None
+        self._fetcher_error = None
 
     def _get_fetcher(self):
-        if self._fetcher is None:
-            _old_cwd = os.getcwd()
-            os.chdir(str(_ETFDIR))
-            try:
-                from data_fetcher import ETFDataFetcher
-                self._fetcher = ETFDataFetcher()
-            finally:
-                os.chdir(_old_cwd)
+        if self._fetcher is not None:
+            return self._fetcher
+        if self._fetcher_error is not None:
+            return None
+
+        etf_dir = _resolve_etf_system()
+        if etf_dir is None:
+            self._fetcher_error = "etf_system not found"
+            return None
+
+        try:
+            module = importlib.import_module("data_fetcher")
+            if not hasattr(module, "ETFDataFetcher"):
+                self._fetcher_error = "ETFDataFetcher not in data_fetcher"
+                return None
+            self._fetcher = module.ETFDataFetcher()
+        except Exception as e:
+            self._fetcher_error = str(e)[:100]
+            return None
+
         return self._fetcher
 
     def get_price(self, code: str) -> Optional[PriceSnapshot]:

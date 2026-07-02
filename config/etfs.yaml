@@ -18,7 +18,7 @@ etfs:
   '159206':
     name: 卫星ETF永赢
     type: 行业A
-    sector: 其他
+    sector: 军工
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -58,7 +58,7 @@ etfs:
   '159326':
     name: 电网设备ETF华夏
     type: 行业A
-    sector: 其他
+    sector: 公用事业
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -210,7 +210,7 @@ etfs:
   '159781':
     name: 科创创业ETF易方达
     type: 行业A
-    sector: 其他
+    sector: AI/科技
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -218,7 +218,7 @@ etfs:
   '159783':
     name: 科创创业50ETF华夏
     type: 行业A
-    sector: 其他
+    sector: AI/科技
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -258,7 +258,7 @@ etfs:
   '159869':
     name: 游戏ETF华夏
     type: 行业A
-    sector: 其他
+    sector: 消费
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -410,7 +410,7 @@ etfs:
   '510210':
     name: 上证指数ETF富国
     type: 行业A
-    sector: 其他
+    sector: 宽基
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -610,7 +610,7 @@ etfs:
   '512980':
     name: 传媒ETF广发
     type: 行业A
-    sector: 其他
+    sector: 消费
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -786,7 +786,7 @@ etfs:
   '515000':
     name: 科技ETF华宝
     type: 行业A
-    sector: 其他
+    sector: AI/科技
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -954,7 +954,7 @@ etfs:
   '562550':
     name: 绿电ETF华夏
     type: 行业A
-    sector: 其他
+    sector: 新能源
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -970,7 +970,7 @@ etfs:
   '563230':
     name: 卫星ETF富国
     type: 行业A
-    sector: 其他
+    sector: 军工
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -986,7 +986,7 @@ etfs:
   '563360':
     name: A500ETF华泰柏瑞
     type: 行业A
-    sector: 其他
+    sector: 宽基
     fee: 0.005
     leverage: 1
     risk_level: 0.22
@@ -1098,7 +1098,7 @@ etfs:
   '159046':
     name: 绿电TH
     type: 行业A
-    sector: 综合
+    sector: 新能源
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1202,7 +1202,7 @@ etfs:
   '159125':
     name: 港科技E
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1210,7 +1210,7 @@ etfs:
   '159128':
     name: 港科技TH
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1250,7 +1250,7 @@ etfs:
   '159140':
     name: 创智能E
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1298,7 +1298,7 @@ etfs:
   '159152':
     name: H科技PA
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1466,7 +1466,7 @@ etfs:
   '159218':
     name: 卫星产业
     type: 行业A
-    sector: 综合
+    sector: 军工
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1562,7 +1562,7 @@ etfs:
   '159243':
     name: 创业智能
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1594,7 +1594,7 @@ etfs:
   '159251':
     name: 港科技WJ
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1650,7 +1650,7 @@ etfs:
   '159269':
     name: 港科技NF
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1746,7 +1746,7 @@ etfs:
   '159300':
     name: 300ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1754,7 +1754,7 @@ etfs:
   '159301':
     name: 公用事业
     type: 行业A
-    sector: 综合
+    sector: 公用事业
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1802,7 +1802,7 @@ etfs:
   '159320':
     name: 电网ETF
     type: 行业A
-    sector: 综合
+    sector: 公用事业
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1850,7 +1850,7 @@ etfs:
   '159330':
     name: 300基金
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1858,7 +1858,7 @@ etfs:
   '159337':
     name: 500基金
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1866,7 +1866,7 @@ etfs:
   '159339':
     name: A500
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1874,7 +1874,7 @@ etfs:
   '159350':
     name: 深证50
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1882,7 +1882,7 @@ etfs:
   '159351':
     name: A500中证
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1890,7 +1890,7 @@ etfs:
   '159352':
     name: A500基金
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1898,7 +1898,7 @@ etfs:
   '159353':
     name: 景顺A500
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1906,7 +1906,7 @@ etfs:
   '159356':
     name: A500万家
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1914,7 +1914,7 @@ etfs:
   '159357':
     name: A500博时
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1922,7 +1922,7 @@ etfs:
   '159358':
     name: A500DC
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1930,7 +1930,7 @@ etfs:
   '159359':
     name: ZZA500
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1938,7 +1938,7 @@ etfs:
   '159360':
     name: A500天弘
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1946,7 +1946,7 @@ etfs:
   '159361':
     name: A500E
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -1954,7 +1954,7 @@ etfs:
   '159362':
     name: A500指数
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2042,7 +2042,7 @@ etfs:
   '159390':
     name: A50国联
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2050,7 +2050,7 @@ etfs:
   '159393':
     name: 300万家
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2146,7 +2146,7 @@ etfs:
   '159540':
     name: 信创E
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2370,7 +2370,7 @@ etfs:
   '159593':
     name: A50指数
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2378,7 +2378,7 @@ etfs:
   '159595':
     name: A50基金
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2386,7 +2386,7 @@ etfs:
   '159596':
     name: A50华宝
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2410,7 +2410,7 @@ etfs:
   '159601':
     name: A50
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2418,7 +2418,7 @@ etfs:
   '159602':
     name: 中国A50
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2498,7 +2498,7 @@ etfs:
   '159629':
     name: 1000ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2514,7 +2514,7 @@ etfs:
   '159633':
     name: ZZ1000
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2562,7 +2562,7 @@ etfs:
   '159656':
     name: 300成长
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2618,7 +2618,7 @@ etfs:
   '159673':
     name: PH300ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2634,7 +2634,7 @@ etfs:
   '159680':
     name: 1000指增
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2834,7 +2834,7 @@ etfs:
   '159742':
     name: 恒指科技
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2850,7 +2850,7 @@ etfs:
   '159747':
     name: 香港科技
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2866,7 +2866,7 @@ etfs:
   '159750':
     name: 科技HK50
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2874,7 +2874,7 @@ etfs:
   '159751':
     name: 港科技
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2930,7 +2930,7 @@ etfs:
   '159773':
     name: 创科技
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -2994,7 +2994,7 @@ etfs:
   '159805':
     name: 传媒ETF
     type: 行业A
-    sector: 综合
+    sector: 消费
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3010,7 +3010,7 @@ etfs:
   '159807':
     name: 科技50
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3098,7 +3098,7 @@ etfs:
   '159837':
     name: 生物科技
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3314,7 +3314,7 @@ etfs:
   '159922':
     name: 500ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3322,7 +3322,7 @@ etfs:
   '159925':
     name: 南方300
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3338,7 +3338,7 @@ etfs:
   '159930':
     name: 能源ETF
     type: 行业A
-    sector: 综合
+    sector: 公用事业
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3378,7 +3378,7 @@ etfs:
   '159943':
     name: 深证ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3410,7 +3410,7 @@ etfs:
   '159968':
     name: ZZ500ETF
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3458,7 +3458,7 @@ etfs:
   '159997':
     name: 电子ETF
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3586,7 +3586,7 @@ etfs:
   '510760':
     name: 上证指数ETF国泰
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3602,7 +3602,7 @@ etfs:
   '510980':
     name: 上证指数ETF汇添富
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3642,7 +3642,7 @@ etfs:
   '512020':
     name: A500ETF鹏华
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3650,7 +3650,7 @@ etfs:
   '512050':
     name: A500ETF华夏
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3658,7 +3658,7 @@ etfs:
   '512080':
     name: A500ETF中金
     type: 行业A
-    sector: 综合
+    sector: 宽基
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -3738,7 +3738,7 @@ etfs:
   '512630':
     name: 卫星ETF广发
     type: 行业A
-    sector: 综合
+    sector: 军工
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4002,7 +4002,7 @@ etfs:
   '513560':
     name: 香港科技ETF兴银
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4074,7 +4074,7 @@ etfs:
   '513730':
     name: 东南亚科技ETF华泰柏瑞
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4234,7 +4234,7 @@ etfs:
   '515250':
     name: 智能汽车ETF富国
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4242,7 +4242,7 @@ etfs:
   '515260':
     name: 电子ETF华宝
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4314,7 +4314,7 @@ etfs:
   '515580':
     name: 科技100ETF华泰柏瑞
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4354,7 +4354,7 @@ etfs:
   '515750':
     name: 科技50ETF富国
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4402,7 +4402,7 @@ etfs:
   '516010':
     name: 游戏ETF国泰
     type: 行业A
-    sector: 综合
+    sector: 消费
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4442,7 +4442,7 @@ etfs:
   '516110':
     name: 汽车ETF国泰
     type: 行业A
-    sector: 综合
+    sector: 消费
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4458,7 +4458,7 @@ etfs:
   '516190':
     name: 传媒ETF华夏
     type: 行业A
-    sector: 综合
+    sector: 消费
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4522,7 +4522,7 @@ etfs:
   '516520':
     name: 智能驾驶ETF华泰柏瑞
     type: 行业A
-    sector: 综合
+    sector: AI/科技
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22
@@ -4578,7 +4578,7 @@ etfs:
   '516770':
     name: 游戏ETF华泰柏瑞
     type: 行业A
-    sector: 综合
+    sector: 消费
     fee: 0.0015
     leverage: 1.0
     risk_level: 0.22

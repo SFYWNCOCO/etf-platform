@@ -1,5 +1,5 @@
 """L9 Signal enhancer: injects real news into catalyst calendar and adjusts score."""
-from etf_platform.data.manager import get_news
+from ..data.manager import get_news
 
 
 def enhance_l9(penetration_result: dict) -> dict:

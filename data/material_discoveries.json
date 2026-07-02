@@ -1,0 +1,747 @@
+{
+  "discovered": {
+    "固态电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 5,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "钠离子电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "磷酸锰铁锂": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "半固态电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "凝聚态电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 5,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "氧化物电解质": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "复合集流体": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "硅碳负极": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030",
+        "159755"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "预锂化": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "4680电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 8,
+      "etfs": [
+        "516160",
+        "515030",
+        "159755"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "刀片电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 9,
+      "etfs": [
+        "516160",
+        "515030",
+        "159755"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "麒麟电池": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 9,
+      "etfs": [
+        "516160",
+        "515030",
+        "159755"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "氮化镓": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 8,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "碳化硅": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 8,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "High-NA EUV": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 6,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "Chiplet": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 7,
+      "etfs": [
+        "159995",
+        "512480",
+        "159819"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "玻璃基板封装": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 5,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "背面供电": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 5,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "GAA晶体管": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 7,
+      "etfs": [
+        "159995",
+        "512480"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "2nm工艺": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 7,
+      "etfs": [
+        "159995",
+        "512480",
+        "159819"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "HBM4": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "半导体",
+      "trl": 5,
+      "etfs": [
+        "159995",
+        "512480",
+        "159819"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "钙钛矿叠层": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "异质结HJT": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 8,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "TOPCon": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 9,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "XBC背接触": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 8,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "铜电镀": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "无主栅": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "石墨烯": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 5,
+      "etfs": [
+        "512400"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "碳纳米管": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "气凝胶": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 8,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "液态金属": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 6,
+      "etfs": [
+        "512400",
+        "159995"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "形状记忆合金": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 7,
+      "etfs": [
+        "512660",
+        "512670"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "超材料": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 5,
+      "etfs": [
+        "512660",
+        "512670",
+        "159206"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "MOF": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 5,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "生物降解塑料": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 8,
+      "etfs": [
+        "159985"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "PEEK复合材料": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "新兴材料",
+      "trl": 8,
+      "etfs": [
+        "512660",
+        "512670"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "质子交换膜": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "固体氧化物电解": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "能源",
+      "trl": 5,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "液氢储运": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "能源",
+      "trl": 6,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "绿氢": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030",
+        "159985"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "PEM电解槽": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "能源",
+      "trl": 7,
+      "etfs": [
+        "516160",
+        "515030"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "ADC偶联药物": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 8,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "双抗": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 8,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "mRNA疫苗": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 9,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "GLP-1": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 9,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "CAR-T": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 8,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "基因编辑": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 7,
+      "etfs": [
+        "159992",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "AI制药": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "医药",
+      "trl": 6,
+      "etfs": [
+        "159992",
+        "512170",
+        "159819"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "存算一体": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "前沿科技",
+      "trl": 5,
+      "etfs": [
+        "159819",
+        "159995"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "硅光芯片": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "前沿科技",
+      "trl": 6,
+      "etfs": [
+        "159995",
+        "159819",
+        "515050"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "CPO共封装": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "前沿科技",
+      "trl": 7,
+      "etfs": [
+        "515050",
+        "159994",
+        "159819"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "eVTOL复材": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "军工/航空",
+      "trl": 6,
+      "etfs": [
+        "512660",
+        "512670",
+        "159206"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "超音速发动机": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "军工/航空",
+      "trl": 5,
+      "etfs": [
+        "512660",
+        "512670"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "变循环发动机": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "军工/航空",
+      "trl": 5,
+      "etfs": [
+        "512660",
+        "512670"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "人形机器人": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "前沿科技",
+      "trl": 6,
+      "etfs": [
+        "159819",
+        "159995",
+        "512170"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    },
+    "柔性传感器": {
+      "first_seen": "2026-07-01",
+      "hit_count": 1,
+      "category": "前沿科技",
+      "trl": 6,
+      "etfs": [
+        "159819",
+        "159995"
+      ],
+      "status": "confirmed",
+      "confirmed_at": "2026-07-01"
+    }
+  },
+  "confirmed": [
+    "刀片电池",
+    "麒麟电池",
+    "TOPCon",
+    "mRNA疫苗",
+    "GLP-1",
+    "4680电池",
+    "氮化镓",
+    "碳化硅",
+    "异质结HJT",
+    "XBC背接触",
+    "气凝胶",
+    "生物降解塑料",
+    "PEEK复合材料",
+    "ADC偶联药物",
+    "双抗",
+    "CAR-T",
+    "钠离子电池",
+    "磷酸锰铁锂",
+    "复合集流体",
+    "硅碳负极",
+    "Chiplet",
+    "GAA晶体管",
+    "2nm工艺",
+    "无主栅",
+    "碳纳米管",
+    "形状记忆合金",
+    "质子交换膜",
+    "绿氢",
+    "PEM电解槽",
+    "基因编辑",
+    "CPO共封装",
+    "半固态电池",
+    "氧化物电解质",
+    "预锂化",
+    "High-NA EUV",
+    "钙钛矿叠层",
+    "铜电镀",
+    "液态金属",
+    "液氢储运",
+    "AI制药",
+    "硅光芯片",
+    "eVTOL复材",
+    "人形机器人",
+    "柔性传感器",
+    "固态电池",
+    "凝聚态电池",
+    "玻璃基板封装",
+    "背面供电",
+    "HBM4",
+    "石墨烯",
+    "超材料",
+    "MOF",
+    "固体氧化物电解",
+    "存算一体",
+    "超音速发动机",
+    "变循环发动机"
+  ],
+  "last_scan": "2026-07-01T16:11:19.568438"
+}

@@ -1,0 +1,219 @@
+materials:
+  # ═══════════════════════════════════════════
+  # 新兴材料 (12种) — 技术前沿/实验室到量产过渡期
+  # ═══════════════════════════════════════════
+  固态电池电解质(LLZO):
+    current: "实验室阶段/未定价"
+    trend: "↑ 丰田/QuantumScape领跑"
+    unit: "N/A"
+    affects: ["516160","515030","159755"]
+    impact_direction: "中性偏多"
+    note: "LLZO(石榴石型)离子电导率突破1mS/cm→量产黎明"
+    warning: "🟢 固态电池→颠覆液态锂电池，2028年量产预期"
+    sub_grades: "LLZO(氧化物)/LGPS(硫化物)/LiPON(薄膜)"
+    supplier_regions: {"日本": 35, "美国": 25, "中国": 20, "韩国": 10, "欧洲": 10}
+    substitution_years: 5
+    strategic_days: 180
+    technology_readiness: 5
+    bottleneck_risk: 0.60
+    commercialization_eta: "2028-2030"
+    disruption_potential: 0.90
+    replaces_which_material: "液态电解液(LiPF6)+PE隔膜"
+
+  钙钛矿光伏:
+    current: "实验室效率26%+"
+    trend: "↑ 叠层效率突破33%"
+    unit: "N/A"
+    affects: ["516160","515030","159755"]
+    impact_direction: "利好"
+    note: "协鑫/极电光能→单结26.1%，钙钛矿/晶硅叠层33.7%"
+    warning: "🟢 光伏技术革命→度电成本再降50%"
+    sub_grades: "单结钙钛矿/钙钛矿/晶硅叠层/全钙钛矿叠层"
+    supplier_regions: {"中国": 50, "韩国": 15, "美国": 12, "日本": 10, "欧洲": 13}
+    substitution_years: 4
+    strategic_days: 90
+    technology_readiness: 6
+    bottleneck_risk: 0.40
+    commercialization_eta: "2027-2029"
+    disruption_potential: 0.85
+    replaces_which_material: "晶硅电池+多晶硅"
+
+  石墨烯(单层):
+    current: "研发阶段/公斤级试产"
+    trend: "↑ CVD法成本下降50%/年"
+    unit: "N/A"
+    affects: ["516160","515050","159819"]
+    impact_direction: "中性偏多"
+    note: "第六元素/墨睿科技→粉体百吨级，膜万平方米级"
+    warning: "🟢 最薄最强导电导热→电池/散热/传感器杀手级应用"
+    sub_grades: "石墨烯粉体/石墨烯薄膜(CVD)/氧化石墨烯(rGO)"
+    supplier_regions: {"中国": 55, "韩国": 15, "美国": 12, "欧洲": 10, "其他": 8}
+    substitution_years: 5
+    strategic_days: 90
+    technology_readiness: 5
+    bottleneck_risk: 0.45
+    commercialization_eta: "2029-2032"
+    disruption_potential: 0.80
+    replaces_which_material: "导电炭黑+ITO透明电极+传统散热材料"
+
+  氢能催化剂(质子交换膜):
+    current: "Pt载量0.2mg/cm²"
+    trend: "↑ 低铂/非铂催化剂突破"
+    unit: "N/A"
+    affects: ["516160","159985","515030"]
+    impact_direction: "中性偏多"
+    note: "武汉理工/上海交大→非铂Fe-N-C活性接近Pt/C"
+    warning: "🟢 绿氢PEM电解→催化剂从贵金属→非贵金属"
+    sub_grades: "Pt/C催化剂/PtCo合金催化剂/非铂Fe-N-C催化剂"
+    supplier_regions: {"日本": 30, "美国": 25, "中国": 20, "欧洲": 15, "其他": 10}
+    substitution_years: 4
+    strategic_days: 60
+    technology_readiness: 6
+    bottleneck_risk: 0.50
+    commercialization_eta: "2028-2030"
+    disruption_potential: 0.75
+    replaces_which_material: "铂催化剂(Pt/C)+传统制氢工艺"
+
+  金属锂负极:
+    current: "实验室阶段"
+    trend: "↑ 锂金属电池突破500Wh/kg"
+    unit: "N/A"
+    affects: ["516160","515030"]
+    impact_direction: "中性偏多"
+    note: "SES/恩力动力→锂金属电池A样通过，能量密度>400Wh/kg"
+    warning: "🟡 锂枝晶+体积膨胀是核心挑战，仍需3-5年"
+    sub_grades: "锂箔负极(20μm)/3D锂骨架/锂合金负极(Li-Mg)"
+    supplier_regions: {"中国": 30, "美国": 30, "韩国": 15, "日本": 10, "其他": 15}
+    substitution_years: 5
+    strategic_days: 120
+    technology_readiness: 4
+    bottleneck_risk: 0.70
+    commercialization_eta: "2029-2032"
+    disruption_potential: 0.88
+    replaces_which_material: "石墨负极+硅碳负极"
+
+  CNT碳纳米管:
+    current: "¥300-500/kg(多壁)"
+    trend: "↑ 导电剂+复合材料需求"
+    unit: "元/kg"
+    affects: ["516160","515030","159819"]
+    impact_direction: "利好"
+    note: "天奈科技全球龙头→锂电池导电剂渗透率>30%"
+    warning: "🟢 碳管替代炭黑→导电性提升10倍，用量减半"
+    sub_grades: "多壁CNT(MWCNT)/单壁CNT(SWCNT)/阵列CNT"
+    supplier_regions: {"中国": 60, "日本": 15, "美国": 10, "韩国": 8, "其他": 7}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.20
+    commercialization_eta: "已商业化(2020-)"
+    disruption_potential: 0.55
+    replaces_which_material: "导电炭黑(Super-P)+碳纤维增强"
+
+  量子点:
+    current: "¥50-100/克(光学级)"
+    trend: "↑ QD-OLED/QD-MiniLED量产"
+    unit: "元/克"
+    affects: ["159819","515050","159994"]
+    impact_direction: "利好"
+    note: "三星QD-OLED已量产，纳晶科技→无镉量子点突破"
+    warning: "🟢 量子点显示色域>BT.2020 90%→颠覆LCD/OLED"
+    sub_grades: "CdSe量子点(含镉)/InP量子点(无镉)/钙钛矿量子点"
+    supplier_regions: {"韩国": 35, "中国": 25, "美国": 20, "日本": 10, "其他": 10}
+    substitution_years: 2
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.25
+    commercialization_eta: "已商业化(2022-)"
+    disruption_potential: 0.70
+    replaces_which_material: "荧光粉+传统滤色片"
+
+  eVTOL复材:
+    current: "¥800-1,200/kg(预浸料)"
+    trend: "↑ 适航认证推进中"
+    unit: "元/kg"
+    affects: ["512660","512670","159206"]
+    impact_direction: "利好"
+    note: "亿航/小鹏汇天适航取证→碳纤维复材占eVTOL重量>70%"
+    warning: "🟢 低空经济万亿市场→复材需求爆发"
+    sub_grades: "T800碳纤维预浸料/T1100超高强复材/玻纤增强复材"
+    supplier_regions: {"日本": 35, "中国": 30, "美国": 20, "欧洲": 10, "其他": 5}
+    substitution_years: 1
+    strategic_days: 60
+    technology_readiness: 7
+    bottleneck_risk: 0.30
+    commercialization_eta: "2026-2028(规模化)"
+    disruption_potential: 0.65
+    replaces_which_material: "铝合金航空结构件+传统直升机结构"
+
+  钠电正极(普鲁士蓝/层状):
+    current: "¥30-50/kg(层状氧化物)"
+    trend: "↑ 储能+两轮车市场起量"
+    unit: "元/kg"
+    affects: ["516160","515030"]
+    impact_direction: "利好"
+    note: "中科海钠/宁德时代→钠电池储能电站投运，成本锂电60%"
+    warning: "🟢 钠资源无限→颠覆锂在储能领域的地位"
+    sub_grades: "层状氧化物(NaFeMn)/普鲁士蓝(PBA)/聚阴离子(Na3V2(PO4)3)"
+    supplier_regions: {"中国": 75, "美国": 10, "欧洲": 8, "其他": 7}
+    substitution_years: 1
+    strategic_days: 60
+    technology_readiness: 7
+    bottleneck_risk: 0.15
+    commercialization_eta: "2025-2027(规模化)"
+    disruption_potential: 0.70
+    replaces_which_material: "碳酸锂+三元正极(储能场景)"
+
+  PLA/PHA生物塑料:
+    current: "¥15-25/kg(PLA)"
+    trend: "↑ 禁塑令+碳关税推动"
+    unit: "元/kg"
+    affects: ["159985","515170"]
+    impact_direction: "中性偏多"
+    note: "丰原集团/蓝晶微生物→PLA/PHA万吨级产线投产"
+    warning: "🟢 全球禁塑令→生物可降解塑料需求年增20%"
+    sub_grades: "PLA(聚乳酸)/PHA(聚羟基脂肪酸)/PBAT(共聚酯)"
+    supplier_regions: {"中国": 45, "美国": 20, "欧洲": 15, "泰国": 10, "其他": 10}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.15
+    commercialization_eta: "已商业化(2021-)"
+    disruption_potential: 0.55
+    replaces_which_material: "PE/PP传统塑料+PET塑料"
+
+  液态金属(镓铟):
+    current: "¥5,000-8,000/kg"
+    trend: "↑ 柔性电子+散热应用"
+    unit: "元/kg"
+    affects: ["159819","515050","516160"]
+    impact_direction: "中性偏多"
+    note: "云南科威→液态金属散热器量产，导热率>纯铜10倍"
+    warning: "🟢 柔性机器人+可穿戴→液态金属传感器需求"
+    sub_grades: "镓铟合金(EGaIn)/镓铟锡合金(Galinstan)/液态金属导热膏"
+    supplier_regions: {"中国": 50, "美国": 20, "欧洲": 15, "日本": 10, "其他": 5}
+    substitution_years: 3
+    strategic_days: 45
+    technology_readiness: 6
+    bottleneck_risk: 0.35
+    commercialization_eta: "2027-2030"
+    disruption_potential: 0.60
+    replaces_which_material: "硅脂导热材料+传统柔性导线"
+
+  MOF金属有机框架:
+    current: "研发级¥5-10万/kg"
+    trend: "↑ 碳捕集+储氢突破"
+    unit: "万元/kg"
+    affects: ["159985","515030","516160"]
+    impact_direction: "中性偏多"
+    note: "巴斯夫MOF百吨级量产→碳捕集吸附剂/储氢材料革命"
+    warning: "🟢 MOF比表面积>7000m²/g→气体分离/催化新范式"
+    sub_grades: "MOF-5(储氢)/ZIF-8(气体分离)/UiO-66(催化)/MIL-101(吸附)"
+    supplier_regions: {"美国": 30, "中国": 25, "欧洲": 25, "日本": 10, "其他": 10}
+    substitution_years: 5
+    strategic_days: 90
+    technology_readiness: 5
+    bottleneck_risk: 0.40
+    commercialization_eta: "2029-2033"
+    disruption_potential: 0.75
+    replaces_which_material: "活性炭+沸石+传统催化剂载体"

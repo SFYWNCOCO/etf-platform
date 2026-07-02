@@ -15,87 +15,209 @@ from datetime import datetime, timedelta
 
 from ..config_loader import load_etfs
 
-# ============ 实时材料价格监控 ============
-# 关键材料 → 当前价格 → 方向 → 受影响ETF
+# ============ 实时材料价格监控 (内置核心10种) ============
+# 其余材料通过 config/material_prices.yaml + config/emerging_materials.yaml 插件加载
 MATERIAL_PRICE_MONITOR = {
-    # 半导体材料
-    "光刻胶(ArF)": {
+    # ═══ 半导体 ═══
+    "光刻胶(ArF, 193nm)": {
         "current": "战略物资/不公开", "trend": "↑ 日本管制收紧",
-        "unit": "N/A", "yr_low": None, "yr_high": None,
-        "affects": ["159995","512480","159819","588000"],
-        "impact_direction": "利空", "note": "JSR/TOK垄断90%，日本政策是唯一变量",
+        "unit": "N/A",
+        "affects": ["159995","512480","512760","512760","159819","588000","516510"],
+        "impact_direction": "利空", "note": "JSR/TOK垄断90%+，日本政策是唯一变量",
         "warning": "🔴 随时可能管制升级",
+        "sub_grades": "ArF(193nm)高端/KrF(248nm)中端/g/i线低端",
+        "supplier_regions": {"日本": 90, "美国": 7, "韩国": 2, "中国": 1},
+        "substitution_years": 5, "strategic_days": 30,
+        "technology_readiness": 9, "bottleneck_risk": 0.95,
     },
-    "高纯石英砂": {
+    "高纯石英砂(5N)": {
         "current": "3-5万元/吨", "trend": "→ 平稳",
-        "unit": "万元/吨", "yr_low": "2.5", "yr_high": "5.5",
-        "affects": ["159995","512480","588000"],
+        "unit": "万元/吨",
+        "affects": ["159995","512480","512760","512760","588000","516510","159819"],
         "impact_direction": "利空", "note": "美国Unimin垄断70%，国产纯度不足",
         "warning": "🟡 库存仅20天，任何供应中断即危机",
+        "sub_grades": "5N(半导体级)/4N(光伏级)/3N(普通级)",
+        "supplier_regions": {"美国": 70, "挪威": 15, "中国": 10, "其他": 5},
+        "substitution_years": 3, "strategic_days": 20,
+        "technology_readiness": 8, "bottleneck_risk": 0.90,
     },
-    "硅晶圆(12英寸)": {
-        "current": "$120-130/片", "trend": "→ 平稳",
-        "unit": "$/片", "yr_low": "100", "yr_high": "150",
-        "affects": ["159995","512480","159819","588000","516510"],
-        "impact_direction": "中性", "note": "信越/SUMCO扩产中，供需趋于平衡",
-        "warning": "⚪ 短期无风险",
-    },
-
-    # 新能源材料
+    # ═══ 新能源 ═══
     "碳酸锂(电池级)": {
         "current": "8-10万元/吨", "trend": "↓ 从60万跌至成本线",
-        "unit": "万元/吨", "yr_low": "7.5", "yr_high": "18.0",
-        "affects": ["516160","515030","159755"],
+        "unit": "万元/吨",
+        "affects": ["516160","515030","159755","588800"],
         "impact_direction": "利好", "note": "跌破澳矿成本线→供给出清→价格见底",
         "warning": "🟢 底部信号：锂价已跌90%，做多受益标的",
+        "sub_grades": "电池级(>99.5%)/工业级(>99.2%)",
+        "supplier_regions": {"澳大利亚": 47, "智利": 25, "中国": 15, "阿根廷": 8, "其他": 5},
+        "substitution_years": 2, "strategic_days": 90,
+        "technology_readiness": 9, "bottleneck_risk": 0.35,
     },
-    "钴(电解钴)": {
-        "current": "20-25万元/吨", "trend": "↓ 三元电池需求下降",
-        "unit": "万元/吨", "yr_low": "18", "yr_high": "35",
-        "affects": ["516160"],
-        "impact_direction": "利好", "note": "磷酸铁锂替代三元→钴需求结构性下降",
-        "warning": "⚪ 长期利空钴价，利好下游成本",
+    # ═══ 军工 ═══
+    "碳纤维(T700-T800)": {
+        "current": "120-150元/kg", "trend": "↓ 国产规模效应",
+        "unit": "元/kg",
+        "affects": ["512660","512670","159206","159227"],
+        "impact_direction": "利好", "note": "光威/中复神鹰扩产→航空航天+风电双驱动",
+        "warning": "🟢 国产替代加速，T800认证中",
+        "sub_grades": "T300(工业级)/T700(航空级)/T800(军机)/T1000(开发中)",
+        "supplier_regions": {"中国": 40, "日本": 35, "美国": 15, "其他": 10},
+        "substitution_years": 2, "strategic_days": 90,
+        "technology_readiness": 8, "bottleneck_risk": 0.40,
     },
-    "稀土(氧化镨钕)": {
+    # ═══ 稀土/战略 ═══
+    "氧化镨钕": {
         "current": "38-42万元/吨", "trend": "→ 中国控产稳价",
-        "unit": "万元/吨", "yr_low": "32", "yr_high": "55",
-        "affects": ["512660","512670","516160","516150"],
+        "unit": "万元/吨",
+        "affects": ["512660","512670","516160","512400"],
         "impact_direction": "中性偏多", "note": "中国主导供应60%+，出口管制是双刃剑",
         "warning": "🟡 稀土出口管制→国内稀土企业受益，下游成本承压",
+        "sub_grades": "氧化镨钕(>99%)/金属镨钕/氧化镝(重稀土)",
+        "supplier_regions": {"中国": 65, "美国": 12, "缅甸": 10, "澳大利亚": 8, "其他": 5},
+        "substitution_years": 3, "strategic_days": 180,
+        "technology_readiness": 9, "bottleneck_risk": 0.50,
     },
-
-    # 军工材料
-    "海绵钛(0级)": {
-        "current": "5.0-5.5万元/吨", "trend": "→ 平稳",
-        "unit": "万元/吨", "yr_low": "4.5", "yr_high": "6.5",
-        "affects": ["512660","512670"],
-        "impact_direction": "中性", "note": "宝钛/西部超导产能充足，国产替代率70%",
-        "warning": "⚪ 短期无风险",
+    # ═══ 贵金属 ═══
+    "黄金(Au9999)": {
+        "current": "$2400-2500/oz", "trend": "↑ 央行购金+降息预期",
+        "unit": "$/oz",
+        "affects": ["518880","159937"],
+        "impact_direction": "利好", "note": "全球央行连续18个月净购金→去美元化趋势",
+        "warning": "🟢 金价历史高位，央行购金持续",
+        "sub_grades": "Au9999(标准金锭)/Au9995/金条投资级",
+        "supplier_regions": {"中国": 25, "俄罗斯": 18, "澳大利亚": 12, "美国": 8, "其他": 37},
+        "substitution_years": 0, "strategic_days": 365,
+        "technology_readiness": 9, "bottleneck_risk": 0.05,
     },
-    "镍(电解镍)": {
-        "current": "12-14万元/吨", "trend": "↓ 印尼产能释放",
-        "unit": "万元/吨", "yr_low": "11", "yr_high": "18",
-        "affects": ["512660","512670"],
-        "impact_direction": "利好", "note": "印尼镍矿扩产→高温合金原料成本下降",
-        "warning": "🟢 镍价下行利好航发动力成本",
+    # ═══ 工业金属 ═══
+    "铜(电解铜)": {
+        "current": "$8,500-9,500/吨", "trend": "↑ 电网+新能源需求",
+        "unit": "$/吨",
+        "affects": ["512400","510300","510050","159915"],
+        "impact_direction": "利好", "note": "全球铜矿资本开支不足→2026年供需缺口扩大",
+        "warning": "🟢 铜长期牛市逻辑不变",
+        "sub_grades": "电解铜(>99.99%)/阴极铜/铜精矿(TC/RC)",
+        "supplier_regions": {"智利": 27, "秘鲁": 12, "中国": 9, "刚果金": 8, "其他": 44},
+        "substitution_years": 1, "strategic_days": 45,
+        "technology_readiness": 9, "bottleneck_risk": 0.20,
     },
-
-    # 消费材料
-    "棕榈油(RBD)": {
-        "current": "4200-4800令吉/吨", "trend": "↑ 印尼B40+厄尔尼诺",
-        "unit": "令吉/吨", "yr_low": "3400", "yr_high": "5200",
-        "affects": ["515170"],
-        "impact_direction": "利空", "note": "印尼强制B40生物柴油→棕榈油与燃料争原料",
-        "warning": "🔴 30天库存+95%进口依赖=食品行业的'光刻胶时刻'",
+    # ═══ 能源化工 ═══
+    "原油(Brent)": {
+        "current": "$70-80/桶", "trend": "→ 区间震荡",
+        "unit": "$/桶",
+        "affects": ["159930","512400","159985","510300"],
+        "impact_direction": "中性", "note": "OPEC+减产vs页岩油增产，70-80为均衡区间",
+        "warning": "🟡 中东地缘政治是最大变量",
+        "sub_grades": "Brent(轻质低硫)/WTI(西得克萨斯)/Oman(中东基准)",
+        "supplier_regions": {"美国": 18, "沙特": 12, "俄罗斯": 11, "伊拉克": 5, "其他": 54},
+        "substitution_years": 10, "strategic_days": 90,
+        "technology_readiness": 9, "bottleneck_risk": 0.30,
+    },
+    # ═══ 农业 ═══
+    "大豆(进口)": {
+        "current": "¥4,000-4,500/吨", "trend": "↑ 巴西减产+中美关税",
+        "unit": "元/吨",
+        "affects": ["159825","159865","515170"],
+        "impact_direction": "利空", "note": "中国进口依赖>80%→饲料成本上升→养殖利润承压",
+        "warning": "🔴 中美关税+巴西天气=上行风险",
+        "sub_grades": "进口大豆(转基因)/国产大豆(非转基因)/豆粕(饲料级)",
+        "supplier_regions": {"巴西": 60, "美国": 25, "阿根廷": 8, "中国": 3, "其他": 4},
+        "substitution_years": 3, "strategic_days": 60,
+        "technology_readiness": 9, "bottleneck_risk": 0.65,
+    },
+    # ═══ 通信 ═══
+    "光模块芯片(EML)": {
+        "current": "国产化率<30%", "trend": "↑ AI驱动需求爆发",
+        "unit": "N/A",
+        "affects": ["515050","159994","159819"],
+        "impact_direction": "中性偏多", "note": "800G/1.6T光模块放量→EML+VCSEL需求激增",
+        "warning": "🟢 AI算力互联核心器件",
+        "sub_grades": "EML(电吸收调制激光器)/DML(直接调制)/VCSEL(垂直腔面)",
+        "supplier_regions": {"美国": 40, "日本": 25, "中国": 20, "台湾": 10, "其他": 5},
+        "substitution_years": 3, "strategic_days": 45,
+        "technology_readiness": 8, "bottleneck_risk": 0.55,
     },
 }
+
+# ═══════════════════════════════════════════════════════════════
+# 材料插件注册表 — 支持从 YAML 文件动态加载材料 + 快速添加
+# ═══════════════════════════════════════════════════════════════
+MATERIAL_PLUGIN_REGISTRY = {}
+
+# 材料字段默认值 — 快速添加时自动补全缺失字段
+_DEFAULTS = {
+    "current": "待补充", "trend": "→ 待确认", "unit": "N/A",
+    "impact_direction": "中性", "note": "快速添加, 待补充详细信息",
+    "warning": "⚪ 待评估",
+    "sub_grades": "待补充", "supplier_regions": {"待确认": 100},
+    "substitution_years": 5, "strategic_days": 30,
+    "technology_readiness": 5, "bottleneck_risk": 0.50,
+}
+
+
+def register_material(name, data):
+    """注册单个材料 — 自动补全缺失字段的默认值.
+
+    最少只需填 current/warning/affects 三个字段即可注册。
+    """
+    entry = dict(_DEFAULTS)
+    entry.update(data)
+    # 确保 affects 是列表
+    if isinstance(entry["affects"], str):
+        entry["affects"] = [entry["affects"]]
+    entry["_source"] = data.get("_source", "plugin")
+    entry["_registered_at"] = data.get("_registered_at", datetime.now().isoformat())
+    MATERIAL_PLUGIN_REGISTRY[name] = entry
+    return True
+
+
+def register_from_file(path):
+    """从 YAML 文件批量注册 — 支持完整格式和minimal格式."""
+    import yaml
+    from pathlib import Path
+    path = Path(path)
+    if not path.exists():
+        return 0
+    with open(path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    if not cfg or "materials" not in cfg:
+        return 0
+    mats = cfg["materials"]
+    if mats is None or not isinstance(mats, dict):
+        return 0
+    count = 0
+    for name, data in mats.items():
+        # 无 data = 注释占位, 跳过
+        if data is None:
+            continue
+        register_material(name, data)
+        count += 1
+    return count
+
+
+def get_all_materials():
+    """返回合并后的完整材料字典 (内置核心 + 插件注册)。"""
+    merged = {}
+    merged.update(MATERIAL_PRICE_MONITOR)
+    merged.update(MATERIAL_PLUGIN_REGISTRY)
+    return merged
+
+
+def _auto_load_plugins():
+    """模块加载时自动扫描 config/ 下的材料 YAML 文件."""
+    from pathlib import Path
+    config_dir = Path(__file__).resolve().parent.parent.parent.parent / "config"
+    for fname in ("material_prices.yaml", "emerging_materials.yaml", "material_quick_add.yaml"):
+        p = config_dir / fname
+        if p.exists():
+            register_from_file(p)
 
 # ============ 人员风险数据库 ============
 PERSONNEL_RISK_DB = [
     # 半导体
     {"company": "中芯国际", "code": "688981", "person": "梁孟松", "role": "联席CEO/技术核心", "irreplaceable": 0.90,
      "age": 73, "tenure_yrs": 8, "risk": "退休/技术路线分歧→7nm攻关中断",
-     "affects_etf": ["159995","512480","588000"], "impact": -0.08,
+     "affects_etf": ["159995","512480","512760","588000"], "impact": -0.08,
      "watch_signals": ["减持股份", "董事会变动", "技术路线争议新闻"]},
     {"company": "寒武纪", "code": "688256", "person": "陈天石", "role": "创始人/CEO", "irreplaceable": 0.85,
      "age": 43, "tenure_yrs": 10, "risk": "创始人减持→AI芯片路线动摇→股价剧烈波动",
@@ -103,7 +225,7 @@ PERSONNEL_RISK_DB = [
      "watch_signals": ["大额减持公告", "质押股份", "核心技术人员离职"]},
     {"company": "北方华创", "code": "002371", "person": "赵晋荣", "role": "董事长", "irreplaceable": 0.70,
      "age": 61, "tenure_yrs": 12, "risk": "管理层变动→设备国产化进度延迟",
-     "affects_etf": ["159995","512480"], "impact": -0.04,
+     "affects_etf": ["159995","512480","512760"], "impact": -0.04,
      "watch_signals": ["高管集体减持", "董事会换届", "研发投入骤降"]},
 
     # 医药
@@ -141,7 +263,7 @@ TECH_MILESTONES_V2 = [
             {"step": "良率>30%（商用门槛）", "status": "待完成", "eta": "2026Q4"},
             {"step": "客户导入（华为/OPPO）", "status": "待完成", "eta": "2027H1"},
         ],
-        "affects": ["159995","512480","588000"],
+        "affects": ["159995","512480","512760","588000"],
         "on_success": "芯片ETF +8~12%, 国产替代叙事升级",
         "on_failure": "芯片ETF -5~8%, 2-3年内无法突破14nm天花板",
         "key_risks": ["光刻机进口受限", "光刻胶断供", "梁孟松退休"],
@@ -214,6 +336,9 @@ TECH_MILESTONES_V2 = [
 ]
 
 
+_auto_load_plugins()
+
+
 class DeepMonitor:
     """P1-P2 深度监控引擎"""
 
@@ -228,7 +353,8 @@ class DeepMonitor:
         print(f"  {'材料':<16} {'价格':<16} {'趋势':<12} {'方向':<8} {'预警'}")
         print("  " + "-" * 70)
 
-        for mat_name, mat in MATERIAL_PRICE_MONITOR.items():
+        all_materials = get_all_materials()
+        for mat_name, mat in all_materials.items():
             flag = "🔴" if mat.get("warning","").startswith("🔴") else (
                 "🟡" if mat.get("warning","").startswith("🟡") else (
                 "🟢" if mat.get("warning","").startswith("🟢") else "⚪"
@@ -250,7 +376,7 @@ class DeepMonitor:
         # 按材料-ETF关联推荐交易
         print(f"\n  📊 材料→ETF 交易映射:")
         mat_etf_signals = defaultdict(lambda: {"long": [], "short": []})
-        for mat_name, mat in MATERIAL_PRICE_MONITOR.items():
+        for mat_name, mat in all_materials.items():
             for etf_code in mat["affects"]:
                 if mat["impact_direction"] in ("利空",):
                     mat_etf_signals[etf_code]["short"].append(mat_name)

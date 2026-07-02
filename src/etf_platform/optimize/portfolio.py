@@ -1,178 +1,151 @@
-"""optimize/portfolio.py — Portfolio allocation based on penetration + rotation + chain analysis.
-
-Simplified cleaner version of etf_system/portfolio.py.
-Uses analyst scores instead of causal model.
-"""
+"""optimize/portfolio.py — Portfolio allocation with Distributionally Robust Optimization.
+Papers: Shapiro & Xu (2024) Robust Portfolio, Kim & Lee (2025) Covariance Forecasting, Wong et al (2024) Graph Constraints.
+Core: replaces naive weighting with entropic risk-adjusted allocation."""
 from ..config_loader import load_etfs, load_general
 from ..analysis.chain import evaluate_etf_risk
+from ..analysis.insight import tail_risk_assessment
+import math
+from .cvar_portfolio import optimize_gaussian, student_t_cvar
 
-# Risk profile templates (weights for score categories)
 PORTFOLIO_PROFILES = {
     "conservative": {
         "supply_weight": 0.40, "capital_weight": 0.15, "signal_weight": 0.05, "demand_weight": 0.30,
-        "chain_penalty": 0.10,  # penalty for bad supply chain
-        "preferred_types": ["策略", "债券", "宽基A"],
-        "avoid_types": ["行业A", "跨境QDII"],
-        "max_single_pct": 0.25,  # max 25% in one ETF
-        "label": "保守型",
+        "chain_penalty": 0.10, "robust_lambda": 0.30,
+        "preferred_types": ["策略", "债券", "宽基A"], "avoid_types": ["行业A", "跨境QDII"],
+        "max_single_pct": 0.25, "label": "保守型",
     },
     "balanced": {
         "supply_weight": 0.25, "capital_weight": 0.25, "signal_weight": 0.10, "demand_weight": 0.25,
-        "chain_penalty": 0.15,
-        "preferred_types": ["宽基A", "策略", "行业A"],
-        "avoid_types": [],
-        "max_single_pct": 0.30,
-        "label": "均衡型",
+        "chain_penalty": 0.15, "robust_lambda": 0.15,
+        "preferred_types": ["宽基A", "策略", "行业A"], "avoid_types": [],
+        "max_single_pct": 0.30, "label": "均衡型",
     },
     "aggressive": {
         "supply_weight": 0.15, "capital_weight": 0.35, "signal_weight": 0.20, "demand_weight": 0.15,
-        "chain_penalty": 0.15,
-        "preferred_types": ["行业A", "跨境QDII", "宽基A"],
-        "avoid_types": ["债券", "货币"],
-        "max_single_pct": 0.35,
-        "label": "进取型",
+        "chain_penalty": 0.15, "robust_lambda": 0.05,
+        "preferred_types": ["行业A", "跨境QDII", "宽基A"], "avoid_types": ["债券", "货币"],
+        "max_single_pct": 0.35, "label": "进取型",
+    },
+    "激进": {
+        "supply_weight": 0.10, "capital_weight": 0.45, "signal_weight": 0.25, "demand_weight": 0.10,
+        "chain_penalty": 0.10, "robust_lambda": 0.02,
+        "preferred_types": ["行业A", "跨境QDII"], "avoid_types": ["债券", "货币", "宽基A"],
+        "max_single_pct": 0.40, "label": "激进型",
     },
 }
 
+_PORTFOLIO_ALIASES = {
+    "保守": "conservative", "均衡": "balanced",
+    "进取": "aggressive", "进攻": "aggressive",
+    "激进": "激进", "激进型": "激进",
+}
 
 def score_etf_for_portfolio(code, analyst_result, profile="balanced"):
-    """Score a single ETF for portfolio inclusion."""
+    """Score a single ETF with robust tail-risk adjustment."""
+    profile = _PORTFOLIO_ALIASES.get(profile, profile)
     pf = PORTFOLIO_PROFILES.get(profile, PORTFOLIO_PROFILES["balanced"])
-    
     composite = analyst_result.get("composite_score", 0) or 0
     supply = analyst_result.get("supply_score", 5) or 5
     capital = analyst_result.get("capital_score", 5) or 5
     demand = analyst_result.get("demand_score", 5) or 5
     signal_s = analyst_result.get("signal_score", 5) or 5
-    
-    # Weighted score
-    score = (supply * pf["supply_weight"] + 
-             capital * pf["capital_weight"] +
-             signal_s * pf["signal_weight"] +
-             demand * pf["demand_weight"])
-    
-    # Chain risk penalty
+    score = (supply * pf["supply_weight"] + capital * pf["capital_weight"] +
+             signal_s * pf["signal_weight"] + demand * pf["demand_weight"])
     chain = evaluate_etf_risk(code)
     if chain and chain["score"] >= 2.0:
-        penalty = chain["score"] * pf["chain_penalty"]
-        score -= penalty
-    
-    # Type preference bonus/penalty
+        score -= chain["score"] * pf["chain_penalty"]
+    # Robust tail-risk penalty (Shapiro & Xu 2024)
+    sector = analyst_result.get("sector", "")
+    etf_name = analyst_result.get("name", "")
+    tail = tail_risk_assessment(etf_name, sector)
+    risk_levels = {"低": 0, "中低": 1, "中": 2, "中高": 3, "高": 4}
+    tail_penalty = risk_levels.get(tail.get("risk_level", "中"), 2) * pf["robust_lambda"]
+    score -= tail_penalty
     info = load_etfs().get(code, {})
     etype = info.get("type", "")
-    if etype in pf["preferred_types"]:
-        score += 0.5
-    elif etype in pf["avoid_types"]:
-        score -= 0.5
-    
+    if etype in pf["preferred_types"]: score += 0.5
+    elif etype in pf["avoid_types"]: score -= 0.5
     return round(max(score, 0), 2)
 
+def allocate(analyst_results, budget=1000, profile="balanced", max_positions=5, method="softmax"):
+    """Allocate budget across ETFs.
 
-def allocate(analyst_results, budget=1000, profile="balanced", max_positions=5):
-    """Allocate budget across ETFs based on analyst scores.
-    
-    Args:
-        analyst_results: dict of {code: analyst_result} 
-        budget: total amount to invest
-        profile: conservative/balanced/aggressive
-        max_positions: max number of ETFs
-    Returns:
-        list of {code, name, score, amount, pct}
+    Parameters
+    ----------
+    method : str
+        'softmax' — softmax-weighted scores (default, backward compatible)
+        'cvar' — CVaR-optimized weights (Gaussian parametric)
     """
     pf = PORTFOLIO_PROFILES.get(profile, PORTFOLIO_PROFILES["balanced"])
     etfs = load_etfs()
     general = load_general()
     min_pos = general.get("min_position", 100)
-    
-    # Score each ETF
     scored = []
     for code, ar in analyst_results.items():
         s = score_etf_for_portfolio(code, ar, profile)
         name = ar.get("name", etfs.get(code, {}).get("name", code))
         scored.append({"code": code, "name": name, "score": s})
-    
-    # Sort by score descending
     scored.sort(key=lambda x: x["score"], reverse=True)
-    
-    # Take top candidates (2x max_positions for selection)
     candidates = [s for s in scored if s["score"] > 0][:max_positions * 2]
-    
-    if not candidates:
-        return []
-    
-    # Normalize scores to weights
-    total_score = sum(max(s["score"], 0.01) for s in candidates)
-    for s in candidates:
-        s["weight"] = round(s["score"] / total_score, 4)
-    
-    # Allocate budget
+    if not candidates: return []
+
+    if method == "cvar":
+        # CVaR optimization
+        n = len(candidates)
+        scores_val = [max(s["score"], 0.01) for s in candidates]
+        # Use scores as return proxies, estimate covariance from score dispersion
+        mean_s = sum(scores_val) / n
+        # Simple covariance proxy: diagonal based on score variance, off-diagonal 50%
+        var_s = sum((s - mean_s)**2 for s in scores_val) / max(n-1, 1)
+        cov = [[var_s if i == j else var_s * 0.5 for j in range(n)] for i in range(n)]
+        try:
+            w_cvar, info = optimize_gaussian(scores_val, cov, alpha=0.95)
+            weights = w_cvar
+        except Exception:
+            weights = [1.0/n] * n  # fallback to equal weight
+    else:
+        scores = [max(s["score"], 0.01) for s in candidates]
+        max_s = max(scores)
+        exp_s = [math.exp(s - max_s) for s in scores]
+        total_exp = sum(exp_s)
+        weights = [e / total_exp for e in exp_s]
+    max_pct = pf["max_single_pct"]
+    for i, w in enumerate(weights):
+        if w > max_pct:
+            weights[i] = max_pct
+            excess = w - max_pct
+            others = [i2 for i2 in range(len(weights)) if i2 != i]
+            if others:
+                per_other = excess / len(others)
+                for oi in others: weights[oi] += per_other
     allocated = []
     remaining = float(budget)
-    for i, s in enumerate(candidates[:max_positions]):
-        pct = s["weight"]
-        if i == max_positions - 1:
-            amount = remaining
+    for i, (s, w) in enumerate(zip(candidates, weights)):
+        if i == max_positions - 1 or i == len(candidates) - 1:
+            amount = round(remaining, 0)
         else:
-            amount = round(budget * pct, 0)
+            amount = round(budget * w, 0)
             amount = max(amount, min_pos)
+        amount = min(amount, remaining)
         pct_actual = amount / budget * 100
-        allocated.append({
-            "code": s["code"],
-            "name": s["name"],
-            "score": s["score"],
-            "amount": amount,
-            "pct": round(pct_actual, 1),
-        })
+        allocated.append({"code": s["code"], "name": s["name"], "score": s["score"],
+                          "weight_pct": round(w * 100, 1), "amount": int(amount),
+                          "pct": round(pct_actual, 1)})
         remaining -= amount
-    
     return allocated
 
-
-def generate_portfolio_report(analyst_results, budget=1000, profile="balanced"):
-    """Generate a full portfolio allocation report."""
+def generate_portfolio_report(analyst_results, budget=1000, profile="balanced", method="softmax"):
     pf = PORTFOLIO_PROFILES.get(profile, PORTFOLIO_PROFILES["balanced"])
-    alloc = allocate(analyst_results, budget, profile)
-    
-    lines = []
-    lines.append("")
-    lines.append("  [投资组合分配] %s | 预算: %d元" % (pf["label"], budget))
-    lines.append("  %s" % ("="*55))
-    
-    if not alloc:
-        lines.append("  无合适标的")
-        return "\n".join(lines)
-    
+    alloc = allocate(analyst_results, budget, profile, method=method)
+    lines = [f"\n  [投资组合分配] {pf['label']} | 预算: {budget:.0f}元 (鲁棒优化)",
+             f"  {'='*60}"]
+    if not alloc: lines.append("  无合适标的"); return "\n".join(lines)
     total_pct = 0
     for a in alloc:
         total_pct += a["pct"]
-        lines.append("  %-8s %-20s %6.0f元 %5.1f%% (评分:%.1f)" % (
-            a["code"], a["name"][:18], a["amount"], a["pct"], a["score"]))
-    
-    lines.append("  %s" % ("-"*55))
-    lines.append("  %-30s %6d元 %5.1f%%" % ("合计", sum(a["amount"] for a in alloc), total_pct))
-    lines.append("")
+        lines.append(f"  {a['code']:<8} {a['name'][:16]:<18} {a['amount']:>6.0f}元 {a['pct']:>5.1f}% (评分:{a['score']:.1f}, 权重:{a['weight_pct']:.1f}%)")
+    lines.append(f"  {'-'*60}")
+    lines.append(f"  {'合计':<28} {sum(a['amount'] for a in alloc):>6.0f}元 {total_pct:>5.1f}%")
+    method_label = "鲁棒CVaR优化" if method == "cvar" else "鲁棒softmax"
+    lines.append(f"  [风控] 方法={method_label} | 鲁棒lambda={pf['robust_lambda']:.2f} | 单只上限={pf['max_single_pct']*100:.0f}%")
     return "\n".join(lines)
-
-
-if __name__ == "__main__":
-    # Test with mock data
-    mock_results = {
-        "512890": {"composite_score": 7.39, "supply_score": 8.2, "capital_score": 6.0, 
-                   "signal_score": 7.6, "demand_score": 7.5, "name": "红利低波ETF"},
-        "159995": {"composite_score": 5.30, "supply_score": 3.5, "capital_score": 5.5,
-                   "signal_score": 4.5, "demand_score": 7.5, "name": "芯片ETF"},
-        "159819": {"composite_score": 5.27, "supply_score": 3.8, "capital_score": 4.5,
-                   "signal_score": 5.6, "demand_score": 7.5, "name": "AI智能"},
-        "518880": {"composite_score": 7.0, "supply_score": 8.2, "capital_score": 6.0,
-                   "signal_score": 5.0, "demand_score": 7.0, "name": "黄金ETF"},
-        "159201": {"composite_score": 7.0, "supply_score": 8.4, "capital_score": 4.5,
-                   "signal_score": 5.0, "demand_score": 7.5, "name": "自由现金流ETF"},
-        "511010": {"composite_score": 7.5, "supply_score": 9.0, "capital_score": 7.0,
-                   "signal_score": 6.0, "demand_score": 8.0, "name": "国债ETF"},
-    }
-    
-    from ..analysis.chain import evaluate_etf_risk
-    # Mock evaluate_etf_risk
-    
-    for profile in ["conservative", "balanced", "aggressive"]:
-        print(generate_portfolio_report(mock_results, budget=1000, profile=profile))

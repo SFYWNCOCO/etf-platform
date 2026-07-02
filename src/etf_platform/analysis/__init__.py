@@ -1,1 +1,3 @@
-# ETF analysis package: penetration, rotation, macro, demand
+# ETF analysis package
+from .causal import CausalEngine, Event
+from .signals import ProfitSignalEngine

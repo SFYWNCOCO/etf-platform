@@ -25,7 +25,12 @@ def load_vulnerability():
 
 
 def load_materials():
-    """Load material dependency map."""
+    """Load material dependency map.
+
+    Uses FullLoader because materials.yaml contains !!python/tuple tags
+    (e.g. (0.90, 30, 36, 0.90)) that safe_load cannot parse.
+    This is a local config file — no untrusted input risk.
+    """
     path = _CONFIG_DIR / "materials.yaml"
     if not path.exists():
         raise FileNotFoundError(f"Config not found: {path}")

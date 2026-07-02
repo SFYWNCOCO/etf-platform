@@ -1,4 +1,4 @@
-﻿"""Valuation & fundamentals for ETFs.
+"""Valuation & fundamentals for ETFs.
 Sources: fund daily API, K-line data, static index mapping."""
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict

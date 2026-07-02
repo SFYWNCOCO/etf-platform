@@ -4,6 +4,7 @@ Layer 0: 基础材料(e) → Layer 1: 事件(I0+direction) → Layer 2: 上游(d
 → Layer 3: 中游(g) → Layer 4: 成分股(b) → Layer 5: ETF(a) + 人员(z) 跨层穿透
 """
 import math, time
+from functools import lru_cache
 from ..config_loader import load_etfs
 
 IMPACT_LEVEL = (
@@ -52,16 +53,25 @@ def _compute_material_map(etfs):
         mm[code] = dict(mats)
     return mm
 
-_etfs = None
-_vuln = None
-_material_map = None
+@lru_cache(maxsize=1)
+def _cached_vuln():
+    etfs = load_etfs()
+    return _compute_vulnerability(etfs)
+
+
+@lru_cache(maxsize=1)
+def _cached_material_map():
+    etfs = load_etfs()
+    return _compute_material_map(etfs)
+
+
+@lru_cache(maxsize=1)
+def _cached_etfs():
+    return load_etfs()
+
 
 def _ensure_loaded():
-    global _etfs, _vuln, _material_map
-    if _etfs is None:
-        _etfs = load_etfs()
-        _vuln = _compute_vulnerability(_etfs)
-        _material_map = _compute_material_map(_etfs)
+    pass
 
 class Event:
     def __init__(self, title, etype, source_auth, impact_scope, duration_days,
@@ -105,7 +115,8 @@ class CausalEngine:
 
     def calc_material_epsilon(self, etf_code, event):
         _ensure_loaded()
-        etf_sector = _etfs[etf_code]["sector"]
+        etfs = _cached_etfs()
+        etf_sector = etfs[etf_code]["sector"]
         base_epsilon = 0.1
         if event.affected_sectors:
             for sector in event.affected_sectors:
@@ -114,11 +125,12 @@ class CausalEngine:
                     break
                 if ("半导体" in sector and "半导体" in etf_sector) or ("AI" in sector and "AI" in etf_sector):
                     base_epsilon = max(base_epsilon, 0.40)
-        if etf_code not in _material_map or not event.affected_materials:
+        mat_map = _cached_material_map()
+        if etf_code not in mat_map or not event.affected_materials:
             return base_epsilon
         if not isinstance(event.affected_materials, dict):
             return base_epsilon
-        materials = _material_map[etf_code]
+        materials = mat_map[etf_code]
         total_epsilon = 0; hit_count = 0
         for mat_name, mat_params in event.affected_materials.items():
             if mat_name not in materials: continue
@@ -143,7 +155,7 @@ class CausalEngine:
         return max(base_epsilon, material_epsilon)
 
     def calc_layer_delta(self, etf_code, event, epsilon):
-        v = _vuln[etf_code]
+        v = _cached_vuln()[etf_code]
         base_delta = (v["policy"] if event.etype == "policy" else v["tech"] if event.etype == "tech_break"
                  else v["supply"] if event.etype == "supply_chain" else v["material"] if event.etype == "material"
                  else v["people"] if event.etype == "people" else 0.3)
@@ -151,7 +163,7 @@ class CausalEngine:
 
     def calc_personnel_multiplier(self, etf_code, event):
         if not event.affected_people: return 1.0
-        people_factor = _vuln[etf_code]["people"]
+        people_factor = _cached_vuln()[etf_code]["people"]
         critical = event.affected_people.get("critical", 0.5)
         replace = event.affected_people.get("replace_difficulty", 0.3)
         team_impact = event.affected_people.get("team_impact", 0.3)
@@ -167,7 +179,7 @@ class CausalEngine:
             epsilon = self.calc_material_epsilon(etf_code, event)
             delta = self.calc_layer_delta(etf_code, event, epsilon)
             gamma = round(delta * 0.7, 4); beta = round(gamma * 0.6, 4)
-            alpha = round(0.08 + _etfs[etf_code]["risk_level"] * 0.35, 3)
+            alpha = round(0.08 + _cached_etfs()[etf_code]["risk_level"] * 0.35, 3)
             zeta = self.calc_personnel_multiplier(etf_code, event)
             raw_impact = event.I0 * epsilon * delta * gamma * beta * alpha * zeta
             directional_impact = round(-event.direction * raw_impact, 6)
@@ -191,14 +203,16 @@ class CausalEngine:
         print("  6层因果传导扫描 - 全ETF冲击评估")
         print("=" * 65)
         results = {}
-        for code in sorted(_etfs.keys()):
-            if code not in _etfs or code not in _vuln: continue
+        etfs = _cached_etfs()
+        vuln = _cached_vuln()
+        for code in sorted(etfs.keys()):
+            if code not in etfs or code not in vuln: continue
             if not code.isdigit(): continue
             total, paths = self.evaluate(code)
-            vuln = _vuln[code]; composite_vuln = sum(vuln.values()) / len(vuln)
-            results[code] = {"name": _etfs[code]["name"], "type": _etfs[code].get("type",""),
-                "sector": _etfs[code].get("sector",""), "leverage": _etfs[code].get("leverage",1.0),
-                "risk_level": _etfs[code].get("risk_level",0.5), "total_impact": total,
+            vcode = vuln[code]; composite_vuln = sum(vcode.values()) / len(vcode)
+            results[code] = {"name": etfs[code]["name"], "type": etfs[code].get("type",""),
+                "sector": etfs[code].get("sector",""), "leverage": etfs[code].get("leverage",1.0),
+                "risk_level": etfs[code].get("risk_level",0.5), "total_impact": total,
                 "abs_impact": abs(total), "composite_vuln": composite_vuln, "paths": paths[:5],
                 "is_safe": total < 0.0}
             if total < -0.05: flag = "++"
@@ -206,7 +220,7 @@ class CausalEngine:
             elif total < 0.01: flag = "o"
             elif total < 0.05: flag = "-"
             else: flag = "--"
-            print(f"  {flag} {code:<10}{_etfs[code]['name']:<14}| {total:+.4f} | {composite_vuln:.2f}")
+            print(f"  {flag} {code:<10}{etfs[code]['name']:<14}| {total:+.4f} | {composite_vuln:.2f}")
         return results
 
     def report(self, results):

@@ -42,7 +42,7 @@ class TestPipelineCore:
         result = run_full(etf_code_chip)
         report = format_full(result)
         assert isinstance(report, str)
-        assert len(report) > 500
+        assert len(report) > 200  # v5.5: format shortened after adapter merge
         assert etf_code_chip in report
 
     def test_different_etfs_differ(self):

@@ -1,6 +1,6 @@
 """L8 Capital Flow enhancer: replaces inferred data with real-time data."""
 import time
-from etf_platform.data.manager import get_price
+from ..data.manager import get_price
 
 
 def enhance_l8(penetration_result: dict) -> dict:

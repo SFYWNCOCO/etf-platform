@@ -1,0 +1,1221 @@
+materials:
+  # ═══════════════════════════════════════════
+  # 半导体材料 (9种)
+  # ═══════════════════════════════════════════
+  光刻胶(ArF, 193nm):
+    current: "战略物资/不公开"
+    trend: "↑ 日本管制收紧"
+    unit: "N/A"
+    affects: ["159995","512480","159819","588000","516510"]
+    impact_direction: "利空"
+    note: "JSR/TOK垄断90%+，日本政策是唯一变量"
+    warning: "🔴 随时可能管制升级"
+    sub_grades: "ArF(193nm)高端/KrF(248nm)中端/g/i线低端"
+    supplier_regions: {"日本": 90, "美国": 7, "韩国": 2, "中国": 1}
+    substitution_years: 5
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.95
+
+  高纯石英砂(5N):
+    current: "3-5万元/吨"
+    trend: "→ 平稳"
+    unit: "万元/吨"
+    affects: ["159995","512480","588000","516510","159819"]
+    impact_direction: "利空"
+    note: "美国Unimin垄断70%，国产纯度不足"
+    warning: "🟡 库存仅20天，任何供应中断即危机"
+    sub_grades: "5N(半导体级)/4N(光伏级)/3N(普通级)"
+    supplier_regions: {"美国": 70, "挪威": 15, "中国": 10, "其他": 5}
+    substitution_years: 3
+    strategic_days: 20
+    technology_readiness: 8
+    bottleneck_risk: 0.90
+
+  硅晶圆(12英寸):
+    current: "$120-130/片"
+    trend: "→ 平稳"
+    unit: "$/片"
+    affects: ["159995","512480","159819","588000","516510"]
+    impact_direction: "中性"
+    note: "信越/SUMCO扩产中，供需趋于平衡"
+    warning: "⚪ 短期无风险"
+    sub_grades: "12英寸(先进制程)/8英寸(成熟制程)"
+    supplier_regions: {"日本": 55, "台湾": 20, "德国": 12, "韩国": 10, "中国": 3}
+    substitution_years: 2
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.60
+
+  硅晶圆(8英寸):
+    current: "$35-45/片"
+    trend: "↓ 产能过剩"
+    unit: "$/片"
+    affects: ["159995","512480","159819"]
+    impact_direction: "利好"
+    note: "全球8英寸产能充足，国产替代率>30%"
+    warning: "⚪ 供需宽松"
+    sub_grades: "8英寸(成熟制程)/6英寸(功率器件)"
+    supplier_regions: {"中国": 30, "台湾": 25, "日本": 20, "韩国": 15, "其他": 10}
+    substitution_years: 0
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  CMP抛光液:
+    current: "国产化率<15%"
+    trend: "↑ 国产替代加速"
+    unit: "N/A"
+    affects: ["159995","512480","588000"]
+    impact_direction: "中性偏多"
+    note: "安集科技突破Cu-CMP，Cabot仍占70%+"
+    warning: "🟡 进口依赖度高，管制风险"
+    sub_grades: "Cu-CMP(铜互连)/W-CMP(钨栓塞)/Oxide-CMP(氧化物)"
+    supplier_regions: {"美国": 70, "日本": 15, "中国": 10, "韩国": 5}
+    substitution_years: 3
+    strategic_days: 25
+    technology_readiness: 7
+    bottleneck_risk: 0.85
+
+  电子气体(NF3/WF6):
+    current: "国产化率<20%"
+    trend: "↑ 华特/金宏扩产"
+    unit: "N/A"
+    affects: ["159995","512480","588000","516510"]
+    impact_direction: "中性偏多"
+    note: "NF3/WF6逐步国产化，但高端仍依赖Air Liquide"
+    warning: "🟡 刻蚀气体进口占比>80%"
+    sub_grades: "NF3(清洗气)/WF6(钨沉积)/高纯NH3(氮化硅)"
+    supplier_regions: {"日本": 40, "美国": 25, "法国": 20, "中国": 10, "韩国": 5}
+    substitution_years: 4
+    strategic_days: 21
+    technology_readiness: 7
+    bottleneck_risk: 0.80
+
+  溅射靶材(Ta/Cu):
+    current: "国产化率<10%"
+    trend: "↑ 江丰电子突破"
+    unit: "N/A"
+    affects: ["159995","512480","588000"]
+    impact_direction: "中性偏多"
+    note: "日矿金属/Honeywell垄断Ta靶，江丰Cu靶已入台积电"
+    warning: "🟡 高纯Ta靶100%进口"
+    sub_grades: "Ta靶(阻挡层)/Cu靶(互连)/Al靶(布线)"
+    supplier_regions: {"日本": 60, "美国": 25, "中国": 10, "韩国": 5}
+    substitution_years: 5
+    strategic_days: 30
+    technology_readiness: 6
+    bottleneck_risk: 0.90
+
+  ABF封装基板:
+    current: "供不应求"
+    trend: "↑ AI芯片拉动需求"
+    unit: "N/A"
+    affects: ["159995","512480","159819","516510"]
+    impact_direction: "利空"
+    note: "日本味之素垄断ABF膜，ABF基板产能紧缺"
+    warning: "🔴 AI算力芯片封装瓶颈材料"
+    sub_grades: "ABF(Ajinomoto Build-up Film)/BT树脂基板"
+    supplier_regions: {"日本": 85, "台湾": 10, "韩国": 5, "中国": 0}
+    substitution_years: 4
+    strategic_days: 14
+    technology_readiness: 9
+    bottleneck_risk: 0.92
+
+  高纯氢氟酸:
+    current: "电子级国产率<30%"
+    trend: "↑ 多氟多/巨化突破"
+    unit: "N/A"
+    affects: ["159995","512480","588000"]
+    impact_direction: "中性偏多"
+    note: "Stella Chemifa(日本)垄断半导体级HF"
+    warning: "🟡 电子级HF进口依赖>70%"
+    sub_grades: "EL级(电子级)/UP-S级(超高纯)/CMOS级"
+    supplier_regions: {"日本": 55, "中国": 25, "韩国": 15, "其他": 5}
+    substitution_years: 2
+    strategic_days: 21
+    technology_readiness: 7
+    bottleneck_risk: 0.70
+
+  # ═══════════════════════════════════════════
+  # 新能源材料 (10种)
+  # ═══════════════════════════════════════════
+  碳酸锂(电池级):
+    current: "8-10万元/吨"
+    trend: "↓ 从60万跌至成本线"
+    unit: "万元/吨"
+    affects: ["516160","515030","159755","588800"]
+    impact_direction: "利好"
+    note: "跌破澳矿成本线→供给出清→价格见底"
+    warning: "🟢 底部信号：锂价已跌90%，做多受益标的"
+    sub_grades: "电池级(>99.5%)/工业级(>99.2%)"
+    supplier_regions: {"澳大利亚": 47, "智利": 25, "中国": 15, "阿根廷": 8, "其他": 5}
+    substitution_years: 2
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.35
+
+  氢氧化锂:
+    current: "7-9万元/吨"
+    trend: "↓ 跟随碳酸锂下行"
+    unit: "万元/吨"
+    affects: ["516160","515030","159755"]
+    impact_direction: "利好"
+    note: "高镍正极材料核心原料，LiOH·H2O需求增长"
+    warning: "🟢 高镍三元渗透率提升→氢氧化锂结构性利好"
+    sub_grades: "电池级单水(LiOH·H2O)/微粉级"
+    supplier_regions: {"中国": 55, "澳大利亚": 25, "智利": 15, "其他": 5}
+    substitution_years: 1
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.30
+
+  钴(电解钴):
+    current: "20-25万元/吨"
+    trend: "↓ 三元电池需求下降"
+    unit: "万元/吨"
+    affects: ["516160","515030"]
+    impact_direction: "利好"
+    note: "磷酸铁锂替代三元→钴需求结构性下降"
+    warning: "⚪ 长期利空钴价，利好下游成本"
+    sub_grades: "电解钴(>99.8%)/钴盐(硫酸钴/氯化钴)"
+    supplier_regions: {"刚果金": 70, "印尼": 10, "中国": 8, "其他": 12}
+    substitution_years: 3
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.55
+
+  石墨负极:
+    current: "2.5-3.5万元/吨"
+    trend: "→ 人造石墨主流"
+    unit: "万元/吨"
+    affects: ["516160","515030","159755"]
+    impact_direction: "中性"
+    note: "中国石墨资源全球第一，贝特瑞/杉杉全球龙头"
+    warning: "⚪ 国产供给充足"
+    sub_grades: "人造石墨(350mAh/g)/天然石墨(365mAh/g)/硅碳复合(>400mAh/g)"
+    supplier_regions: {"中国": 75, "日本": 10, "韩国": 8, "其他": 7}
+    substitution_years: 1
+    strategic_days: 120
+    technology_readiness: 9
+    bottleneck_risk: 0.15
+
+  LiPF6电解液:
+    current: "6-8万元/吨"
+    trend: "↓ 产能过剩"
+    unit: "万元/吨"
+    affects: ["516160","515030"]
+    impact_direction: "利好"
+    note: "天赐材料全球龙头，六氟磷酸锂产能充足"
+    warning: "🟢 电解液价格低位→电池成本下降"
+    sub_grades: "LiPF6(六氟磷酸锂)/LiFSI(新型锂盐)/添加剂VC/FEC"
+    supplier_regions: {"中国": 70, "日本": 15, "韩国": 10, "其他": 5}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  湿法PE隔膜:
+    current: "0.8-1.2元/㎡"
+    trend: "↓ 恩捷/星源扩产"
+    unit: "元/㎡"
+    affects: ["516160","515030"]
+    impact_direction: "利好"
+    note: "中国隔膜全球市占率>60%，湿法涂覆是趋势"
+    warning: "🟢 国产替代完整，成本持续下降"
+    sub_grades: "湿法PE(9-12μm)/干法PP(16-20μm)/涂覆隔膜"
+    supplier_regions: {"中国": 65, "日本": 15, "韩国": 12, "其他": 8}
+    substitution_years: 0
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  多晶硅(致密料):
+    current: "40-50元/kg"
+    trend: "↓ 产能释放+需求稳"
+    unit: "元/kg"
+    affects: ["516160","515030","159755"]
+    impact_direction: "利好"
+    note: "通威/大全扩产→硅料不再紧缺→组件降价"
+    warning: "🟢 光伏装机成本持续降低"
+    sub_grades: "致密料(N型)/菜花料(P型)/颗粒硅"
+    supplier_regions: {"中国": 80, "德国": 8, "美国": 5, "韩国": 4, "其他": 3}
+    substitution_years: 0
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  光伏玻璃(2.0mm):
+    current: "18-22元/㎡"
+    trend: "→ 供需平衡"
+    unit: "元/㎡"
+    affects: ["516160","515030","159755"]
+    impact_direction: "中性"
+    note: "信义/福莱特双寡头，双玻组件渗透率>50%"
+    warning: "⚪ 产能充裕"
+    sub_grades: "2.0mm(双玻)/3.2mm(单玻)/超白压延"
+    supplier_regions: {"中国": 85, "马来西亚": 8, "其他": 7}
+    substitution_years: 0
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  EVA胶膜:
+    current: "8-10元/㎡"
+    trend: "→ 透明EVA→POE转换"
+    unit: "元/㎡"
+    affects: ["516160","515030"]
+    impact_direction: "中性"
+    note: "福斯特全球龙头，POE胶膜替代EVA趋势"
+    warning: "⚪ EVA树脂需进口，国产POE突破中"
+    sub_grades: "透明EVA/白色EVA/POE/EPE共挤"
+    supplier_regions: {"中国": 60, "韩国": 20, "日本": 10, "其他": 10}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.25
+
+  正面银浆:
+    current: "5,000-6,000元/kg"
+    trend: "↑ 银粉进口依赖"
+    unit: "元/kg"
+    affects: ["516160","515030"]
+    impact_direction: "利空"
+    note: "银粉占银浆成本>80%，日本DOWA垄断高端银粉"
+    warning: "🟡 银粉进口依赖>70%，银价上行推高成本"
+    sub_grades: "正面银浆(TOPCon)/背面银浆/低温银浆(HJT)"
+    supplier_regions: {"日本": 60, "中国": 20, "美国": 10, "韩国": 5, "其他": 5}
+    substitution_years: 3
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.65
+
+  # ═══════════════════════════════════════════
+  # 军工材料 (8种)
+  # ═══════════════════════════════════════════
+  海绵钛(0级):
+    current: "5.0-5.5万元/吨"
+    trend: "→ 平稳"
+    unit: "万元/吨"
+    affects: ["512660","512670"]
+    impact_direction: "中性"
+    note: "宝钛/西部超导产能充足，国产替代率70%"
+    warning: "⚪ 短期无风险"
+    sub_grades: "0级(航天级)/1级(航空级)/2级(工业级)"
+    supplier_regions: {"中国": 55, "俄罗斯": 20, "日本": 15, "哈萨克": 5, "其他": 5}
+    substitution_years: 0
+    strategic_days: 120
+    technology_readiness: 9
+    bottleneck_risk: 0.15
+
+  镍(电解镍):
+    current: "12-14万元/吨"
+    trend: "↓ 印尼产能释放"
+    unit: "万元/吨"
+    affects: ["512660","512670"]
+    impact_direction: "利好"
+    note: "印尼镍矿扩产→高温合金原料成本下降"
+    warning: "🟢 镍价下行利好航发动力成本"
+    sub_grades: "电解镍(>99.96%)/镍豆/镍粉(高温合金用)"
+    supplier_regions: {"印尼": 50, "中国": 20, "俄罗斯": 15, "菲律宾": 8, "其他": 7}
+    substitution_years: 0
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  碳纤维(T700-T800):
+    current: "120-150元/kg"
+    trend: "↓ 国产规模效应"
+    unit: "元/kg"
+    affects: ["512660","512670","159206","159227"]
+    impact_direction: "利好"
+    note: "光威/中复神鹰扩产→航空航天+风电双驱动"
+    warning: "🟢 国产替代加速，T800认证中"
+    sub_grades: "T300(工业级)/T700(航空级)/T800(军机)/T1000(开发中)"
+    supplier_regions: {"中国": 40, "日本": 35, "美国": 15, "其他": 10}
+    substitution_years: 2
+    strategic_days: 90
+    technology_readiness: 8
+    bottleneck_risk: 0.40
+
+  GH4169高温合金:
+    current: "20-25万元/吨"
+    trend: "→ 平稳"
+    unit: "万元/吨"
+    affects: ["512660","512670"]
+    impact_direction: "中性"
+    note: "抚钢/钢研高纳国产化率>60%，军品稳定"
+    warning: "⚪ 需求稳定增长"
+    sub_grades: "GH4169(变形合金)/K4169(铸造合金)/GH4169G(新一代)"
+    supplier_regions: {"中国": 60, "美国": 25, "欧洲": 10, "其他": 5}
+    substitution_years: 0
+    strategic_days: 180
+    technology_readiness: 9
+    bottleneck_risk: 0.25
+
+  铼:
+    current: "战略物资/不公开"
+    trend: "↑ 航空发动机需求"
+    unit: "N/A"
+    affects: ["512660","512670"]
+    impact_direction: "利空"
+    note: "全球年产量仅50吨，中国储量极低→依赖进口"
+    warning: "🔴 单晶叶片关键元素，供应极度脆弱"
+    sub_grades: "高纯铼粉(99.99%)/铼酸铵/铼合金"
+    supplier_regions: {"智利": 55, "美国": 15, "波兰": 10, "哈萨克": 8, "中国": 2, "其他": 10}
+    substitution_years: 8
+    strategic_days: 15
+    technology_readiness: 9
+    bottleneck_risk: 0.98
+
+  铝锂合金(2195):
+    current: "未公开/军品定价"
+    trend: "↑ 航天运载器需求"
+    unit: "N/A"
+    affects: ["512660","512670"]
+    impact_direction: "利空"
+    note: "中国刚突破2系铝锂合金量产，产能严重不足"
+    warning: "🟡 火箭贮箱关键材料，仅西南铝/中铝可产"
+    sub_grades: "2195(航天级)/2099(航空级)/2060(薄板)"
+    supplier_regions: {"中国": 30, "美国": 40, "俄罗斯": 20, "其他": 10}
+    substitution_years: 5
+    strategic_days: 60
+    technology_readiness: 7
+    bottleneck_risk: 0.75
+
+  隐身涂层:
+    current: "军品机密/不公开"
+    trend: "→ 技术储备"
+    unit: "N/A"
+    affects: ["512660","512670"]
+    impact_direction: "中性"
+    note: "J-20/轰-20隐身技术核心，中国已突破宽频隐身"
+    warning: "⚪ 技术自主可控"
+    sub_grades: "雷达吸波涂层(RAM)/红外隐身涂层/多频谱隐身"
+    supplier_regions: {"中国": 80, "美国": 15, "其他": 5}
+    substitution_years: 0
+    strategic_days: 365
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  陶瓷基(SiCf/SiC):
+    current: "研发阶段/未规模化"
+    trend: "↑ 航空发动机CMC叶片"
+    unit: "N/A"
+    affects: ["512660","512670"]
+    impact_direction: "中性偏多"
+    note: "国产SiC纤维突破，CMC燃烧室/涡轮外环验证中"
+    warning: "🟢 航空发动机减重革命性材料"
+    sub_grades: "SiCf/SiC(连续纤维增强)/C/SiC(碳纤维增强)/SiCf/SiBCN"
+    supplier_regions: {"中国": 25, "美国": 40, "法国": 15, "日本": 12, "其他": 8}
+    substitution_years: 5
+    strategic_days: 180
+    technology_readiness: 6
+    bottleneck_risk: 0.60
+
+  # ═══════════════════════════════════════════
+  # 稀土/战略金属 (5种)
+  # ═══════════════════════════════════════════
+  氧化镨钕:
+    current: "38-42万元/吨"
+    trend: "→ 中国控产稳价"
+    unit: "万元/吨"
+    affects: ["512660","512670","516160","512400"]
+    impact_direction: "中性偏多"
+    note: "中国主导供应60%+，出口管制是双刃剑"
+    warning: "🟡 稀土出口管制→国内稀土企业受益，下游成本承压"
+    sub_grades: "氧化镨钕(>99%)/金属镨钕/氧化镝(重稀土)"
+    supplier_regions: {"中国": 65, "美国": 12, "缅甸": 10, "澳大利亚": 8, "其他": 5}
+    substitution_years: 3
+    strategic_days: 180
+    technology_readiness: 9
+    bottleneck_risk: 0.50
+
+  钨(APT):
+    current: "18-20万元/吨"
+    trend: "↑ 军工+刀具需求"
+    unit: "万元/吨"
+    affects: ["512400","512660"]
+    impact_direction: "中性偏多"
+    note: "中国钨储量58%全球，硬质合金需求增长"
+    warning: "⚪ 供给集中但可控"
+    sub_grades: "APT(仲钨酸铵)/钨粉(>99.95%)/碳化钨"
+    supplier_regions: {"中国": 82, "越南": 8, "俄罗斯": 5, "其他": 5}
+    substitution_years: 2
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.30
+
+  锑:
+    current: "8-10万元/吨"
+    trend: "↑ 光伏玻璃澄清剂+阻燃"
+    unit: "万元/吨"
+    affects: ["512400"]
+    impact_direction: "中性偏多"
+    note: "中国锑储量全球第一，光伏澄清剂新增需求"
+    warning: "🟢 光伏用锑需求年增15%"
+    sub_grades: "精锑(>99.85%)/三氧化二锑/锑锭"
+    supplier_regions: {"中国": 55, "俄罗斯": 20, "塔吉克": 10, "其他": 15}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.35
+
+  锗:
+    current: "8,000-10,000元/kg"
+    trend: "↑ 红外+光纤需求"
+    unit: "元/kg"
+    affects: ["512400","159819"]
+    impact_direction: "中性偏多"
+    note: "中国控制全球70%锗供应，红外军事需求刚性"
+    warning: "🟡 中国出口管制→海外供给紧张"
+    sub_grades: "高纯锗(>99.9999%)/单晶锗/锗锭(>99.99%)"
+    supplier_regions: {"中国": 70, "比利时": 10, "俄罗斯": 8, "其他": 12}
+    substitution_years: 3
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.40
+
+  镓:
+    current: "战略管制/公开价格失真"
+    trend: "↑ 中国出口管制"
+    unit: "N/A"
+    affects: ["159995","512480","159819"]
+    impact_direction: "利空"
+    note: "中国控制全球90%+镓供应，半导体衬底关键元素"
+    warning: "🔴 出口管制→全球GaAs/GaN衬底供应风险"
+    sub_grades: "高纯镓(>99.9999%)/氮化镓/砷化镓"
+    supplier_regions: {"中国": 92, "俄罗斯": 3, "哈萨克": 2, "其他": 3}
+    substitution_years: 5
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.90
+
+  # ═══════════════════════════════════════════
+  # 贵金属 (4种)
+  # ═══════════════════════════════════════════
+  黄金(Au9999):
+    current: "$2400-2500/oz"
+    trend: "↑ 央行购金+降息预期"
+    unit: "$/oz"
+    affects: ["518880","159937"]
+    impact_direction: "利好"
+    note: "全球央行连续18个月净购金→去美元化趋势"
+    warning: "🟢 金价历史高位，央行购金持续"
+    sub_grades: "Au9999(标准金锭)/Au9995/金条投资级"
+    supplier_regions: {"中国": 25, "俄罗斯": 18, "澳大利亚": 12, "美国": 8, "其他": 37}
+    substitution_years: 0
+    strategic_days: 365
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  白银:
+    current: "$29-32/oz"
+    trend: "↑ 光伏+工业需求"
+    unit: "$/oz"
+    affects: ["518880"]
+    impact_direction: "利好"
+    note: "光伏银浆需求+25%YoY→工业属性增强"
+    warning: "🟢 金银比修复空间大"
+    sub_grades: "Ag9999(电解银)/Ag999(珠宝级)/纳米银粉"
+    supplier_regions: {"墨西哥": 23, "中国": 13, "秘鲁": 12, "智利": 5, "其他": 47}
+    substitution_years: 1
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  铂:
+    current: "$900-$1,100/oz"
+    trend: "→ 氢能催化需求增长"
+    unit: "$/oz"
+    affects: ["518880","516160"]
+    impact_direction: "中性偏多"
+    note: "燃料电池催化剂+首饰双需求，南非供应主导"
+    warning: "🟢 氢能产业化→铂需求新增长极"
+    sub_grades: "海绵铂(>99.95%)/铂锭/铂催化剂"
+    supplier_regions: {"南非": 72, "俄罗斯": 12, "津巴布韦": 8, "其他": 8}
+    substitution_years: 5
+    strategic_days: 60
+    technology_readiness: 8
+    bottleneck_risk: 0.40
+
+  钯:
+    current: "$900-$1,100/oz"
+    trend: "↓ 燃油车催化剂需求见顶"
+    unit: "$/oz"
+    affects: ["518880","512400"]
+    impact_direction: "中性偏空"
+    note: "三元催化器需求下降+电动车替代燃油车"
+    warning: "🟡 长期需求结构性下降"
+    sub_grades: "海绵钯(>99.95%)/钯锭/钯催化剂"
+    supplier_regions: {"俄罗斯": 40, "南非": 35, "美国": 8, "其他": 17}
+    substitution_years: 3
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.25
+
+  # ═══════════════════════════════════════════
+  # 工业金属 (7种)
+  # ═══════════════════════════════════════════
+  铜(电解铜):
+    current: "$8,500-9,500/吨"
+    trend: "↑ 电网+新能源需求"
+    unit: "$/吨"
+    affects: ["512400","510300","510050","159915"]
+    impact_direction: "利好"
+    note: "全球铜矿资本开支不足→2026年供需缺口扩大"
+    warning: "🟢 铜长期牛市逻辑不变"
+    sub_grades: "电解铜(>99.99%)/阴极铜/铜精矿(TC/RC)"
+    supplier_regions: {"智利": 27, "秘鲁": 12, "中国": 9, "刚果金": 8, "其他": 44}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  铝(电解铝):
+    current: "1.9-2.1万元/吨"
+    trend: "→ 震荡"
+    unit: "万元/吨"
+    affects: ["512400"]
+    impact_direction: "中性"
+    note: "云南水电铝复产+汽车轻量化双驱动"
+    warning: "⚪ 供需弱平衡"
+    sub_grades: "A00铝锭(>99.7%)/6063铝棒/铝板带箔"
+    supplier_regions: {"中国": 58, "印度": 6, "俄罗斯": 5, "加拿大": 4, "其他": 27}
+    substitution_years: 0
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  锌(0#锌锭):
+    current: "2.1-2.3万元/吨"
+    trend: "↓ 需求偏弱"
+    unit: "万元/吨"
+    affects: ["512400"]
+    impact_direction: "中性偏空"
+    note: "地产竣工疲弱→镀锌需求下滑"
+    warning: "🟡 地产链拖累需求"
+    sub_grades: "0#锌锭(>99.995%)/1#锌锭(>99.99%)/锌精矿"
+    supplier_regions: {"中国": 35, "秘鲁": 12, "澳大利亚": 8, "印度": 6, "其他": 39}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.15
+
+  铅(1#铅锭):
+    current: "1.5-1.7万元/吨"
+    trend: "→ 铅酸电池稳定需求"
+    unit: "万元/吨"
+    affects: ["512400"]
+    impact_direction: "中性"
+    note: "铅酸电池储能/UPS需求稳定，电动车替代缓慢"
+    warning: "⚪ 需求稳定但无增量"
+    sub_grades: "1#铅锭(>99.994%)/再生铅/铅精矿"
+    supplier_regions: {"中国": 48, "澳大利亚": 8, "秘鲁": 6, "美国": 5, "其他": 33}
+    substitution_years: 2
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  锡:
+    current: "24-28万元/吨"
+    trend: "↑ 焊料+光伏焊带需求"
+    unit: "万元/吨"
+    affects: ["512400","159819"]
+    impact_direction: "中性偏多"
+    note: "缅甸佤邦停产→全球锡供给大幅收缩"
+    warning: "🟡 佤邦禁矿令→供给端持续收紧"
+    sub_grades: "1#锡锭(>99.95%)/锡焊料/锡精矿(>60%)"
+    supplier_regions: {"中国": 30, "缅甸": 20, "印尼": 18, "其他": 32}
+    substitution_years: 2
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.45
+
+  硅铁(75#):
+    current: "6,500-7,500元/吨"
+    trend: "↓ 钢铁行业减产"
+    unit: "元/吨"
+    affects: ["512400"]
+    impact_direction: "中性偏空"
+    note: "粗钢产量见顶→硅铁需求萎缩"
+    warning: "🟡 钢铁减量发展→长期利空"
+    sub_grades: "75#硅铁(Si>75%)/72#硅铁(Si>72%)/低碳硅铁"
+    supplier_regions: {"中国": 72, "俄罗斯": 10, "挪威": 8, "其他": 10}
+    substitution_years: 1
+    strategic_days: 30
+    technology_readiness: 8
+    bottleneck_risk: 0.10
+
+  电解锰:
+    current: "1.2-1.5万元/吨"
+    trend: "→ 不锈钢稳定需求"
+    unit: "万元/吨"
+    affects: ["512400"]
+    impact_direction: "中性"
+    note: "中国电解锰产量全球>95%，产能充裕"
+    warning: "⚪ 供给充足"
+    sub_grades: "电解锰(>99.7%)/锰锭(>99.9%)/硫酸锰"
+    supplier_regions: {"中国": 95, "南非": 3, "其他": 2}
+    substitution_years: 0
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  # ═══════════════════════════════════════════
+  # 能源化工 (7种)
+  # ═══════════════════════════════════════════
+  原油(Brent):
+    current: "$70-80/桶"
+    trend: "→ 区间震荡"
+    unit: "$/桶"
+    affects: ["159930","512400","159985","510300"]
+    impact_direction: "中性"
+    note: "OPEC+减产vs页岩油增产，70-80为均衡区间"
+    warning: "🟡 中东地缘政治是最大变量"
+    sub_grades: "Brent(轻质低硫)/WTI(西得克萨斯)/Oman(中东基准)"
+    supplier_regions: {"美国": 18, "沙特": 12, "俄罗斯": 11, "伊拉克": 5, "其他": 54}
+    substitution_years: 10
+    strategic_days: 90
+    technology_readiness: 9
+    bottleneck_risk: 0.30
+
+  天然气(JKM):
+    current: "$10-12/MMBtu"
+    trend: "→ 季节性波动"
+    unit: "$/MMBtu"
+    affects: ["159930","159985"]
+    impact_direction: "中性"
+    note: "暖冬→需求偏弱，但AI数据中心用气增长"
+    warning: "⚪ AI算力中心燃气轮机需求是新变量"
+    sub_grades: "JKM(亚洲现货)/HH(Henry Hub)/TTF(欧洲基准)"
+    supplier_regions: {"美国": 25, "俄罗斯": 17, "卡塔尔": 12, "澳大利亚": 10, "其他": 36}
+    substitution_years: 5
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  动力煤:
+    current: "800-900元/吨"
+    trend: "↓ 新能源替代+需求见顶"
+    unit: "元/吨"
+    affects: ["159985","512400","510300"]
+    impact_direction: "中性偏空"
+    note: "中国煤炭消费量2025年见顶→长期下行"
+    warning: "🟡 碳达峰→煤价长期承压"
+    sub_grades: "5500大卡动力煤/5000大卡/4500大卡"
+    supplier_regions: {"中国": 50, "印尼": 15, "澳大利亚": 12, "俄罗斯": 8, "其他": 15}
+    substitution_years: 3
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  PTA:
+    current: "5,500-6,500元/吨"
+    trend: "→ 产能过剩"
+    unit: "元/吨"
+    affects: ["159985","515170"]
+    impact_direction: "中性"
+    note: "中国PTA产能占全球>60%，逸盛/恒力龙头"
+    warning: "⚪ 涤纶产业链过剩→PTA价格低位"
+    sub_grades: "PTA(精对苯二甲酸)/MEG(乙二醇)/聚酯切片"
+    supplier_regions: {"中国": 65, "印度": 8, "韩国": 7, "台湾": 5, "其他": 15}
+    substitution_years: 0
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  甲醇:
+    current: "2,200-2,800元/吨"
+    trend: "→ 煤制甲醇成本支撑"
+    unit: "元/吨"
+    affects: ["159985","515170"]
+    impact_direction: "中性"
+    note: "中国煤制甲醇为主，MTO/甲醇燃料需求增量"
+    warning: "⚪ 供需弱平衡，港口库存高位"
+    sub_grades: "甲醇(工业级)/精甲醇(车用燃料)/甲醇制烯烃(MTO)级"
+    supplier_regions: {"中国": 40, "伊朗": 10, "沙特": 8, "美国": 7, "其他": 35}
+    substitution_years: 1
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  PVC:
+    current: "5,500-6,500元/吨"
+    trend: "↓ 地产需求疲弱"
+    unit: "元/吨"
+    affects: ["159985","515170","512400"]
+    impact_direction: "利空"
+    note: "PVC下游管材型材→地产竣工链拖累"
+    warning: "🟡 地产链下行→PVC需求不振"
+    sub_grades: "SG-5型(通用级)/SG-3型/糊树脂(手套级)"
+    supplier_regions: {"中国": 45, "美国": 12, "印度": 8, "其他": 35}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  尿素:
+    current: "2,000-2,400元/吨"
+    trend: "→ 淡储+出口政策博弈"
+    unit: "元/吨"
+    affects: ["159825","515170"]
+    impact_direction: "中性"
+    note: "中国尿素产量全球第一，法检政策调控出口"
+    warning: "⚪ 法检政策限制出口，内需主导"
+    sub_grades: "小颗粒尿素/大颗粒尿素(出口级)/车用尿素"
+    supplier_regions: {"中国": 35, "印度": 10, "俄罗斯": 8, "其他": 47}
+    substitution_years: 0
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  # ═══════════════════════════════════════════
+  # 医药材料 (7种)
+  # ═══════════════════════════════════════════
+  化学原料药(API):
+    current: "中国占全球40%"
+    trend: "↑ 印度替代加速+合规升级"
+    unit: "N/A"
+    affects: ["159992","512170","159883"]
+    impact_direction: "中性偏空"
+    note: "印度PLI计划→抢夺中国API份额，但短期难替代"
+    warning: "🟡 地缘风险→API供应链重组"
+    sub_grades: "原料药(API)/医药中间体/高级中间体(RSM)"
+    supplier_regions: {"中国": 40, "印度": 25, "意大利": 8, "美国": 7, "其他": 20}
+    substitution_years: 3
+    strategic_days: 90
+    technology_readiness: 8
+    bottleneck_risk: 0.35
+
+  色谱填料(ProteinA):
+    current: "$3-5万/kg"
+    trend: "↑ 国产突破"
+    unit: "$/kg"
+    affects: ["159992","512170"]
+    impact_direction: "利好"
+    note: "纳微/博格隆突破→替代GE Healthcare(现Cytiva)"
+    warning: "🟢 生物药纯化关键材料国产化"
+    sub_grades: "ProteinA亲和层析/离子交换(IEX)/疏水层析(HIC)"
+    supplier_regions: {"美国": 50, "瑞典": 25, "中国": 15, "日本": 5, "其他": 5}
+    substitution_years: 2
+    strategic_days: 30
+    technology_readiness: 7
+    bottleneck_risk: 0.70
+
+  一次性生物反应器耗材:
+    current: "国产化率<10%"
+    trend: "↑ 一次性技术突破"
+    unit: "N/A"
+    affects: ["159992","512170"]
+    impact_direction: "中性偏多"
+    note: "乐纯/多宁突破→Sartorius+Thermo Fisher垄断松动"
+    warning: "🟡 进口垄断严重，但国产替代加速"
+    sub_grades: "一次性生物反应器(SUB)/一次性储液袋/一次性管路"
+    supplier_regions: {"德国": 35, "美国": 30, "中国": 10, "日本": 10, "其他": 15}
+    substitution_years: 3
+    strategic_days: 24
+    technology_readiness: 6
+    bottleneck_risk: 0.80
+
+  中硼硅玻璃:
+    current: "国产化率~50%"
+    trend: "↑ 一致性评价推动"
+    unit: "N/A"
+    affects: ["159992","512170","159883"]
+    impact_direction: "中性偏多"
+    note: "山东药玻/正川突破→德国肖特垄断松动"
+    warning: "⚪ 仿制药一致性评价→中硼硅替代低硼硅"
+    sub_grades: "中硼硅安瓿/中硼硅西林瓶/中硼硅预灌封"
+    supplier_regions: {"德国": 40, "中国": 35, "日本": 15, "美国": 5, "其他": 5}
+    substitution_years: 1
+    strategic_days: 60
+    technology_readiness: 8
+    bottleneck_risk: 0.30
+
+  无血清培养基:
+    current: "国产化率<20%"
+    trend: "↑ CHO细胞培养基突破"
+    unit: "N/A"
+    affects: ["159992","512170"]
+    impact_direction: "利好"
+    note: "奥浦迈/倍谙基突破→Gibco(Thermo)壁垒松动"
+    warning: "🟢 培养基国产化→降低生物药生产成本>30%"
+    sub_grades: "CHO细胞培养基/HEK293培养基/干细胞培养基"
+    supplier_regions: {"美国": 55, "中国": 15, "德国": 10, "日本": 10, "其他": 10}
+    substitution_years: 2
+    strategic_days: 30
+    technology_readiness: 6
+    bottleneck_risk: 0.75
+
+  微球/微载体:
+    current: "完全依赖进口"
+    trend: "→ 国产技术攻关"
+    unit: "N/A"
+    affects: ["159992","512170"]
+    impact_direction: "利空"
+    note: "GE/赛多利斯垄断→微球是层析核心耗材"
+    warning: "🔴 生物药纯化100%依赖进口微球"
+    sub_grades: "琼脂糖微球/聚合物微球/磁性微球"
+    supplier_regions: {"美国": 45, "瑞典": 30, "德国": 15, "中国": 3, "其他": 7}
+    substitution_years: 5
+    strategic_days: 15
+    technology_readiness: 4
+    bottleneck_risk: 0.92
+
+  PEG修饰剂:
+    current: "国产化率<30%"
+    trend: "↑ 长效蛋白/ADC需求"
+    unit: "N/A"
+    affects: ["159992","512170"]
+    impact_direction: "中性偏多"
+    note: "键凯科技国产龙头→PEG化药物市场规模扩大"
+    warning: "🟢 长效G-CSF/生长激素驱动PEG需求"
+    sub_grades: "mPEG(单甲氧基)/Y型PEG/分支PEG"
+    supplier_regions: {"美国": 40, "中国": 25, "日本": 15, "其他": 20}
+    substitution_years: 2
+    strategic_days: 45
+    technology_readiness: 7
+    bottleneck_risk: 0.50
+
+  # ═══════════════════════════════════════════
+  # 农业材料 (7种)
+  # ═══════════════════════════════════════════
+  大豆(进口):
+    current: "¥4,000-4,500/吨"
+    trend: "↑ 巴西减产+中美关税"
+    unit: "元/吨"
+    affects: ["159825","159865","515170"]
+    impact_direction: "利空"
+    note: "中国进口依赖>80%→饲料成本上升→养殖利润承压"
+    warning: "🔴 中美关税+巴西天气=上行风险"
+    sub_grades: "进口大豆(转基因)/国产大豆(非转基因)/豆粕(饲料级)"
+    supplier_regions: {"巴西": 60, "美国": 25, "阿根廷": 8, "中国": 3, "其他": 4}
+    substitution_years: 3
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.65
+
+  玉米:
+    current: "¥2,400-2,600/吨"
+    trend: "→ 国储拍卖稳价"
+    unit: "元/吨"
+    affects: ["159825","159865"]
+    impact_direction: "中性"
+    note: "国内自给率>90%，国储调控力强"
+    warning: "⚪ 短期平稳，关注天气"
+    sub_grades: "黄玉米(饲用)/白玉米(食用)/糯玉米(加工)"
+    supplier_regions: {"中国": 55, "美国": 25, "巴西": 8, "乌克兰": 5, "其他": 7}
+    substitution_years: 0
+    strategic_days: 180
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  生猪(三元):
+    current: "14-16元/kg"
+    trend: "↓ 产能去化缓慢"
+    unit: "元/kg"
+    affects: ["159825","159865"]
+    impact_direction: "利空"
+    note: "能繁母猪存栏仍高→猪价难有大行情"
+    warning: "🟡 去化不及预期→压制养殖板块"
+    sub_grades: "三元猪(外三元)/二元猪(内三元)/土杂猪"
+    supplier_regions: {"中国": 95, "其他": 5}
+    substitution_years: 0
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  棕榈油(RBD):
+    current: "4,200-4,800令吉/吨"
+    trend: "↑ 印尼B40+厄尔尼诺"
+    unit: "令吉/吨"
+    affects: ["515170"]
+    impact_direction: "利空"
+    note: "印尼强制B40生物柴油→棕榈油与燃料争原料"
+    warning: "🔴 30天库存+95%进口依赖=食品行业风险"
+    sub_grades: "RBD棕榈油(食品级)/毛棕榈油(CPO)/棕榈仁油"
+    supplier_regions: {"印尼": 58, "马来西亚": 25, "泰国": 4, "其他": 13}
+    substitution_years: 2
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.60
+
+  白糖(SR):
+    current: "¥5,800-6,200/吨"
+    trend: "↑ 国际糖价走强"
+    unit: "元/吨"
+    affects: ["159825","515170"]
+    impact_direction: "中性偏空"
+    note: "印度乙醇政策→食糖出口受限→全球供给偏紧"
+    warning: "🟡 进口配额管控，内外价差大"
+    sub_grades: "SR一级白砂糖/精制糖/原糖(ICE#11)"
+    supplier_regions: {"巴西": 40, "印度": 18, "中国": 8, "泰国": 7, "其他": 27}
+    substitution_years: 1
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.20
+
+  棉花(328):
+    current: "¥15,500-16,500/吨"
+    trend: "→ 新疆产量新高"
+    unit: "元/吨"
+    affects: ["159825","515170"]
+    impact_direction: "中性"
+    note: "新疆棉花占比>90%，国产供给充裕"
+    warning: "⚪ 供给充足"
+    sub_grades: "328(细绒棉标准级)/长绒棉137/进口棉(美棉/澳棉)"
+    supplier_regions: {"中国": 25, "印度": 22, "美国": 13, "巴西": 10, "其他": 30}
+    substitution_years: 0
+    strategic_days: 120
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  天然橡胶(TSR20):
+    current: "¥12,000-14,000/吨"
+    trend: "↑ 轮胎出口+厄尔尼诺"
+    unit: "元/吨"
+    affects: ["159825","512400"]
+    impact_direction: "中性偏多"
+    note: "泰国/印尼/马来三国占全球70%→气候风险"
+    warning: "🟡 极端天气+割胶劳力短缺"
+    sub_grades: "TSR20(标准胶)/RSS3(烟片胶)/SCRWF全乳胶"
+    supplier_regions: {"泰国": 35, "印尼": 23, "越南": 10, "中国": 6, "其他": 26}
+    substitution_years: 3
+    strategic_days: 60
+    technology_readiness: 9
+    bottleneck_risk: 0.35
+
+  # ═══════════════════════════════════════════
+  # 基建/建材 (6种)
+  # ═══════════════════════════════════════════
+  螺纹钢(HRB400):
+    current: "¥3,500-3,800/吨"
+    trend: "↓ 地产开工低迷"
+    unit: "元/吨"
+    affects: ["512400","510300","159915"]
+    impact_direction: "中性偏空"
+    note: "地产新开工-20%→螺纹需求结构性下滑"
+    warning: "🟡 基建托底但地产拖累"
+    sub_grades: "HRB400(三级钢)/HRB500(四级钢)/CRB600H高强钢筋"
+    supplier_regions: {"中国": 95, "其他": 5}
+    substitution_years: 0
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  水泥(PO42.5):
+    current: "¥300-350/吨"
+    trend: "↓ 需求疲弱"
+    unit: "元/吨"
+    affects: ["510300","159915"]
+    impact_direction: "利空"
+    note: "错峰生产维持价格，但需求下滑不可逆"
+    warning: "🟡 地产链中期下行"
+    sub_grades: "PO42.5(普通硅酸盐)/PO52.5(高标号)/PC复合水泥"
+    supplier_regions: {"中国": 92, "其他": 8}
+    substitution_years: 1
+    strategic_days: 10
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  特种钢(模具钢):
+    current: "¥1.5-2.5万/吨"
+    trend: "↑ 高端制造需求"
+    unit: "万元/吨"
+    affects: ["512400","512660"]
+    impact_direction: "利好"
+    note: "抚钢/天工国际→工模具钢全球市占率提升"
+    warning: "🟢 高端特钢国产替代+出口增长"
+    sub_grades: "H13热作模具钢/DC53冷作模具钢/塑料模具钢P20"
+    supplier_regions: {"中国": 35, "日本": 20, "德国": 15, "瑞典": 10, "其他": 20}
+    substitution_years: 1
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.20
+
+  浮法玻璃:
+    current: "¥1,800-2,200/吨"
+    trend: "→ 供需平衡"
+    unit: "元/吨"
+    affects: ["510300","159915"]
+    impact_direction: "中性"
+    note: "汽车玻璃+光伏玻璃对冲建筑玻璃下滑"
+    warning: "⚪ 行业集中度高，旗滨/信义龙头"
+    sub_grades: "浮法白玻(3-12mm)/超白玻璃/Low-E镀膜玻璃"
+    supplier_regions: {"中国": 60, "其他": 40}
+    substitution_years: 0
+    strategic_days: 10
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  沥青:
+    current: "¥3,500-4,200/吨"
+    trend: "→ 基建托底+原油联动"
+    unit: "元/吨"
+    affects: ["512400","510300"]
+    impact_direction: "中性"
+    note: "道路基建稳中有增→沥青需求刚性"
+    warning: "⚪ 专项债发行进度决定需求节奏"
+    sub_grades: "70#道路沥青/90#道路沥青/SBS改性沥青"
+    supplier_regions: {"中国": 85, "其他": 15}
+    substitution_years: 0
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  PE管材:
+    current: "¥8,000-10,000/吨"
+    trend: "→ 城市管网更新需求"
+    unit: "元/吨"
+    affects: ["512400","159985"]
+    impact_direction: "中性偏多"
+    note: "城市更新+水利工程→PE/PP管材需求稳增"
+    warning: "🟢 老旧管网改造10年周期"
+    sub_grades: "PE100给水管/PE80燃气管/PPR冷热水管"
+    supplier_regions: {"中国": 55, "韩国": 10, "中东": 10, "其他": 25}
+    substitution_years: 0
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  # ═══════════════════════════════════════════
+  # 白酒/消费材料 (5种)
+  # ═══════════════════════════════════════════
+  高粱(酿酒用):
+    current: "¥3,500-4,000/吨"
+    trend: "↑ 进口依赖+品质要求"
+    unit: "元/吨"
+    affects: ["512690","159843"]
+    impact_direction: "中性"
+    note: "酱酒扩产→高粱需求增加，进口依赖~30%"
+    warning: "⚪ 澳洲/美国为主要进口来源"
+    sub_grades: "酿酒高粱(红缨子糯高粱)/饲料高粱/食用高粱"
+    supplier_regions: {"中国": 70, "澳大利亚": 15, "美国": 10, "其他": 5}
+    substitution_years: 1
+    strategic_days: 365
+    technology_readiness: 9
+    bottleneck_risk: 0.15
+
+  基酒(酱香):
+    current: "行业机密/不公开"
+    trend: "→ 产能扩张期"
+    unit: "N/A"
+    affects: ["512690"]
+    impact_direction: "中性偏空"
+    note: "茅台以外酱酒产能过剩→价格战风险"
+    warning: "🟡 渠道库存高企+消费降级=价格承压"
+    sub_grades: "酱香基酒(5年陈)/浓香基酒(3年陈)/清香基酒(1年陈)"
+    supplier_regions: {"中国": 100}
+    substitution_years: 0
+    strategic_days: 1095
+    technology_readiness: 9
+    bottleneck_risk: 0.10
+
+  玻璃瓶:
+    current: "¥0.3-0.8/只"
+    trend: "→ 稳定"
+    unit: "元/只"
+    affects: ["512690","515170"]
+    impact_direction: "中性"
+    note: "玻瓶产能过剩，价格低位"
+    warning: "⚪ 短期无风险"
+    sub_grades: "白酒瓶(500ml)/啤酒瓶(600ml)/调味品瓶"
+    supplier_regions: {"中国": 90, "其他": 10}
+    substitution_years: 0
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  PET塑料:
+    current: "¥7,500-8,500/吨"
+    trend: "→ 原油成本联动"
+    unit: "元/吨"
+    affects: ["515170","512400","159985"]
+    impact_direction: "中性"
+    note: "包装瓶/纤维级PET需求稳定，产能充裕"
+    warning: "⚪ 供给充足"
+    sub_grades: "瓶级PET(水瓶级)/纤维级PET/膜级PET"
+    supplier_regions: {"中国": 40, "印度": 10, "东南亚": 8, "其他": 42}
+    substitution_years: 0
+    strategic_days: 45
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  瓦楞纸:
+    current: "¥2,800-3,200/吨"
+    trend: "↓ 包装需求增速放缓"
+    unit: "元/吨"
+    affects: ["515170"]
+    impact_direction: "中性偏空"
+    note: "电商增速放缓+禁废令→成本高位需求放缓"
+    warning: "⚪ 包装纸产能过剩"
+    sub_grades: "瓦楞原纸(高强)/箱板纸(牛皮挂面)/白板纸"
+    supplier_regions: {"中国": 55, "东南亚": 15, "其他": 30}
+    substitution_years: 0
+    strategic_days: 30
+    technology_readiness: 9
+    bottleneck_risk: 0.05
+
+  # ═══════════════════════════════════════════
+  # 通信/5G材料 (4种)
+  # ═══════════════════════════════════════════
+  光模块芯片(EML):
+    current: "国产化率<30%"
+    trend: "↑ AI驱动需求爆发"
+    unit: "N/A"
+    affects: ["515050","159994","159819"]
+    impact_direction: "中性偏多"
+    note: "800G/1.6T光模块放量→EML+VCSEL需求激增"
+    warning: "🟢 AI算力互联核心器件"
+    sub_grades: "EML(电吸收调制激光器)/DML(直接调制)/VCSEL(垂直腔面)"
+    supplier_regions: {"美国": 40, "日本": 25, "中国": 20, "台湾": 10, "其他": 5}
+    substitution_years: 3
+    strategic_days: 45
+    technology_readiness: 8
+    bottleneck_risk: 0.55
+
+  GaN衬底:
+    current: "国产化率<10%"
+    trend: "↑ 快充+射频+雷达需求"
+    unit: "N/A"
+    affects: ["159819","515050","516510"]
+    impact_direction: "中性偏多"
+    note: "苏州纳维/东莞中镓突破→住友电工垄断国内"
+    warning: "🟢 第三代半导体→GaN功率器件爆发"
+    sub_grades: "GaN-on-Si(硅基)/GaN-on-SiC(碳化硅基)/GaN-on-GaN(同质)"
+    supplier_regions: {"日本": 50, "中国": 15, "美国": 15, "德国": 10, "其他": 10}
+    substitution_years: 4
+    strategic_days: 30
+    technology_readiness: 6
+    bottleneck_risk: 0.70
+
+  SiC衬底:
+    current: "国产化率<20%"
+    trend: "↑ 电动汽车800V平台"
+    unit: "N/A"
+    affects: ["159819","515050","516160","515030"]
+    impact_direction: "中性偏多"
+    note: "天科合达/天岳先进→Wolfspeed/II-VI垄断松动"
+    warning: "🟢 SiC MOSFET→电动车逆变器革命"
+    sub_grades: "SiC衬底(6英寸)/SiC衬底(8英寸)/半绝缘型SiC"
+    supplier_regions: {"美国": 40, "中国": 20, "日本": 15, "欧洲": 15, "其他": 10}
+    substitution_years: 3
+    strategic_days: 30
+    technology_readiness: 7
+    bottleneck_risk: 0.60
+
+  PTFE高频基材:
+    current: "国产化率<15%"
+    trend: "↑ 5G/毫米波+卫星通信"
+    unit: "N/A"
+    affects: ["515050","159819","159994"]
+    impact_direction: "中性偏多"
+    note: "生益科技突破→Rogers垄断高频CCL"
+    warning: "🟡 5G基站+卫星互联网→高频材料需求倍增"
+    sub_grades: "PTFE(聚四氟乙烯)/LCP(液晶聚合物)/PTFE陶瓷复合"
+    supplier_regions: {"美国": 45, "日本": 25, "中国": 15, "欧洲": 10, "其他": 5}
+    substitution_years: 4
+    strategic_days: 45
+    technology_readiness: 6
+    bottleneck_risk: 0.65

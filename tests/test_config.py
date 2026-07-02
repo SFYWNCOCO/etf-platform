@@ -53,17 +53,15 @@ class TestConfigLoader:
         assert cfg["budget"] == 1000
 
 class TestAdapterImports:
-    def test_v7_adapter(self):
-        from etf_platform._v7_adapter import run_v7, format_v7
-        assert callable(run_v7)
-        assert callable(format_v7)
-
-    def test_v9_adapter(self):
-        from etf_platform._v9_adapter import run_v9, format_v9, batch_v9
-        assert callable(run_v9)
-        assert callable(format_v9)
-        assert callable(batch_v9)
+    """v7/v9 adapters merged into pipeline.py (v5.5 refactor).
+    Only demand_adapter remains as a standalone module."""
 
     def test_demand_adapter(self):
         from etf_platform._demand_adapter import add_demand_layers
         assert callable(add_demand_layers)
+
+    def test_pipeline_exports_all_functions(self):
+        from etf_platform.pipeline import run_full, format_full, batch_full
+        assert callable(run_full)
+        assert callable(format_full)
+        assert callable(batch_full)

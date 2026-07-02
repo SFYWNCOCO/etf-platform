@@ -452,6 +452,123 @@ def app():
             print("    %s: %s (%dms)" % (h.source_name, h.status.value, h.latency_ms))
         print("")
 
+    elif cmd == "causal":
+        code = args[1] if len(args) > 1 else ""
+        from .analysis.causal import CausalEngine
+        from .data.events import inject_events
+        engine = CausalEngine()
+        inject_events(engine, verbose=False)
+        if code:
+            total, paths = engine.evaluate(code)
+            print(f"\n  Causal: {code} | Total Impact: {total:+.6f}")
+            for i, p in enumerate(paths[:5]):
+                print(f"  Path {i+1}: {p['event'][:40]} -> {p['directional']:+.4f} {p['level']}")
+        else:
+            results = engine.scan_all()
+            engine.report(results)
+
+    elif cmd == "signals":
+        from .analysis.signals import ProfitSignalEngine
+        ProfitSignalEngine().run_all()
+
+    elif cmd == "events":
+        from .data.events import EVENT_PRESETS, PRESET_COMBOS
+        print("\n  Events:")
+        for pn, evs in EVENT_PRESETS.items():
+            print(f"  [{pn}]: {len(evs)} events")
+        print(f"  Combos: {list(PRESET_COMBOS.keys())}")
+
+    elif cmd == "select":
+        mode = "balanced"; top_n = 10
+        for a in args[1:]:
+            if a.startswith("--mode="): mode = a.split("=")[1]
+            if a.startswith("--top="): top_n = int(a.split("=")[1])
+        from .decision.select import select, report as sel_report
+        results = select(mode=mode, top_n=top_n)
+        sel_report(results)
+
+    elif cmd == "backtest":
+        from .optimize.backtest import run_backtest, run_rolling_backtest
+        rolling = "--rolling" in args
+        if rolling:
+            result = run_rolling_backtest()
+        else:
+            result = run_backtest()
+        if result.get("trades"):
+            print(f"\n  Backtest: {result['total']} trades, {result['accuracy']}% accuracy")
+
+    elif cmd == "hook":
+        sub = args[1] if len(args) > 1 else "summary"
+        from .hook_harness import hook_patrol, hook_backtest, hook_daily_summary
+
+        if sub == "patrol":
+            from .decision.screener import screen
+            results = screen(top_n=10, profile="均衡")
+            hook_patrol(results)
+            print(f"Hooked patrol: {len(results)} screened → Harness Loop")
+        elif sub == "backtest":
+            from .optimize.backtest import run_backtest
+            report = run_backtest()
+            hook_backtest(report)
+            print(f"Hooked backtest: {report.get('accuracy')}% → Harness Loop")
+        elif sub == "summary":
+            hook_daily_summary()
+            print("Hooked daily summary → Harness Loop")
+        elif sub == "verify":
+            from .hook_harness import load_json
+            fw = load_json()
+            etf_fws = {k: v for k, v in fw.get("frameworks", {}).items() if v.get("scope") == "etf"}
+            print(f"ETF Thompson frameworks: {len(etf_fws)}")
+            for n, f in sorted(etf_fws.items()):
+                wr = f.get("win_rate", 0)
+                print(f"  {n}: wins={f.get('wins',0)} losses={f.get('losses',0)} wr={wr:.1%}")
+        else:
+            print("Usage: etf hook [patrol|backtest|summary|verify]")
+
+    elif cmd == "material":
+        sub = args[1] if len(args) > 1 else "scan"
+        from .analysis.material_watchdog import scan_news, quick_add, confirm_discovery, list_pending
+
+        if sub == "scan":
+            limit = int(args[2]) if len(args) > 2 else 20
+            scan_news(limit)
+        elif sub == "add":
+            if len(args) < 4:
+                print("用法: etf material add <材料名> <趋势> <ETF1,ETF2>")
+                print('示例: etf material add "固态电解质(LLZO)" "↑ 日韩量产突破" "516160,515030"')
+            else:
+                name = args[2]
+                trend = args[3]
+                etf_str = args[4] if len(args) > 4 else "510300"
+                affects = [e.strip() for e in etf_str.split(",")]
+                quick_add(name, trend, affects)
+                print(f"✅ '{name}' 已注册")
+        elif sub == "confirm":
+            if len(args) < 3:
+                print("用法: etf material confirm <材料名>")
+            else:
+                confirm_discovery(args[2])
+        elif sub == "list":
+            list_pending()
+        else:
+            print("用法: etf material [scan|add|confirm|list]")
+
+    elif cmd == "deep":
+        from .analysis.deep import DeepMonitor
+        dm = DeepMonitor()
+        dm.run()
+
+    elif cmd == "optimize":
+        from .decision.optimizer import load_decision_log, compare_strategies
+        decisions = load_decision_log()
+        if decisions:
+            result = compare_strategies(decisions, {})
+            print(f"\n  {len(decisions)} decisions analyzed")
+            for s in result.get("suggestions", []):
+                print(f"  - {s['recommendation']}: {s['reason']}")
+        else:
+            print("  No decision log data yet")
+
     else:
         print(f"Unknown command: {cmd}")
         print("Use: etf --help")
