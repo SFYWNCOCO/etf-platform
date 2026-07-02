@@ -48,6 +48,14 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
             "L9_Signals": _score_from_risk(rl),
         }
 
+    # Material/Personnel/Tech bridge (deep.py -> L3-L7)
+    # Applied BEFORE sector_scores — sector_scores takes final authority
+    try:
+        from .analysis.material_bridge import apply_to_layers
+        scores = apply_to_layers(code, scores, sector)
+    except Exception:
+        pass
+
     # v5.5: Sector-informed L3-L7 scores replace risk_level derivation
     # This breaks the "245 ETFs share same scores" bottleneck identified in l006
     try:
