@@ -25,6 +25,34 @@ def _print_screen_results(results):
     if not results:
         print("\n  No results.\n")
         return
+    
+    # v5.6: l003 knowledge-aware dual-mode display
+    l003 = None
+    if results and isinstance(results[0], dict) and "_l003_insight" in results[0]:
+        l003 = results[0]["_l003_insight"]
+        results = results[1:]
+    
+    if l003:
+        print(f"\n  {'='*70}")
+        print(f"  \u2620\ufe0f l003\u77e5\u8bc6\u5e93: \u7a7f\u900f\u8bc4\u5206=\u98ce\u9669\u6307\u6807(\u975e\u6536\u76ca\u6307\u6807)")
+        print(f"  {'='*70}")
+        print(f"  \u9ad8\u5206(>7)=\u5b89\u5168\u65e0\u50ac\u5316\u5242 | \u4f4e\u5206(<4)=\u9ad8\u5f39\u6027\u77ed\u7a97\u53e3\u535a\u5f08")
+        safe = l003.get("safe_mode", [])
+        if safe:
+            print(f"\n  \U0001f6e1\ufe0f \u5b89\u5168\u914d\u7f6e (Top {min(5, len(safe))}):")
+            for s in safe[:5]:
+                print(f"     {s['code']} {s['name'][:18]:<19} score={s['score']} | {s['note']}")
+        catalyst = l003.get("catalyst_mode", [])
+        if catalyst:
+            print(f"\n  \U0001f680 \u50ac\u5316\u5242\u5f39\u6027 (Top {min(5, len(catalyst))}):")
+            for c in catalyst[:5]:
+                print(f"     {c['code']} {c['name'][:18]:<19} score={c['score']} momentum={c['momentum']} elasticity={c['elasticity']} | {c['note']}")
+        elif l003.get("top_catalyst_by_elasticity"):
+            print(f"\n  \U0001f680 \u5f39\u6027\u6392\u540d (\u4f4e\u5206+\u9ad8\u52a8\u91cf):")
+            for c in l003["top_catalyst_by_elasticity"][:5]:
+                print(f"     {c['code']} {c['name'][:18]:<19} elasticity={c['elasticity']}")
+        print()
+
     print(f"\n  {'='*70}")
     print(f"  ETF \u63a8\u8350\u6392\u540d")
     print(f"  {'='*70}")
