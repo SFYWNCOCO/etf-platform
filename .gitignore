@@ -29,3 +29,10 @@ data_cache/
 *_debug*.py
 *_tmp*.py
 test_fix*.py
+
+# Runtime artifacts
+data/live_cache/
+data/screener_cache/
+data/*_latest.json
+data/*patrol*.md
+logs/
