@@ -235,7 +235,6 @@ def app():
             return
         code_a, code_b = args[1], args[2]
         from .data.valuation import get_valuation
-        from .pipeline import run_full
         ra = run_full(code_a)
         rb = run_full(code_b)
         va = get_valuation(code_a)
@@ -394,7 +393,6 @@ def app():
         """策略决策分析"""
         from .optimize.decision import print_report, analyze
         if "--json" in args:
-            import json
             print(json.dumps(analyze(), ensure_ascii=False, indent=2))
         else:
             print_report()
