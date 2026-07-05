@@ -80,8 +80,8 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     # Add demand layers (L10+L11)
     try:
         from .analysis.demand import score_demand_climate, score_sector_demand_risk
-        l10_result = score_demand_climate(sector)
-        l11_result = score_sector_demand_risk(sector)
+        l10_result = score_demand_climate(sector, risk_level=rl)
+        l11_result = score_sector_demand_risk(sector, risk_level=rl)
         scores["L10_Demand"] = l10_result.get("score", 5.0)
         scores["L11_SectorRisk"] = l11_result.get("score", 5.0)
     except Exception:
@@ -133,7 +133,9 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     try:
         from .analysis.sector_flow_bridge import get_bridge
         bridge = get_bridge()
-        flow_scores = bridge.score(sector, risk_level=rl)
+        etf_type = info.get("type", "")
+        etf_fee = info.get("fee", 0.005)
+        flow_scores = bridge.score(sector, risk_level=rl, etf_type=etf_type, fee=etf_fee)
         scores["L8_CapitalFlow"] = flow_scores["L8"]
         scores["L9_Signals"] = flow_scores["L9"]
     except Exception:
