@@ -16,16 +16,23 @@ LAYER_CATEGORIES = {
     "资金面": ["L8_CapitalFlow"],
     "信号面": ["L9_Signals"],
     "需求面": ["L10_Demand", "L11_SectorRisk"],
+    "周期面": ["L12_PoliticalRisk", "L13_MacroCycle"],
+    "风控面": ["L14_StoicRisk", "L18_VaR", "L20_OptionVol"],
+    "增强面": ["L15_StateSim", "L16_LiveSignals", "L17_Factor", "L19_FXChannel"],
 }
 
 # v5.5: L2 now has holdings data via l2_holdings_bridge
 EXCLUDED_LAYERS = {"L1_ETF"}
 
 CATEGORY_WEIGHTS = {
-    "保守": {"供给侧": 0.45, "资金面": 0.10, "信号面": 0.05, "需求面": 0.40},
-    "均衡": {"供给侧": 0.35, "资金面": 0.25, "信号面": 0.10, "需求面": 0.30},
-    "进取": {"供给侧": 0.20, "资金面": 0.40, "信号面": 0.20, "需求面": 0.20},
-    "激进": {"供给侧": 0.15, "资金面": 0.45, "信号面": 0.25, "需求面": 0.15},
+    "保守": {"供给侧": 0.35, "资金面": 0.08, "信号面": 0.04, "需求面": 0.30,
+             "周期面": 0.12, "风控面": 0.08, "增强面": 0.03},
+    "均衡": {"供给侧": 0.27, "资金面": 0.20, "信号面": 0.08, "需求面": 0.22,
+             "周期面": 0.10, "风控面": 0.06, "增强面": 0.07},
+    "进取": {"供给侧": 0.15, "资金面": 0.35, "信号面": 0.15, "需求面": 0.15,
+             "周期面": 0.08, "风控面": 0.04, "增强面": 0.08},
+    "激进": {"供给侧": 0.12, "资金面": 0.38, "信号面": 0.20, "需求面": 0.10,
+             "周期面": 0.06, "风控面": 0.02, "增强面": 0.12},
 }
 
 PROFILE_ALIASES = {
@@ -40,7 +47,12 @@ def _resolve_profile(profile: str) -> str:
     return PROFILE_ALIASES.get(profile, profile)
 
 TREND_ICONS = {"oversold":"🟢超卖","weak":"🟡回调","neutral":"⚪中性","strong":"🟡强势","overbought":"🔴超买","plunging":"🔴急跌","surging":"🟢急涨"}
-LN = {"L3_Material":"材料","L4_SupplyChain":"物流","L5_Tech":"技术","L6_Politics":"政治","L7_Irreplaceable":"替代","L8_CapitalFlow":"资金","L9_Signals":"信号","L10_Demand":"需求","L11_SectorRisk":"行业风险"}
+LN = {"L3_Material":"材料","L4_SupplyChain":"物流","L5_Tech":"技术",
+      "L6_Politics":"政治","L7_Irreplaceable":"替代","L8_CapitalFlow":"资金",
+      "L9_Signals":"信号","L10_Demand":"需求","L11_SectorRisk":"行业风险",
+      "L12_PoliticalRisk":"政治","L13_MacroCycle":"周期","L14_StoicRisk":"风控",
+      "L15_StateSim":"状态","L16_LiveSignals":"信号","L17_Factor":"因子",
+      "L18_VaR":"VaR","L19_FXChannel":"汇率","L20_OptionVol":"期权"}
 
 # v5.6: l003 knowledge-base integration
 # Penetration score IS a risk metric, NOT a return metric (per l003 + correction #30)
@@ -127,11 +139,14 @@ def _compute_auto_weights(results: list, profile: str = "均衡", dead_layers: s
     for k, v in weights.items():
         capped[k] = max(MIN_W, min(MAX_W, v))
     total = sum(capped.values())
+    # v5.6 P0 fix: ensure weights always sum to 1.0 after cap+renormalize
     if total > 0:
-        weights = {k: round(v / total, 4) for k, v in capped.items()}
+        result = {k: round(v / total, 4) for k, v in capped.items()}
     else:
-        weights = capped
-    return weights
+        # All layers below MIN_CV: distribute evenly among all eligible layers
+        n = len(capped)
+        result = {k: round(1.0 / n, 4) for k in capped} if n > 0 else {}
+    return result
 
 
 
@@ -308,7 +323,7 @@ def _batch_with_retry(limit: int, checkpoint_file: Path, profile: str = "均衡"
                 done_codes = set(ck.get("done_codes", []))
                 results_so_far = ck.get("results", [])
                 print(f"  📌 断点续扫: {len(done_codes)}只已完成")
-        except:
+        except Exception:
             done_codes = set()
             results_so_far = []
 
@@ -424,7 +439,7 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
                 with open(cache_file, "r", encoding="utf-8") as f:
                     results = json.load(f)
                 print(f"  缓存 ({age:.0f}s前, {len(results)}只)")
-            except:
+            except Exception:
                 results = None
 
     if results is None and codes is None:
@@ -436,7 +451,7 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
             clean = [{k:v for k,v in r.items() if isinstance(v,(dict,list,str,int,float,bool)) or v is None} for r in results]
             with open(cache_file, "w", encoding="utf-8") as f:
                 json.dump(clean, f, ensure_ascii=False, default=str)
-        except:
+        except Exception:
             pass
     elif codes is not None and results is not None:
         print(f"  穿透完成 ({len(results)}只)")
@@ -510,6 +525,13 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
         spot_df = None
         print(f"  获取实时数据+趋势+新闻动态评分...")
     
+    # v5.6: Build index first - O(n) instead of O(n*m)
+    raw_index = {}
+    for raw in results:
+        c = raw.get("etf_code", raw.get("code", ""))
+        if c:
+            raw_index[c] = raw
+
     for item in top_results:
         code = item["code"]
         # Trend
@@ -517,11 +539,11 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
             trend = get_trend(code)
             if trend:
                 item["trend"] = {"change_5d":trend.change_5d,"change_20d":trend.change_20d,"change_60d":trend.change_60d,"position_pct":trend.position_pct,"max_drawdown":trend.max_drawdown,"signal":trend.trend_signal,"price":trend.price,"volatility":trend.volatility_20d}
-        except:
+        except Exception:
             pass
-        # Enhance all top_results items
-        for raw in results:
-            if raw.get("etf_code", raw.get("code", "")) == code:
+        # Enhance using dict lookup (v5.6: O(1) instead of O(n*m))
+        raw = raw_index.get(code)
+        if raw:
                 try:
                     # Get news for this ETF's sector
                     sector = item.get("sector", "")
@@ -530,10 +552,32 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
                         item["_news_count"] = len(news_items)
                         if news_items:
                             ls = item["layer_scores"]
-                            neg = sum(1 for n in news_items if any(k in n.title for k in ["跌","降","利空","风险","跳水","暴跌"]))
-                            pos = sum(1 for n in news_items if any(k in n.title for k in ["涨","升","利好","突破","反弹"]))
+                            # v5.6: Context-aware sentiment (same as l9_news._sentiment_score)
+                            pos_strong = ["突破","新高","放量","超预期","暴涨","涨停","主线"]
+                            pos_mild = ["涨","升","利好","反弹","回升","回暖","改善","收窄"]
+                            neg_strong = ["崩盘","暴跌","爆雷","违约","退市"]
+                            neg_mild = ["跌","跳水","预警","下滑","萎缩","低迷"]
+                            negations = {"跌幅收窄":0.3,"跌势放缓":0.3,"利空出尽":0.4,"降息":0.6,"降准":0.6}
+                            pos_cnt = 0
+                            neg_cnt = 0
+                            for n in news_items:
+                                t = n.title or ""
+                                sc = 0.0
+                                for pat, val in negations.items():
+                                    if pat in t: sc += val
+                                for kw in pos_strong:
+                                    if kw in t: sc += 1.0
+                                for kw in neg_strong:
+                                    if kw in t: sc -= 1.0
+                                if abs(sc) < 0.5:
+                                    for kw in pos_mild:
+                                        if kw in t: sc += 0.5
+                                    for kw in neg_mild:
+                                        if kw in t: sc -= 0.5
+                                if sc > 0.2: pos_cnt += 1
+                                elif sc < -0.2: neg_cnt += 1
                             old_l9 = ls.get("L9_Signals", 5.0)
-                            adj = (pos - neg) * 0.5
+                            adj = (pos_cnt - neg_cnt) * 0.5
                             ls["L9_Signals"] = max(1, min(10, old_l9 + adj))
                     # Live data
                     raw2 = enhance_l8(raw)
@@ -623,14 +667,20 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
         if tracking_file.exists():
             with open(tracking_file, "r", encoding="utf-8") as f:
                 tracking = _json.load(f)
+        today_str = _dt.now().strftime("%Y-%m-%d")
+        # v5.6 P2 fix: dedup by date (one entry per day), keep last 12 months
+        # Remove any existing entry for today (replace, not append duplicate)
+        tracking = [t for t in tracking if t.get("date") != today_str]
         tracking.append({
-            "date": _dt.now().strftime("%Y-%m-%d"),
+            "date": today_str,
             "profile": profile,
             "codes": [r["code"] for r in result if isinstance(r, dict) and "code" in r],
             "scores": [r.get("composite_score", 0) for r in result if isinstance(r, dict) and "code" in r]
         })
-        # Keep last 12 months
-        tracking = tracking[-12:]
+        # Keep entries within last 365 days (true 12-month window)
+        from datetime import timedelta
+        cutoff = (_dt.now() - timedelta(days=365)).strftime("%Y-%m-%d")
+        tracking = [t for t in tracking if t.get("date", "") >= cutoff]
         with open(tracking_file, "w", encoding="utf-8") as f:
             _json.dump(tracking, f, ensure_ascii=False, indent=2, default=str)
     except Exception:

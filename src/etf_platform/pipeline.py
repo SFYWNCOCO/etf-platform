@@ -1,4 +1,4 @@
-"""Unified L1-L12 penetration pipeline — no etf_system dependency."""
+"""Unified L1-L13 penetration pipeline — no etf_system dependency."""
 from .config_loader import load_etfs
 
 
@@ -18,7 +18,7 @@ def _score_from_risk(risk_level: float, base: float = 5.0, invert: bool = True, 
 
 
 def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
-    """Run all 12 layers for a single ETF code."""
+    """Run all 13 layers for a single ETF code."""
     etfs = load_etfs()
     info = etfs.get(code, {})
     if not info:
@@ -155,17 +155,94 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     except Exception:
         pass
 
-    # Live enhancement (real-time price/news)
+    # L13 MacroCycle — Kondratiev+Kuznets+Juglar (k001+k002)
+    try:
+        from .layers.l12_macro_cycle import score_cycle_layer
+        cycle_info = score_cycle_layer(sector, rl)
+        scores["L13_MacroCycle"] = cycle_info["score"]
+    except Exception:
+        pass
+
+    # Factor momentum adjustment — Fama-French (k003)
+    try:
+        from .layers.l13_factor_loading import score_factor_adjustment
+        factor_adj = score_factor_adjustment(sector)
+        for layer in ["L5_Tech", "L7_Irreplaceable"]:
+            if layer in scores and isinstance(scores[layer], (int, float)):
+                scores[layer] = round(max(1.0, min(10.0, scores[layer] + factor_adj)), 1)
+    except Exception:
+        pass
+
+    # L14 Stoic Risk — dichotomy of control + negative visualization (k004)
+    try:
+        from .layers.l14_stoic_risk import score_stoic_layer
+        stoic = score_stoic_layer(sector, rl)
+        scores["L14_StoicRisk"] = stoic["score"]
+        # Apply stoic adjustment to L1 (controllability bonus for safe sectors)
+        # NOTE: L1_ETF is already a pure risk_level proxy. Bonus stored separately.
+        if stoic.get("controllability", 5) >= 7:
+            scores["L1_ControllabilityBonus"] = 0.5
+    except Exception:
+        pass
+
+    # L15 State Similarity — market state recognition (k005)
+    try:
+        from .layers.l15_state_similarity import score_state_similarity
+        state = score_state_similarity(sector)
+        scores["L15_StateSim"] = state["score"]
+    except Exception:
+        pass
+
+    # L16 Live Signals — premium/liquidity/quality (k006+k007+k008+k009)
+    try:
+        from .layers.l16_live_signals import get_live_signals
+        is_cross = "QDII" in info.get("type", "") or info.get("access") == "qdii"
+        live = get_live_signals(sector, is_cross_border=is_cross)
+        scores["L16_LiveSignals"] = live["score"]
+    except Exception:
+        pass
+
+    # L17 Quantitative Factor — Fama-French + custom factors (akshare实证校准)
+    try:
+        from .layers.l17_quantitative_factor import apply_factor_layer
+        scores = apply_factor_layer(sector, scores)
+    except Exception:
+        scores["L17_Factor"] = 5.5
+
+    # L18 VaR Risk — Value at Risk + stress testing (akshare波动率)
+    try:
+        from .layers.l18_var_risk import apply_var_layer
+        scores = apply_var_layer(sector, scores)
+    except Exception:
+        scores["L18_VaR"] = 5.5
+
+    # L19 FX Channel — exchange rate impact on cross-border ETFs
+    try:
+        from .layers.l19_fx_channel import apply_fx_layer
+        scores = apply_fx_layer(sector, scores, info.get("type", ""))
+    except Exception:
+        scores["L19_FXChannel"] = 5.5
+
+    # L20 Option Volatility — implied vol + option strategy recommendation
+    try:
+        from .layers.l20_option_volatility import apply_option_layer
+        scores = apply_option_layer(sector, scores)
+    except Exception:
+        scores["L20_OptionVol"] = 5.5
+
+    # L9 News enhancement (always attempt — sector-cached, fast)
+    try:
+        from .enhance.l9_news import enhance_l9
+        result = enhance_l9({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
+        scores.update(result.get("layer_scores", {}))
+    except Exception:
+        pass
+
+    # L8 Live enhancement (real-time price data — only when live=True)
     if live:
         try:
             from .enhance.l8_realtime import enhance_l8
             result = enhance_l8({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
-            scores.update(result.get("layer_scores", {}))
-        except Exception:
-            pass
-        try:
-            from .enhance.l9_news import enhance_l9
-            result = enhance_l9({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
             scores.update(result.get("layer_scores", {}))
         except Exception:
             pass
@@ -179,14 +256,15 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
         "risk_level": rl,
         "layer_scores": scores,
         "layers": {},
-        "pipeline_version": "1.0.0",
+        "cycle_info": cycle_info,
+        "pipeline_version": "1.2.0",
         "score": round(sum(scores.values()) / max(len(scores), 1), 1),
         "profile": profile,
     }
 
 
 def format_full(result: dict) -> str:
-    """Format all 12 layers as text report."""
+    """Format all 13 layers as text report."""
     code = result.get("etf_code", "?")
     name = result.get("name", code)
     sector = result.get("sector", "?")
@@ -203,7 +281,7 @@ def format_full(result: dict) -> str:
 
 
 def batch_full(limit: int = 50, sort_by: str = "score", codes: list = None, live: bool = False, profile: str = "均衡") -> list:
-    """Batch run for multiple ETFs with all 12 layers."""
+    """Batch run for multiple ETFs with all 13 layers."""
     etfs = load_etfs()
     if codes:
         target = codes

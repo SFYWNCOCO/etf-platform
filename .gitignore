@@ -1,39 +1,44 @@
-# Python
+# ETF Platform .gitignore
+
+# Python cache
 __pycache__/
-*.py[cod]
-*.egg-info/
-dist/
-build/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+*.cover
+
+# Temp data files
+data/*.json
+data/*.csv
+data/archive/
+data/screener_cache/
+data/live_cache/
+data/_detail*.txt
+
+# Temporary diagnostic files
+_*.py
+_*.json
+quick_diag*.py
+sanity_check.py
+deep_analysis.py
+focused_analysis.py
+diagnostic*.py
+check_*.py
+batch_diverse.py
+update_groups.py
+sync_check.py
+test_inference.py
+
+# Config backups
+config/*.bak*
 
 # IDE
 .vscode/
 .idea/
-
-# Environment
-.env
-venv/
-.venv/
+*.swp
+*.swo
 
 # OS
 Thumbs.db
 .DS_Store
-
-# Temp
-*.bak
-*.bak2
-tmp/
-_sandbox/
-data_cache/
-
-# Test/debug isolation
-*_debug*.py
-*_tmp*.py
-test_fix*.py
-
-# Runtime artifacts
-data/live_cache/
-data/screener_cache/
-data/*_latest.json
-data/*patrol*.md
-logs/
-data/archive/

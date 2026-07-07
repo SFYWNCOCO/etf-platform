@@ -130,7 +130,7 @@ def _print_comparison(ra, rb, va, vb):
         try:
             from .data.kline import get_trend
             return get_trend(code)
-        except:
+        except Exception:
             return None
     ta = get_trend_simple(code_a)
     tb = get_trend_simple(code_b)
@@ -171,6 +171,12 @@ def app():
         print("  etf events [recent|log]          Market event timeline")
         print("  etf batch [--limit=N]    Batch analysis")
         print("  etf archive [collect|list|show]  Daily archive for research")
+        print("  etf cycle [sector]       Three-cycle macro report (k001+k002)")
+        print("  etf factor <CODE>        Fama-French factor exposure (k003)")
+        print("  etf factors              Full sector factor map")
+        print("  etf stoic <sector>       Stoic risk analysis (k004)")
+        print("  etf state [sector]       Market state similarity (k005)")
+        print("  etf live <CODE>          Live premium/liquidity/quality (k006-k009)")
         print("  etf --help               This help")
         return
     
@@ -657,6 +663,108 @@ def app():
                     print(_json.dumps(day, ensure_ascii=False, indent=2))
         else:
             print("Usage: etf archive [collect|list|show YYYY-MM-DD]")
+
+
+    elif cmd == "cycle":
+        """三周期宏观状态报告 (k001+k002)"""
+        sector = args[1] if len(args) > 1 else None
+        from .layers.l12_macro_cycle import format_cycle_report, get_cycle_adjustments
+        print(format_cycle_report(sector))
+
+    elif cmd == "factor":
+        """Fama-French因子暴露分析 (k003)"""
+        code = args[1] if len(args) > 1 else ""
+        if not code:
+            print("Usage: etf factor <CODE>")
+            return
+        from .config_loader import load_etfs
+        from .layers.l13_factor_loading import get_factor_exposure
+        etfs = load_etfs()
+        info = etfs.get(code, {})
+        sector = info.get("sector", "未知")
+        factors = get_factor_exposure(sector)
+        print(f"\n  [{code}] {info.get('name','')} 因子暴露")
+        print(f"  {'='*55}")
+        for k, v in sorted(factors.items()):
+            print(f"  {k}: {v}")
+        print()
+
+    elif cmd == "factors":
+        """全市场因子暴露概览"""
+        from .layers.l13_factor_loading import FACTOR_MAP
+        print(f"\n  行业因子暴露映射表 ({len(FACTOR_MAP)} sectors)")
+        print(f"  {'='*55}")
+        print(f"  {'行业':<16} {'SMB':<6} {'HML':<6} {'RMW':<6} {'CMA':<6} {'LowVol':<6}")
+        for sector, factors in sorted(FACTOR_MAP.items()):
+            print(f"  {sector:<16} {factors.get('SMB',0):<6.2f} {factors.get('HML',0):<6.2f} {factors.get('RMW',0):<6.2f} {factors.get('CMA',0):<6.2f} {factors.get('LowVol',0):<6.2f}")
+        print()
+
+    elif cmd == "stoic":
+        """斯多葛风险分析 (k004)"""
+        if len(args) < 2:
+            print("Usage: etf stoic <sector>")
+            return
+        sector = args[1]
+        from .layers.l14_stoic_risk import score_stoic_layer
+        r = score_stoic_layer(sector, 0.5)
+        print(f"\n  斯多葛风险分析: {sector}")
+        print(f"  {'='*55}")
+        print(f"  可控性评分: {r['controllability']}/10")
+        print(f"  尾部风险:   {r['tail_risk']}/10")
+        print(f"  平均回撤:   {r['avg_drawdown']:.1f}%")
+        print(f"  综合斯多葛分: {r['score']}/10")
+        if r.get('scenarios'):
+            print(f"\n  压力测试:")
+            for sc, dd in r['scenarios'].items():
+                icon = "🔴" if dd < -30 else ("🟡" if dd < -15 else "🟢")
+                print(f"    {icon} {sc}: {dd:.0f}%")
+        print()
+
+    elif cmd == "state":
+        """市场状态相似度 (k005)"""
+        sector = args[1] if len(args) > 1 else ""
+        from .layers.l15_state_similarity import find_similar_states, score_state_similarity
+        matches = find_similar_states()
+        print(f"\n  市场状态匹配")
+        print(f"  {'='*55}")
+        for m in matches:
+            sim_pct = m['similarity'] * 100
+            icon = "🟢" if sim_pct > 70 else ("🟡" if sim_pct > 50 else "⚪")
+            print(f"  {icon} [{m['name']}] sim={sim_pct:.0f}%")
+            print(f"     {m['description']}")
+            print(f"     策略: {m['strategy']}")
+        if sector:
+            state_r = score_state_similarity(sector)
+            print(f"\n  {sector} 在该状态下的评分: {state_r['score']}/10")
+            if state_r.get('sector_benefits'):
+                print(f"  🟢 该行业受益于当前市场状态")
+        print()
+
+    elif cmd == "live":
+        """折溢价+流动性+基金质量 (k006+k007+k008+k009)"""
+        code = args[1] if len(args) > 1 else ""
+        if not code:
+            print("Usage: etf live <CODE> [amount_yi] [premium_pct]")
+            print("  amount_yi: 日均成交额(亿), 默认1.0")
+            print("  premium_pct: 折溢价率%, 默认0.0")
+            return
+        amount_yi = float(args[2]) if len(args) > 2 else 1.0
+        premium_pct = float(args[3]) if len(args) > 3 else 0.0
+        from .config_loader import load_etfs
+        from .layers.l16_live_signals import get_live_signals
+        etfs = load_etfs()
+        info = etfs.get(code, {})
+        sector = info.get("sector", "未知")
+        is_cross = "QDII" in info.get("type", "") or info.get("access") == "qdii"
+        r = get_live_signals(sector, amount_yi, premium_pct, is_cross)
+        print(f"\n  [{code}] {info.get('name','')} 实时信号")
+        print(f"  {'='*55}")
+        print(f"  综合评分: {r['score']}/10")
+        print(f"  流动性:   {r['liquidity']['label']} ({amount_yi:.1f}亿/日)")
+        if r['premium']['signal'] != 'neutral':
+            print(f"  折溢价:   {r['premium']['signal']} ({premium_pct:+.2f}%)")
+        print(f"  基金质量: {r['fund_quality']['score']}/10")
+        print()
 
 
     else:
