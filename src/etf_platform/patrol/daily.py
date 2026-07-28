@@ -1,7 +1,10 @@
 """ETF每日巡检 + 飞书推送 + 归档 + 事件记录"""
 from datetime import datetime
-import json, os
+import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 BASE = Path(__file__).resolve().parent.parent.parent.parent
 PATROL_OUT = BASE / "etf-platform" / "data" / "patrol_latest.json"
@@ -53,7 +56,7 @@ def run_patrol(watchlist=None, archive: bool = True):
             # Log significant moves
             if abs(chg) > 8:
                 events_today.append({"type": "big_move", "code": code, "name": name, "change": round(chg, 1)})
-        except Exception as e:
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
             lines.append(f"  ❓ {code} {name:<12} ERROR: {e}")
             watch_results.append({"code": code, "name": name, "error": str(e)[:50]})
 
@@ -69,7 +72,8 @@ def run_patrol(watchlist=None, archive: bool = True):
             lines.append(f"  📉 领跌: {', '.join(laggards[:3])}")
         if leaders or laggards:
             events_today.append({"type": "rotation", "leaders": leaders[:3], "laggards": laggards[:3]})
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
+        logger.debug("rotation check failed: %s", e)
         pass
 
     # QVIX check
@@ -80,25 +84,64 @@ def run_patrol(watchlist=None, archive: bool = True):
         qvix_50 = regime_data.get("qvix_50", 0)
         lines.append(f"\n  📊 QVIX: {regime} (50={qvix_50:.0f})")
         if regime in ("fear", "panic"):
-            lines.append(f"  ⚠️ 市场恐慌 — 建议减仓或持有现金")
+            lines.append("  ⚠️ 市场恐慌 — 建议减仓或持有现金")
             events_today.append({"type": "market_regime", "regime": regime, "qvix_50": qvix_50})
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
+        logger.debug("QVIX check failed: %s", e)
         pass
 
-    lines.append("\n  Top 5:")
+    # L16增强: 折溢价+资金流信号
+    lines.append("\n  📡 L16增强信号:")
+    try:
+        from ..analysis.dip_monitor import DIPMonitor
+        from ..analysis.fund_flow import FundFlowAnalyzer
+        dip = DIPMonitor()
+        flow = FundFlowAnalyzer()
+
+        # 折溢价概览
+        dip_df = dip.fetch_etf_data()
+        if not dip_df.empty:
+            dip_alerts = dip.detect_alerts(dip_df)
+            high_risk = [a for a in dip_alerts if a.risk_level == "high"]
+            lines.append(f"    折溢价: {len(dip_alerts)}预警 ({len(high_risk)}高风险)")
+            if high_risk[:3]:
+                top_dip = high_risk[:3]
+                lines.append(f"    极端折价: {' | '.join(f'{a.code}({a.premium_rate:+.1f}%)' for a in top_dip)}")
+
+        # 资金流概览
+        flow_df = flow.fetch_data()
+        if not flow_df.empty and '主力净流入-净额' in flow_df.columns:
+            total_flow = flow_df['主力净流入-净额'].sum() / 1e8
+            lines.append(f"    资金流: 主力净{total_flow:+.2f}亿 ({(flow_df['主力净流入-净额']>0).sum()}流入/{(flow_df['主力净流入-净额']<0).sum()}流出)")
+    except Exception as e:
+        lines.append(f"    L16增强: ⚠️ {str(e)[:40]}")
+
+    # 归档L16增强数据
+    l16_data = {}
+    try:
+        dip_df = dip.fetch_etf_data()
+        if not dip_df.empty:
+            dip_alerts = dip.detect_alerts(dip_df)
+            l16_data["dip_alerts"] = len(dip_alerts)
+            l16_data["dip_high_risk"] = len([a for a in dip_alerts if a.risk_level == "high"])
+        flow_df = flow.fetch_data()
+        if not flow_df.empty and '主力净流入-净额' in flow_df.columns:
+            l16_data["total_main_flow_yi"] = round(flow_df['主力净流入-净额'].sum() / 1e8, 2)
+    except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError):
+            logger.warning("silent catch in daily.py:130 - needs review")
     top5 = []
     try:
         top5 = recommend(top_n=5, profile="均衡")
         for r in top5:
             lines.append(f"  #{r['rank']} {r['code']} {r['name'][:16]:<18} {r['composite_score']:.1f}")
-    except Exception as e:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
         lines.append(f"  N/A: {e}")
 
     lines.append("=" * 55)
     report = "\n".join(lines)
     print(report)
 
-    persist_patrol(now, watch_results, top5, report)
+    persist_patrol(now, watch_results, top5, report, l16_data)
     write_feishu_report(now, watch_results, top5)
     
     # Archive snapshot
@@ -107,7 +150,7 @@ def run_patrol(watchlist=None, archive: bool = True):
             from ..archive.collector import collect_full_snapshot, log_event
             print("\n  📦 归档每日数据...")
             collect_full_snapshot(quick=True)
-        except Exception as e:
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
             print(f"  ⚠️ 归档失败: {e}")
     
     # Log today's events
@@ -115,13 +158,14 @@ def run_patrol(watchlist=None, archive: bool = True):
         try:
             from ..archive.collector import log_event
             log_event(ev.pop("type"), ev)
-        except Exception:
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
+            logger.debug("log_event failed: %s", e)
             pass
     
     return report
 
 
-def persist_patrol(now, watch_results, top5, report):
+def persist_patrol(now, watch_results, top5, report, l16_data=None):
     PATROL_OUT.parent.mkdir(parents=True, exist_ok=True)
     data = {
         "timestamp": now.isoformat(),
@@ -130,6 +174,7 @@ def persist_patrol(now, watch_results, top5, report):
             {"rank": r["rank"], "code": r["code"], "name": r["name"][:20], "score": r["composite_score"]}
             for r in top5
         ] if top5 else [],
+        "l16_enhanced": l16_data if l16_data else None,
     }
     with open(PATROL_OUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

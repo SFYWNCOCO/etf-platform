@@ -1,3 +1,3 @@
-"""Real-time data enhancers for penetration analysis."""
-from .l8_realtime import enhance_l8
-from .l9_news import enhance_l9
+"""Real-time data enhancers for penetration analysis.
+NOTE: Lazy imports only. l8_realtime triggers data.sina -> socket python311.dll conflict.
+"""

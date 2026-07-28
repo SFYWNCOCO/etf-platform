@@ -1,0 +1,9 @@
+# Backtest engine configuration.
+# Used by optimize/backtest.py for transaction costs and event cutoff date.
+
+# 交易成本: 佣金 0.05% + 印花税 0.05% + 滑点 0.10% = 0.20%
+transaction_cost: 0.002
+cost_bps: 0.2
+
+# 移除近 30 天事件(避免未充分定价的前视偏差)
+cutoff_date: '2026-06-14'

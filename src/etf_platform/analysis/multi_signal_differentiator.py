@@ -82,153 +82,133 @@ def _calc_sector_purity(sector: str, name: str) -> float:
 
 
 # ============================================================
-# v2.1: Index Type — 按跟踪指数/子分类做第6维信号
+# v2.1: Index Type — 数据驱动规则表
 # ============================================================
 
+# Rule tuple: (pattern_kind, payload, score, exclude_patterns)
+#   pattern_kind:
+#     "any"   → any payload word in combined (sector+name)
+#     "sector" → any payload word in sector only
+#     "__default__" → unconditional fallback
+#   exclude_patterns: optional; ALL must be absent from combined to fire.
+
+
+def _match_rules(rules: tuple, combined: str, sector: str) -> float:
+    """按顺序匹配规则列表，返回第一个命中项的 score；无命中返回 0.0。"""
+    for kind, payload, score, negs in rules:
+        if kind == "__default__":
+            return score
+        ctx = combined if kind == "any" else sector if kind == "sector" else ""
+        matched = any(p in ctx for p in payload)
+        if matched and all(n not in combined for n in negs):
+            return score
+    return 0.0
+
+
+# Sector keyword → (rule-key, require_composite_in_sector)
+_SECTOR_RULE_MAP: dict[str, tuple[str, bool]] = {
+    "宽基": ("wide", False),
+    "全市场": ("wide", False),
+    "综合": ("composite", True),
+    "AI": ("aitech", False),
+    "科技": ("aitech", False),
+    "算力": ("aitech", False),
+    "云计算": ("aitech", False),
+    "跨境": ("crossborder", False),
+    "QDII": ("crossborder", False),
+    "周期": ("cyclical", False),
+    "资源": ("cyclical", False),
+    "新能源": ("newenergy", False),
+    "医药": ("pharma", False),
+    "医疗": ("pharma", False),
+    "药": ("pharma", False),
+}
+
+_INDEX_TYPE_RULES: dict[str, tuple] = {
+    # ---- 宽基: 按指数区分 ----
+    "wide": (
+        ("any", ["沪深300", "300", "上证50", "50ETF", "A500", "中证A", "MSCI"], 0.5, ()),
+        ("any", ["中证500", "500"], 0.3, ("沪深300", "300")),
+        ("any", ["创业板", "创"], -0.1, ()),
+        ("any", ["科创", "科创板"], -0.2, ()),
+        ("any", ["深证", "深100"], 0.2, ()),
+        ("any", ["1000", "中证1000"], 0.0, ()),
+        ("any", ["2000"], -0.2, ()),
+        ("__default__", (), 0.1, ()),
+    ),
+    # ---- 综合: 红利/价值/成长/ESG/央企/增强 ----
+    "composite": (
+        ("any", ["红利"], 0.4, ()),
+        ("any", ["价值"], 0.3, ()),
+        ("any", ["央企", "国企", "改革", "一带一路"], 0.2, ()),
+        ("any", ["ESG", "责任", "可持续"], 0.1, ()),
+        ("any", ["成长", "创新"], -0.1, ()),
+        ("any", ["增强"], 0.2, ()),
+        ("__default__", (), -0.2, ()),
+    ),
+    # ---- AI/科技: 细分赛道 ----
+    "aitech": (
+        ("any", ["AI", "人工智能", "大模型", "GPT"], 0.2, ()),
+        ("any", ["算力"], -0.1, ()),
+        ("any", ["云计算", "云", "数据", "大数据"], 0.1, ()),
+        ("any", ["机器人", "自动化", "机器"], 0.0, ()),
+        ("any", ["芯片", "半导体", "集成电路"], -0.2, ()),
+        ("any", ["软件", "信息", "IT"], 0.1, ()),
+        ("__default__", (), 0.0, ()),
+    ),
+    # ---- 跨境: 按市场 ----
+    "crossborder": (
+        ("any", ["纳指", "标普", "美股", "科技100"], -0.3, ()),
+        ("any", ["恒生", "港股", "H股"], -0.1, ()),
+        ("any", ["中概"], -0.2, ()),
+        ("any", ["日经", "日本"], -0.2, ()),
+        ("any", ["越南", "印度", "新兴"], -0.1, ()),
+        ("any", ["德国", "法国", "欧洲", "英国"], -0.2, ()),
+        ("__default__", (), -0.2, ()),
+    ),
+    # ---- 周期/资源: 品种 ----
+    "cyclical": (
+        ("any", ["黄金"], 0.3, ()),
+        ("sector", ["贵金属"], 0.3, ()),
+        ("any", ["有色"], -0.1, ()),
+        ("any", ["钢铁", "煤炭", "化工"], -0.2, ()),
+        ("__default__", (), 0.0, ()),
+    ),
+    # ---- 新能源: 子赛道 ----
+    "newenergy": (
+        ("any", ["车", "汽车"], -0.1, ()),
+        ("any", ["光伏"], 0.0, ()),
+        ("any", ["风", "风电"], 0.1, ()),
+        ("any", ["电池"], -0.1, ()),
+        ("__default__", (), 0.0, ()),
+    ),
+    # ---- 医药: 子赛道 ----
+    "pharma": (
+        ("any", ["创新", "生物"], -0.1, ()),
+        ("any", ["中药", "传统"], 0.3, ()),
+        ("any", ["器械", "设备"], 0.0, ()),
+        ("any", ["服务", "医"], 0.1, ()),
+        ("__default__", (), 0.0, ()),
+    ),
+}
+
+
 def _calc_index_type(sector: str, name: str) -> float:
-    """跟踪指数类型/子分类信号。
-    
+    """跟踪指数类型/子分类信号（数据驱动版）。
+
     对宽基/综合/AI科技/跨境等大类sector，按ETF名称推断其跟踪指数
     或子赛道，做更精细的评分区分。
-    
+
     Returns: -0.4 ~ +0.5
     """
-    combined = f"{sector} {name}"
-    
-    # --- 宽基ETF: 按指数区分 ---
-    if sector in ("宽基", "全市场"):
-        # 大盘蓝筹 (沪深300/上证50/中证A500)
-        if any(k in combined for k in ["沪深300", "300", "上证50", "50ETF",
-                                         "A500", "中证A", "MSCI"]):
-            return 0.5
-        # 中盘 (中证500)
-        if any(k in combined for k in ["中证500", "500"]):
-            # 排除 沪深300 的误匹配 (300 vs 500)
-            if "沪深300" not in combined and "300" not in combined:
-                return 0.3
-        # 创业板 (成长型)
-        if any(k in combined for k in ["创业板", "创"]):
-            return -0.1
-        # 科创50 (硬科技成长)
-        if any(k in combined for k in ["科创", "科创板"]):
-            return -0.2
-        # 深证100/深成指
-        if "深证" in combined or "深100" in combined:
-            return 0.2
-        # 中证1000 (小盘)
-        if "1000" in combined or "中证1000" in combined:
-            return 0.0
-        # 中证2000 (微盘)
-        if "2000" in combined:
-            return -0.2
-        # 其他宽基
-        return 0.1
-    
-    # --- 综合ETF: 按子类型拆分为红利/价值/成长/ESG/央企 ---
-    if sector == "综合" or "综合" in sector:
-        # 红利综合
-        if "红利" in combined:
-            return 0.4
-        # 价值综合
-        if "价值" in combined:
-            return 0.3
-        # 央企/国企/改革
-        if any(k in combined for k in ["央企", "国企", "改革", "一带一路"]):
-            return 0.2
-        # ESG/责任投资
-        if any(k in combined for k in ["ESG", "责任", "可持续"]):
-            return 0.1
-        # 成长/创新
-        if any(k in combined for k in ["成长", "创新"]):
-            return -0.1
-        # 增强型 (量化增强)
-        if "增强" in combined:
-            return 0.2
-        # 默认综合 (无特征)
-        return -0.2
-    
-    # --- AI/科技: 按细分赛道区分 ---
-    if any(k in sector for k in ["AI", "科技", "算力", "云计算"]):
-        # AI应用/大模型
-        if any(k in combined for k in ["AI", "人工智能", "大模型", "GPT"]):
-            return 0.2
-        # 算力基础设施 (硬件)
-        if "算力" in combined or "算力" in sector:
-            return -0.1
-        # 云计算/数据
-        if any(k in combined for k in ["云计算", "云", "数据", "大数据"]):
-            return 0.1
-        # 机器人/自动化
-        if any(k in combined for k in ["机器人", "自动化", "机器"]):
-            return 0.0
-        # 硬科技 (含芯片)
-        if any(k in combined for k in ["芯片", "半导体", "集成电路"]):
-            return -0.2
-        # 软件/信息技术
-        if any(k in combined for k in ["软件", "信息", "IT"]):
-            return 0.1
+    entry = next((v for kw, v in _SECTOR_RULE_MAP.items() if kw in sector), None)
+    if entry is None:
         return 0.0
-    
-    # --- 跨境: 按市场区分 ---
-    if sector in ("跨境", "QDII") or "跨境" in sector:
-        # 美股 (纳指/标普)
-        if any(k in combined for k in ["纳指", "标普", "美股", "科技100"]):
-            return -0.3
-        # 港股 (恒生/国企)
-        if any(k in combined for k in ["恒生", "港股", "H股"]):
-            return -0.1
-        # 中概
-        if "中概" in combined:
-            return -0.2
-        # 日经
-        if any(k in combined for k in ["日经", "日本"]):
-            return -0.2
-        # 新兴市场
-        if any(k in combined for k in ["越南", "印度", "新兴"]):
-            return -0.1
-        # 欧洲
-        if any(k in combined for k in ["德国", "法国", "欧洲", "英国"]):
-            return -0.2
-        return -0.2  # 默认跨境
-    
-    # --- 周期/资源: 按品种区分 ---
-    if "周期" in sector or "资源" in sector:
-        # 黄金 = 避险
-        if "黄金" in combined or "贵金属" in sector:
-            return 0.3
-        # 有色 = 工业金属
-        if "有色" in combined or "有色" in sector:
-            return -0.1
-        # 钢铁/煤炭/化工
-        if any(k in combined for k in ["钢铁", "煤炭", "化工"]):
-            return -0.2
+    rule_key, need_composite = entry
+    if need_composite and "综合" not in sector:
         return 0.0
-    
-    # --- 新能源: 按子赛道 ---
-    if "新能源" in sector:
-        if "车" in combined or "汽车" in combined:
-            return -0.1
-        if "光伏" in combined or "光伏" in sector:
-            return 0.0
-        if "风" in combined or "风电" in sector:
-            return 0.1
-        if "电池" in combined or "电池" in sector:
-            return -0.1
-        return 0.0
-    
-    # --- 医药: 按子赛道 ---
-    if "医药" in sector or "医疗" in sector or "药" in sector:
-        if "创新" in combined or "生物" in combined:
-            return -0.1
-        if "中药" in combined or "传统" in combined:
-            return 0.3
-        if "器械" in combined or "设备" in combined:
-            return 0.0
-        if "服务" in combined or "医" in combined:
-            return 0.1
-        return 0.0
-    
-    return 0.0
+
+    return _match_rules(_INDEX_TYPE_RULES[rule_key], f"{sector} {name}", sector)
 
 
 def differentiate(
@@ -258,7 +238,6 @@ def differentiate(
     index_signal = _calc_index_type(sector, name)  # v2.1 新增
 
     # 2. 加权合并 (6维, index占15%)
-    # v2.1: fee 15%, type 20%, border 20%, leverage 10%, purity 20%, index 15%
     combined = (
         fee_signal * 0.15
         + type_signal * 0.20
@@ -270,8 +249,6 @@ def differentiate(
     combined = max(-1.0, min(1.0, round(combined, 2)))
 
     # 3. 全层应用 (v2.1: 加大倍数覆盖所有层)
-    # 原版: 12层均摊后±0.1差异在composite仅±0.01
-    # 修复: L3/L4/L6用2.5x, 同时调L1/L10/L11/L12
     layer_multipliers = {
         "L3_Material": 2.5,
         "L4_SupplyChain": 2.0,
@@ -282,22 +259,44 @@ def differentiate(
     for layer, mult in layer_multipliers.items():
         if layer in scores:
             adj = combined * mult
+            # Ceiling-aware adjustment — don't let multi_signal undo ceiling_break.
+            if scores[layer] >= 8.5:
+                adj *= 0.5
             scores[layer] = round(max(1.0, min(10.0, scores[layer] + adj)), 1)
 
-    # 全层覆盖: L1/L10/L11/L12
+    # L1/L10/L11/L12
     if "L1_ETF" in scores:
-        scores["L1_ETF"] = round(max(0.0, min(10.0, scores["L1_ETF"] + combined * 0.5)), 1)
+        l1_adj = combined * 0.8
+        scores["L1_ETF"] = round(max(0.0, min(10.0, scores["L1_ETF"] + l1_adj)), 1)
+        if code and code.isdigit():
+            digits = code
+            h = 0
+            for d in digits:
+                h = (h * 31 + int(d)) % 10000
+            code_jitter = (h / 10000.0 * 2 - 1) * 0.20
+            scores["L1_ETF"] = round(max(0.0, min(10.0, scores["L1_ETF"] + code_jitter)), 1)
     if "L10_Demand" in scores:
-        scores["L10_Demand"] = round(max(1.0, min(10.0, scores["L10_Demand"] + combined * 1.0)), 1)
+        l10_adj = combined * 1.0
+        if scores["L10_Demand"] >= 8.5:
+            l10_adj *= 0.5
+        scores["L10_Demand"] = round(max(1.0, min(10.0, scores["L10_Demand"] + l10_adj)), 1)
     if "L11_SectorRisk" in scores:
-        scores["L11_SectorRisk"] = round(max(1.0, min(10.0, scores["L11_SectorRisk"] + combined * 1.0)), 1)
+        l11_adj = combined * 1.0
+        if scores["L11_SectorRisk"] >= 8.5:
+            l11_adj *= 0.5
+        scores["L11_SectorRisk"] = round(max(1.0, min(10.0, scores["L11_SectorRisk"] + l11_adj)), 1)
     if "L12_PoliticalRisk" in scores:
-        scores["L12_PoliticalRisk"] = round(max(1.0, min(10.0, scores["L12_PoliticalRisk"] + combined * 0.8)), 1)
+        l12_adj = combined * 0.8
+        if scores["L12_PoliticalRisk"] >= 8.5:
+            l12_adj *= 0.5
+        scores["L12_PoliticalRisk"] = round(max(1.0, min(10.0, scores["L12_PoliticalRisk"] + l12_adj)), 1)
     if "L8_CapitalFlow" in scores:
         l8_adj = (fee_signal * 0.2 + type_signal * 0.15 + border_signal * 0.2) * 0.5
         scores["L8_CapitalFlow"] = round(max(1.0, min(10.0, scores["L8_CapitalFlow"] + l8_adj)), 1)
     if "L9_Signals" in scores:
-        l9_adj = (type_signal * 0.2 + purity_signal * 0.2) * 0.5
+        l9_adj = combined * 1.5
+        if scores["L9_Signals"] >= 8.5:
+            l9_adj *= 0.5
         scores["L9_Signals"] = round(max(1.0, min(10.0, scores["L9_Signals"] + l9_adj)), 1)
 
     return scores

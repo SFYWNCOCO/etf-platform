@@ -1,0 +1,12 @@
+# Risk layer configuration.
+# Used by l14_stoic_risk.py (斯多葛风险哲学层) and l18_var_risk.py (VaR风控层).
+
+# L18 VaR 压力测试情景阈值 (下跌幅度)
+stress_mild: -0.05      # 温和下跌 -5%
+stress_severe: -0.10    # 剧烈下跌 -10%
+stress_tail: -0.20      # 尾部风险 -20%
+
+# L14 斯多葛综合评分权重
+# composite = c_score * controllability_weight + t_score * tail_risk_weight
+stoic_controllability_weight: 0.6
+stoic_tail_risk_weight: 0.4

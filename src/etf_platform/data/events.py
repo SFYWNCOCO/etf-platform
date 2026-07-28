@@ -66,6 +66,61 @@ EVENT_PRESETS = {
             "etype": "macro", "source_auth": 0.5, "impact_scope": 0.80,
             "duration_days": 90, "surprise": 0.3, "reversibility": 0.5, "direction": -0.15,
         },
+        # === 2026 H2 新增事件 ===
+        "stagflation": {
+            "title": "美国CPI反弹至4.2%+非农仅增5.7万+劳动参与率50年新低，滞胀风险重现",
+            "etype": "macro", "source_auth": 0.9, "impact_scope": 0.85,
+            "duration_days": 365, "surprise": 0.6, "reversibility": 0.3, "direction": -0.3,
+            "affected_sectors": ["红利/价值", "红利+低波", "利率债", "货币基金", "公用事业", "黄金"],
+        },
+        "hormuz": {
+            "title": "霍尔木兹海峡危机(2-6月)→能源供应史上最大中断→全球能源转型加速",
+            "etype": "geopolitical", "source_auth": 0.9, "impact_scope": 0.90,
+            "duration_days": 365, "surprise": 0.8, "reversibility": 0.4, "direction": +0.4,
+            "affected_sectors": ["新能源", "光伏", "电池", "公用事业", "黄金"],
+        },
+        "iran_peace": {
+            "title": "美国-伊朗6月签署和平协议+解除石油制裁，能源价格回落但地缘风险溢价仍在",
+            "etype": "geopolitical", "source_auth": 0.9, "impact_scope": 0.60,
+            "duration_days": 180, "surprise": 0.3, "reversibility": 0.5, "direction": +0.2,
+            "affected_sectors": ["周期/资源", "航空", "消费"],
+        },
+        "us_china_tech": {
+            "title": "中美科技脱钩加剧：中国扩大对日出口管制+芯片战争延伸+苹果考虑中国存储芯片",
+            "etype": "policy", "source_auth": 0.8, "impact_scope": 0.70,
+            "duration_days": 365, "surprise": 0.4, "reversibility": 0.2, "direction": +0.5,
+            "affected_sectors": ["半导体", "半导体设备", "硬科技", "AI算力"],
+        },
+        "eu_heatwave": {
+            "title": "欧洲历史性热浪→中国空调需求暴增→建筑节能股大涨→欧盟对华贸易依赖加深",
+            "etype": "climate", "source_auth": 0.7, "impact_scope": 0.30,
+            "duration_days": 90, "surprise": 0.5, "reversibility": 0.7, "direction": +0.3,
+            "affected_sectors": ["家电", "公用事业", "新能源"],
+        },
+        "ecb_hike": {
+            "title": "ECB自2023年来首次加息(6月11日)→能源成本推动通胀→欧洲经济萎缩",
+            "etype": "macro", "source_auth": 0.9, "impact_scope": 0.50,
+            "duration_days": 180, "surprise": 0.3, "reversibility": 0.5, "direction": -0.2,
+            "affected_sectors": ["金融", "银行", "证券", "公用事业"],
+        },
+        "ai_gov_stake": {
+            "title": "OpenAI提议美国政府持股5%→财政与货币政策边界模糊→AI投资军备竞赛制度化",
+            "etype": "policy", "source_auth": 0.6, "impact_scope": 0.40,
+            "duration_days": 180, "surprise": 0.5, "reversibility": 0.6, "direction": +0.3,
+            "affected_sectors": ["AI/科技", "AI算力", "云计算/算力"],
+        },
+        "medicare_glpl1": {
+            "title": "Medicare首次覆盖减肥药(GLP-1)7月1日起→诺和诺德/礼来数百万新患者",
+            "etype": "policy", "source_auth": 0.8, "impact_scope": 0.20,
+            "duration_days": 365, "surprise": 0.3, "reversibility": 0.1, "direction": +0.6,
+            "affected_sectors": ["医药", "中药"],
+        },
+        "ev_sales_shift": {
+            "title": "美国汽车市场完美风暴：EV销量暴跌40.7%+混动主导+兰博基尼放弃纯电",
+            "etype": "macro", "source_auth": 0.7, "impact_scope": 0.30,
+            "duration_days": 180, "surprise": 0.4, "reversibility": 0.5, "direction": -0.2,
+            "affected_sectors": ["汽车", "新能源车", "电池"],
+        },
     },
     "sector": {  # 行业
         "new_energy": {

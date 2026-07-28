@@ -1,13 +1,20 @@
 import sys
 import json
 from pathlib import Path
-from .pipeline import run_full, batch_full, format_full
+
+# Fallback for running as script: python src/etf_platform/cli.py
+# When executed directly, relative imports fail. Resolve by adding src/ to sys.path.
+_here = Path(__file__).resolve().parent.parent.parent
+_src = _here.parent  # _here is etf_platform/, so parent is src/
+if str(_src) not in sys.path:
+    sys.path.insert(0, str(_src))
+
+from etf_platform.pipeline import run_full, batch_full, format_full
 
 
 def _print_health_table(health_results):
-    import datetime
     print(f"\n{'='*55}")
-    print(f"  ETF \u6570\u636e\u6e90\u5065\u5eb7\u68c0\u67e5")
+    print("  ETF \u6570\u636e\u6e90\u5065\u5eb7\u68c0\u67e5")
     print(f"{'='*55}")
     print(f"  {'\u6e90\u540d\u79f0':<20} {'\u72b6\u6001':<12} {'\u5ef6\u8fdf':<8}")
     print(f"  {'-'*40}")
@@ -34,9 +41,9 @@ def _print_screen_results(results):
     
     if l003:
         print(f"\n  {'='*70}")
-        print(f"  \u2620\ufe0f l003\u77e5\u8bc6\u5e93: \u7a7f\u900f\u8bc4\u5206=\u98ce\u9669\u6307\u6807(\u975e\u6536\u76ca\u6307\u6807)")
+        print("  \u2620\ufe0f l003\u77e5\u8bc6\u5e93: \u7a7f\u900f\u8bc4\u5206=\u98ce\u9669\u6307\u6807(\u975e\u6536\u76ca\u6307\u6807)")
         print(f"  {'='*70}")
-        print(f"  \u9ad8\u5206(>7)=\u5b89\u5168\u65e0\u50ac\u5316\u5242 | \u4f4e\u5206(<4)=\u9ad8\u5f39\u6027\u77ed\u7a97\u53e3\u535a\u5f08")
+        print("  \u9ad8\u5206(>7)=\u5b89\u5168\u65e0\u50ac\u5316\u5242 | \u4f4e\u5206(<4)=\u9ad8\u5f39\u6027\u77ed\u7a97\u53e3\u535a\u5f08")
         safe = l003.get("safe_mode", [])
         if safe:
             print(f"\n  \U0001f6e1\ufe0f \u5b89\u5168\u914d\u7f6e (Top {min(5, len(safe))}):")
@@ -48,13 +55,13 @@ def _print_screen_results(results):
             for c in catalyst[:5]:
                 print(f"     {c['code']} {c['name'][:18]:<19} score={c['score']} momentum={c['momentum']} elasticity={c['elasticity']} | {c['note']}")
         elif l003.get("top_catalyst_by_elasticity"):
-            print(f"\n  \U0001f680 \u5f39\u6027\u6392\u540d (\u4f4e\u5206+\u9ad8\u52a8\u91cf):")
+            print("\n  \U0001f680 \u5f39\u6027\u6392\u540d (\u4f4e\u5206+\u9ad8\u52a8\u91cf):")
             for c in l003["top_catalyst_by_elasticity"][:5]:
                 print(f"     {c['code']} {c['name'][:18]:<19} elasticity={c['elasticity']}")
         print()
 
     print(f"\n  {'='*70}")
-    print(f"  ETF \u63a8\u8350\u6392\u540d")
+    print("  ETF \u63a8\u8350\u6392\u540d")
     print(f"  {'='*70}")
     print(f"  {'#':<3} {'\u4ee3\u7801':<8} {'\u540d\u79f0':<22} {'\u884c\u4e1a':<12} {'\u603b\u5206':<6} {'\u98ce\u9669':<5} {'\u8d8b\u52bf':<14}")
     print(f"  {'-'*70}")
@@ -73,7 +80,7 @@ def _print_screen_results(results):
         sc = r["composite_score"]
         print(f"  {r['rank']:<3} {c:<8} {n:<22} {sec:<12} {sc:<6.1f} {risk_icon}{rl:.2f} {trend_str:<14}")
     print(f"  {'='*70}")
-    print(f"  \u6838\u5fc3\u7406\u7531:")
+    print("  \u6838\u5fc3\u7406\u7531:")
     for r in results[:5]:
         print(f"  #{r['rank']} {r['name']}")
         print(f"      {r['reason']}")
@@ -88,7 +95,7 @@ def _print_comparison(ra, rb, va, vb):
     sb = rb.get("layer_scores", {})
     
     print(f"\n  {'='*65}")
-    print(f"  ETF \u5bf9\u6bd4")
+    print("  ETF \u5bf9\u6bd4")
     print(f"  {'='*65}")
     
     # Basic info
@@ -128,9 +135,9 @@ def _print_comparison(ra, rb, va, vb):
     print(f"  {'-'*55}")
     def get_trend_simple(code):
         try:
-            from .data.kline import get_trend
+            from etf_platform.data.kline import get_trend
             return get_trend(code)
-        except Exception:
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError):
             return None
     ta = get_trend_simple(code_a)
     tb = get_trend_simple(code_b)
@@ -145,13 +152,29 @@ def _print_comparison(ra, rb, va, vb):
 
 def app():
     args = sys.argv[1:] if len(sys.argv) > 1 else []
-    
+
+    # Pre-warm pipeline + spot data in background (hides ~24s startup latency)
+    import threading as _t
+    def _pre_warm():
+        run_full("159995", live=False)  # pipeline layers (~2s)
+        try:  # spot data for screen() — saves ~22s on first scan
+            import akshare as ak
+            df = ak.fund_etf_spot_em()
+            from src.etf_platform.decision.screener import _spot_cache, _SPOT_CACHE_LOCK
+            import time as _time
+            with _SPOT_CACHE_LOCK:
+                _spot_cache["df"] = df
+                _spot_cache["ts"] = _time.time()
+        except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError, IndexError, StopIteration):
+            pass  # silent catch — pre-warm is non-critical
+    _t.Thread(target=_pre_warm, name="etf-pre-warm", daemon=True).start()
+
     if not args or args[0] in ("-h", "--help"):
         print("Usage:")
         print("  etf run <CODE>           Single ETF 11-layer penetration (JSON)")
         print("  etf report <CODE>        Full formatted report")
         print("")
-        print("  etf analyse <CODE>       Deep analysis (7 modules)")
+        print("  etf analyze <CODE>       Deep analysis (7 modules)")
         print("  etf patrol               Daily patrol (scan+rotation+prices)")
         print("  etf portfolio [--profile=] [--budget=N]  Portfolio allocation")
         print("  etf chain [CODE]         Supply chain risk analysis")
@@ -177,6 +200,13 @@ def app():
         print("  etf stoic <sector>       Stoic risk analysis (k004)")
         print("  etf state [sector]       Market state similarity (k005)")
         print("  etf live <CODE>          Live premium/liquidity/quality (k006-k009)")
+        print("  etf dip                ETF折溢价实时监控 ★NEW")
+        print("  etf flow               ETF资金流向分析 ★NEW")
+        print("  etf ranking            ETF同类排名与评级 ★NEW")
+        print("  etf overlap [CODE_A] [CODE_B] 持仓重叠度分析 ★NEW")
+        print("  etf estimate <CODE>    收益测算器 ★NEW")
+        print("  etf picker [--profile=]   2-week upside prediction Top 3  ★NEW")
+        print("  etf picker [--profile=]   2-week upside prediction Top 3  ★NEW")
         print("  etf --help               This help")
         return
     
@@ -214,7 +244,7 @@ def app():
             print(f"  ... ({len(results)-10} more)")
     
     elif cmd == "check":
-        from .data.manager import check_all_sources
+        from etf_platform.data.manager import check_all_sources
         health_results = check_all_sources()
         _print_health_table(health_results)
         healthy = sum(1 for h in health_results if h.status.value == "healthy")
@@ -226,7 +256,7 @@ def app():
         if not code:
             print("Error: need ETF code, e.g. etf price 159995")
             return
-        from .data.manager import get_price
+        from etf_platform.data.manager import get_price
         price, source = get_price(code)
         if price:
             print(f"\n  {price.name} ({price.code})")
@@ -240,7 +270,7 @@ def app():
         keyword = args[1] if len(args) > 1 else ""
         if not keyword:
             keyword = "ETF"
-        from .data.manager import get_news
+        from etf_platform.data.manager import get_news
         items = get_news(keyword, limit=10)
         print(f"\n  {len(items)} news results for: {keyword}\n")
         for item in items:
@@ -257,12 +287,12 @@ def app():
                 top_n = int(a.split("=")[1])
             if a.startswith("--profile="):
                 profile = a.split("=")[1]
-        from .decision.screener import screen
+        from etf_platform.decision.screener import screen
         results = screen(top_n=top_n, profile=profile)
         _print_screen_results(results)
     
     elif cmd == "recommend":
-        from .decision.screener import recommend
+        from etf_platform.decision.screener import recommend
         results = recommend()
         _print_screen_results(results)
     
@@ -271,7 +301,7 @@ def app():
             print("Error: need two ETF codes, e.g. etf compare 159263 159995")
             return
         code_a, code_b = args[1], args[2]
-        from .data.valuation import get_valuation
+        from etf_platform.data.valuation import get_valuation
         ra = run_full(code_a)
         rb = run_full(code_b)
         va = get_valuation(code_a)
@@ -283,7 +313,7 @@ def app():
         if not code:
             print("Error: need ETF code")
             return
-        from .data.valuation import get_fund_snapshot
+        from etf_platform.data.valuation import get_fund_snapshot
         v = get_fund_snapshot(code)
         if v and v.nav > 0:
             print(f"\n  {v.name} ({v.code})")
@@ -300,7 +330,7 @@ def app():
         else:
             print(f"  No data for {code}\n")
     
-    elif cmd == "analyse":
+    elif cmd == "analyze":
         """全面分析: 穿透+轮动+宏观+建议"""
         code = args[1] if len(args) > 1 else ""
         profile = "balanced"
@@ -310,7 +340,7 @@ def app():
         if not code:
             print("Error: need ETF code")
             return
-        from .analyst import analyse as _analyse
+        from etf_platform.analyst import analyze as _analyse
         r = _analyse(code, profile=profile)
         layers = r.get("layer_scores", {})
         print("")
@@ -330,12 +360,12 @@ def app():
     
     elif cmd == "patrol":
         """每日巡逻: 全市场扫描+轮动+行情+建议"""
-        from .analyst import patrol as _patrol
+        from etf_platform.analyst import patrol as _patrol
         print(_patrol())
     
     elif cmd == "rotation":
         """行业轮动快照"""
-        from .analysis.rotation import detect_rotation
+        from etf_platform.analysis.rotation import detect_rotation
         r = detect_rotation()
         if r.get("sectors"):
             print("")
@@ -363,16 +393,16 @@ def app():
                 profile = a.split("=")[1]
             elif not a.startswith("--"):
                 codes.append(a)
-        from .optimize.portfolio import generate_portfolio_report
-        from .analyst import analyse
+        from etf_platform.optimize.portfolio import generate_portfolio_report
+        from etf_platform.analyst import analyze
         results = {}
         if codes:
             for code in codes:
-                r = analyse(code, profile=profile)
+                r = analyze(code, profile=profile)
                 results[code] = r
         else:
             for code in ["512890","159995","159819","518880","159201","511010"]:
-                r = analyse(code, profile=profile)
+                r = analyze(code, profile=profile)
                 results[code] = r
         print(generate_portfolio_report(results, budget=budget, profile=profile))
 
@@ -382,7 +412,7 @@ def app():
         if not code:
             print("Usage: etf health <CODE>")
             return
-        from .analysis.macro import full_eco_report
+        from etf_platform.analysis.macro import full_eco_report
         r = full_eco_report(code)
         h = r["health"]
         if h:
@@ -405,7 +435,7 @@ def app():
     elif cmd == "holdings":
         """持仓穿透数据"""
         code = args[1] if len(args) > 1 else ""
-        from .analysis.holdings import get_holdings, get_concentration_analysis, list_covered_etfs
+        from etf_platform.analysis.holdings import get_holdings, get_concentration_analysis, list_covered_etfs
         if code:
             h = get_holdings(code)
             ca = get_concentration_analysis(code)
@@ -428,7 +458,7 @@ def app():
 
     elif cmd == "insight":
         """策略决策分析"""
-        from .optimize.decision import print_report, analyze
+        from etf_platform.optimize.decision import print_report, analyze
         if "--json" in args:
             print(json.dumps(analyze(), ensure_ascii=False, indent=2))
         else:
@@ -437,7 +467,7 @@ def app():
     elif cmd == "chain":
         """供应链风险分析"""
         code = args[1] if len(args) > 1 else ""
-        from .analysis.chain import get_chain_report, find_safest_etfs, find_riskiest_etfs
+        from etf_platform.analysis.chain import get_chain_report, find_safest_etfs, find_riskiest_etfs
         if code:
             r = get_chain_report(code)
             if r and "risk_level" in r:
@@ -454,7 +484,7 @@ def app():
                         print("    • %s (%s)" % (sc["scene"], sc["probability"]))
                 print("")
             else:
-                print("  ⚠️ %s 暂无供应链数据, 可用 etf analyse %s" % (code, code))
+                print("  ⚠️ %s 暂无供应链数据, 可用 etf analyze %s" % (code, code))
         else:
             print("")
             print("  [供应链风险排名]")
@@ -470,8 +500,8 @@ def app():
             print("")
     elif cmd == "status":
         """系统状态概览"""
-        from .data.manager import check_all_sources
-        from .config_loader import load_etfs
+        from etf_platform.data.manager import check_all_sources
+        from etf_platform.config_loader import load_etfs
         etfs = load_etfs()
         health = check_all_sources()
         healthy = sum(1 for h in health if h.status.value == "healthy")
@@ -489,8 +519,8 @@ def app():
 
     elif cmd == "causal":
         code = args[1] if len(args) > 1 else ""
-        from .analysis.causal import CausalEngine
-        from .data.events import inject_events
+        from etf_platform.analysis.causal import CausalEngine
+        from etf_platform.data.events import inject_events
         engine = CausalEngine()
         inject_events(engine, verbose=False)
         if code:
@@ -503,13 +533,13 @@ def app():
             engine.report(results)
 
     elif cmd == "signals":
-        from .analysis.signals import ProfitSignalEngine
+        from etf_platform.analysis.signals import ProfitSignalEngine
         ProfitSignalEngine().run_all()
 
     elif cmd == "events":
         """Market event timeline — log or query events."""
         sub = args[1] if len(args) > 1 else "recent"
-        from .archive.collector import log_event, load_events
+        from etf_platform.archive.collector import log_event, load_events
         if sub == "log":
             if len(args) < 3:
                 print("Usage: etf events log <type> <message>")
@@ -534,7 +564,7 @@ def app():
                     msg = ev.get("message", "")
                     print(f"  {ts} | {et:<20} | {msg[:60]}")
         elif sub == "causal":
-            from .data.events import EVENT_PRESETS, PRESET_COMBOS
+            from etf_platform.data.events import EVENT_PRESETS, PRESET_COMBOS
             print("\n  Causal Events:")
             for pn, evs in EVENT_PRESETS.items():
                 print(f"  [{pn}]: {len(evs)} events")
@@ -547,12 +577,12 @@ def app():
         for a in args[1:]:
             if a.startswith("--mode="): mode = a.split("=")[1]
             if a.startswith("--top="): top_n = int(a.split("=")[1])
-        from .decision.select import select, report as sel_report
+        from etf_platform.decision.select import select, report as sel_report
         results = select(mode=mode, top_n=top_n)
         sel_report(results)
 
     elif cmd == "backtest":
-        from .optimize.backtest import run_backtest, run_rolling_backtest
+        from etf_platform.optimize.backtest import run_backtest, run_rolling_backtest
         rolling = "--rolling" in args
         if rolling:
             result = run_rolling_backtest()
@@ -563,15 +593,15 @@ def app():
 
     elif cmd == "hook":
         sub = args[1] if len(args) > 1 else "summary"
-        from .hook_harness import hook_patrol, hook_backtest, hook_daily_summary
+        from etf_platform.hook_harness import hook_patrol, hook_backtest, hook_daily_summary
 
         if sub == "patrol":
-            from .decision.screener import screen
+            from etf_platform.decision.screener import screen
             results = screen(top_n=10, profile="均衡")
             hook_patrol(results)
             print(f"Hooked patrol: {len(results)} screened → Harness Loop")
         elif sub == "backtest":
-            from .optimize.backtest import run_backtest
+            from etf_platform.optimize.backtest import run_backtest
             report = run_backtest()
             hook_backtest(report)
             print(f"Hooked backtest: {report.get('accuracy')}% → Harness Loop")
@@ -579,7 +609,7 @@ def app():
             hook_daily_summary()
             print("Hooked daily summary → Harness Loop")
         elif sub == "verify":
-            from .hook_harness import load_json
+            from etf_platform.hook_harness import load_json
             fw = load_json()
             etf_fws = {k: v for k, v in fw.get("frameworks", {}).items() if v.get("scope") == "etf"}
             print(f"ETF Thompson frameworks: {len(etf_fws)}")
@@ -591,7 +621,7 @@ def app():
 
     elif cmd == "material":
         sub = args[1] if len(args) > 1 else "scan"
-        from .analysis.material_watchdog import scan_news, quick_add, confirm_discovery, list_pending
+        from etf_platform.analysis.material_watchdog import scan_news, quick_add, confirm_discovery, list_pending
 
         if sub == "scan":
             limit = int(args[2]) if len(args) > 2 else 20
@@ -618,12 +648,12 @@ def app():
             print("用法: etf material [scan|add|confirm|list]")
 
     elif cmd == "deep":
-        from .analysis.deep import DeepMonitor
+        from etf_platform.analysis.deep import DeepMonitor
         dm = DeepMonitor()
         dm.run()
 
     elif cmd == "optimize":
-        from .decision.optimizer import load_decision_log, compare_strategies
+        from etf_platform.decision.optimizer import load_decision_log, compare_strategies
         decisions = load_decision_log()
         if decisions:
             result = compare_strategies(decisions, {})
@@ -636,7 +666,7 @@ def app():
     elif cmd == "archive":
         """Daily data archive — collect, query, or list."""
         sub = args[1] if len(args) > 1 else "collect"
-        from .archive.collector import collect_full_snapshot, list_archives, load_day, log_event
+        from etf_platform.archive.collector import collect_full_snapshot, list_archives, load_day, log_event
         if sub == "collect":
             quick = "--quick" in args
             collect_full_snapshot(quick=quick)
@@ -668,7 +698,7 @@ def app():
     elif cmd == "cycle":
         """三周期宏观状态报告 (k001+k002)"""
         sector = args[1] if len(args) > 1 else None
-        from .layers.l12_macro_cycle import format_cycle_report, get_cycle_adjustments
+        from etf_platform.layers.l12_macro_cycle import format_cycle_report
         print(format_cycle_report(sector))
 
     elif cmd == "factor":
@@ -677,8 +707,8 @@ def app():
         if not code:
             print("Usage: etf factor <CODE>")
             return
-        from .config_loader import load_etfs
-        from .layers.l13_factor_loading import get_factor_exposure
+        from etf_platform.config_loader import load_etfs
+        from etf_platform.layers.l13_factor_loading import get_factor_exposure
         etfs = load_etfs()
         info = etfs.get(code, {})
         sector = info.get("sector", "未知")
@@ -691,7 +721,7 @@ def app():
 
     elif cmd == "factors":
         """全市场因子暴露概览"""
-        from .layers.l13_factor_loading import FACTOR_MAP
+        from etf_platform.layers.l13_factor_loading import FACTOR_MAP
         print(f"\n  行业因子暴露映射表 ({len(FACTOR_MAP)} sectors)")
         print(f"  {'='*55}")
         print(f"  {'行业':<16} {'SMB':<6} {'HML':<6} {'RMW':<6} {'CMA':<6} {'LowVol':<6}")
@@ -705,7 +735,7 @@ def app():
             print("Usage: etf stoic <sector>")
             return
         sector = args[1]
-        from .layers.l14_stoic_risk import score_stoic_layer
+        from etf_platform.layers.l14_stoic_risk import score_stoic_layer
         r = score_stoic_layer(sector, 0.5)
         print(f"\n  斯多葛风险分析: {sector}")
         print(f"  {'='*55}")
@@ -714,7 +744,7 @@ def app():
         print(f"  平均回撤:   {r['avg_drawdown']:.1f}%")
         print(f"  综合斯多葛分: {r['score']}/10")
         if r.get('scenarios'):
-            print(f"\n  压力测试:")
+            print("\n  压力测试:")
             for sc, dd in r['scenarios'].items():
                 icon = "🔴" if dd < -30 else ("🟡" if dd < -15 else "🟢")
                 print(f"    {icon} {sc}: {dd:.0f}%")
@@ -723,9 +753,9 @@ def app():
     elif cmd == "state":
         """市场状态相似度 (k005)"""
         sector = args[1] if len(args) > 1 else ""
-        from .layers.l15_state_similarity import find_similar_states, score_state_similarity
+        from etf_platform.layers.l15_state_similarity import find_similar_states, score_state_similarity
         matches = find_similar_states()
-        print(f"\n  市场状态匹配")
+        print("\n  市场状态匹配")
         print(f"  {'='*55}")
         for m in matches:
             sim_pct = m['similarity'] * 100
@@ -737,8 +767,79 @@ def app():
             state_r = score_state_similarity(sector)
             print(f"\n  {sector} 在该状态下的评分: {state_r['score']}/10")
             if state_r.get('sector_benefits'):
-                print(f"  🟢 该行业受益于当前市场状态")
+                print("  🟢 该行业受益于当前市场状态")
         print()
+
+    elif cmd == "estimate":
+        """收益测算器"""
+        code = args[1] if len(args) > 1 else ""
+        amount = 10000
+        for a in args[2:]:
+            if a.startswith("--amount="):
+                amount = float(a.split("=")[1])
+        if not code:
+            print("Usage: etf estimate <CODE> [--amount=10000]")
+            return
+        from etf_platform.utils.return_calculator import ReturnCalculator
+        calc = ReturnCalculator()
+
+        # 优先从ETF实时行情获取名称和收益率
+        name = code
+        try:
+            import akshare as ak
+            spot_df = ak.fund_etf_spot_em()
+            etf_row = spot_df[spot_df['代码'].astype(str) == code]
+            if not etf_row.empty:
+                r = etf_row.iloc[0]
+                name = str(r.get('名称', code))
+                # 用折价率列附近的数据，尝试从净值估算接口补充
+                print(f"\n  [{code}] {name} 收益测算")
+                print(f"  {'='*55}")
+                print(f"  当前市价: {r.get('最新价', '?')} | IOPV: {r.get('IOPV实时估值', '?')} | 折溢价: {r.get('基金折价率', '?')}%")
+                print(f"  日涨跌幅: {r.get('涨跌幅', '?')}%")
+                print(f"  本金: {amount:,.0f}元")
+                print("  ⚠️ 注: 东财实时行情不提供历史阶段收益率，请使用 fund_info_index_em 获取")
+                print()
+            else:
+                print(f"⚠️ 未找到ETF {code}")
+                return
+        except Exception as e:
+            print(f"⚠️ 获取ETF数据失败: {e}")
+            return
+
+    elif cmd == "dip":
+        """ETF折溢价实时监控"""
+        from etf_platform.analysis.dip_monitor import DIPMonitor
+        monitor = DIPMonitor()
+        report, alerts = monitor.run()
+        print(report)
+        print(f"\n共 {len(alerts)} 条预警")
+
+    elif cmd == "flow":
+        """ETF资金流向分析"""
+        from etf_platform.analysis.fund_flow import FundFlowAnalyzer
+        analyzer = FundFlowAnalyzer()
+        report, alerts = analyzer.run()
+        print(report)
+        print(f"\n共 {len(alerts)} 条预警")
+
+    elif cmd == "ranking":
+        """ETF同类排名与评级"""
+        from etf_platform.analysis.ranking import RankingManager
+        manager = RankingManager()
+        report, df = manager.run()
+        print(report[:5000])
+
+    elif cmd == "overlap":
+        """持仓重叠度分析"""
+        from etf_platform.analysis.holdings_overlap import HoldingsOverlapAnalyzer
+        analyzer = HoldingsOverlapAnalyzer()
+        if len(args) >= 3:
+            print("使用示例数据演示重叠度分析:")
+        else:
+            print("使用示例数据演示重叠度分析:")
+        report, results = analyzer.run_demo()
+        print(report)
 
     elif cmd == "live":
         """折溢价+流动性+基金质量 (k006+k007+k008+k009)"""
@@ -750,8 +851,8 @@ def app():
             return
         amount_yi = float(args[2]) if len(args) > 2 else 1.0
         premium_pct = float(args[3]) if len(args) > 3 else 0.0
-        from .config_loader import load_etfs
-        from .layers.l16_live_signals import get_live_signals
+        from etf_platform.config_loader import load_etfs
+        from etf_platform.layers.l16_live_signals import get_live_signals
         etfs = load_etfs()
         info = etfs.get(code, {})
         sector = info.get("sector", "未知")
@@ -766,6 +867,19 @@ def app():
         print(f"  基金质量: {r['fund_quality']['score']}/10")
         print()
 
+
+    elif cmd == "picker":
+        """2周涨幅预测 Top 3"""
+        profile = "均衡"
+        for a in args[1:]:
+            if a.startswith("--profile="):
+                profile = a.split("=")[1]
+        from etf_platform.decision.two_week_picker import pick_top3, format_report
+        from etf_platform.decision.prediction_monitor import log_prediction
+        top3, scored = pick_top3(profile)
+        log_prediction(top3, profile)
+        print(format_report(top3))
+        print(chr(10) + f"  候选池: {len(scored)}只ETF" if len(scored) > 3 else "")
 
     else:
         print(f"Unknown command: {cmd}")

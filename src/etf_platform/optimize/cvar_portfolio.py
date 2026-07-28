@@ -6,11 +6,17 @@ import math
 from statistics import NormalDist
 
 PHI = NormalDist()
-PHI_PDF = lambda x: math.exp(-x*x/2) / math.sqrt(2*math.pi)
+
+
+def PHI_PDF(x):
+    """标准正态分布概率密度函数。"""
+    return math.exp(-x*x/2) / math.sqrt(2*math.pi)
+
 
 def gaussian_cvar(mu, sigma, alpha=0.95):
     z = PHI.inv_cdf(alpha)
     return mu - sigma * PHI_PDF(z) / (1 - alpha)
+
 
 def gaussian_cvar_gradient(w, means, cov, alpha=0.95):
     n = len(w)
@@ -24,28 +30,41 @@ def gaussian_cvar_gradient(w, means, cov, alpha=0.95):
         grad.append(-means[i] - k * ds)
     return grad
 
+
 def optimize_gaussian(means, cov, alpha=0.95, lr=0.01, max_iter=500, tol=1e-6):
+    """Gaussian CVaR 优化 — 梯度下降 + 归一化投影。
+
+    修复 v1: 收敛判定比较 w_new vs w_old(而非归一化后的 w 与未归一化的 w2)。
+    """
     n = len(means)
     w = [1.0/n] * n
     for step in range(max_iter):
         g = gaussian_cvar_gradient(w, means, cov, alpha)
-        w2 = [max(w[i] - lr*g[i], 0.0) for i in range(n)]
-        s = sum(w2)
-        w = [x/s for x in w2] if s > 0 else [1.0/n]*n
-        if sum(abs(w[i]-w2[i]) for i in range(n)) < tol:
+        w_new = [max(w[i] - lr*g[i], 0.0) for i in range(n)]
+        s = sum(w_new)
+        w_new = [x/s for x in w_new] if s > 0 else [1.0/n]*n
+        if sum(abs(w_new[i] - w[i]) for i in range(n)) < tol:
+            w = w_new
             break
+        w = w_new
     mu_p = sum(w[i]*means[i] for i in range(n))
     var_p = sum(w[i]*w[j]*cov[i][j] for i in range(n) for j in range(n))
     sigma_p = math.sqrt(max(var_p, 1e-12))
     return [round(x,6) for x in w], dict(cvar=round(gaussian_cvar(mu_p,sigma_p,alpha),6),
         vol=round(sigma_p,6), ret=round(mu_p,6), alpha=alpha, method='gaussian')
 
+
 def historical_cvar(w, scenarios, alpha=0.95):
     pret = sorted(sum(w[i]*s[i] for i in range(len(w))) for s in scenarios)
     k = max(1, int(len(pret)*(1-alpha)))
     return sum(pret[:k]) / k
 
-def optimize_historical(scenarios, alpha=0.95, lr=0.01, max_iter=500):
+
+def optimize_historical(scenarios, alpha=0.95, lr=0.01, max_iter=500, tol=1e-6):
+    """Historical CVaR 优化 — 基于经验分位数的梯度下降。
+
+    修复 v1: 添加收敛判定(原代码固定跑 max_iter 次,无提前退出)。
+    """
     n = len(scenarios[0]); m = len(scenarios)
     k = max(1, int(m*(1-alpha)))
     w = [1.0/n]*n
@@ -58,11 +77,16 @@ def optimize_historical(scenarios, alpha=0.95, lr=0.01, max_iter=500):
                 tc += 1
                 for j in range(n): sg[j] += scenarios[idx][j]
         sg = [-x/max(tc,1) for x in sg]
-        w2 = [max(w[j] - lr*sg[j], 0.0) for j in range(n)]
-        s = sum(w2)
-        w = [x/s for x in w2] if s > 0 else [1.0/n]*n
+        w_new = [max(w[j] - lr*sg[j], 0.0) for j in range(n)]
+        s = sum(w_new)
+        w_new = [x/s for x in w_new] if s > 0 else [1.0/n]*n
+        if sum(abs(w_new[j] - w[j]) for j in range(n)) < tol:
+            w = w_new
+            break
+        w = w_new
     return [round(x,6) for x in w], dict(cvar=round(historical_cvar(w,scenarios,alpha),6),
         alpha=alpha, method='historical', scenarios=m)
+
 
 def student_t_cvar(mu, sigma, nu=5, alpha=0.95):
     z = PHI.inv_cdf(alpha)

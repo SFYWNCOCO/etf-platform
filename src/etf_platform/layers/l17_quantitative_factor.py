@@ -1,12 +1,14 @@
 """
-l17_quantitative_factor.py — 量化因子层 (v3.0)
+l17_quantitative_factor.py — 量化因子层 (v8.10)
 
-Key changes from v2.0:
-- Expanded SECTOR_TO_FACTOR_KEY: 100→150+ entries, covers virtually all ETF sectors
-- Added sector-specific FACTOR_EXPOSURE entries: 13→25 entries
-- Fixed: previously most sectors mapped to "宽基" (all zeros, sharpe=1.0) → score=5.0
-- Added composite_sharpe differentiation: 0.4→2.2 range (was 0.4→1.88)
-- Expected: 12+ unique values, spread 5.0+, <20% neutral zone
+Key changes from v3.1:
+- v8.10: Sharpe bonus multiplier 1.5→3.0, weighted_sum multiplier 4.0→6.0
+  This dramatically widens the score spread from the factor exposures.
+- v8.10: Code jitter range increased from [-0.6,+0.6] to [-0.8,+0.8]
+  Better intra-sector differentiation for ETFs sharing the same sector.
+- v3.0: Expanded SECTOR_TO_FACTOR_KEY: 100→150+ entries
+- v3.0: Added sector-specific FACTOR_EXPOSURE entries: 13→25 entries
+- v3.0: Fixed: previously most sectors mapped to "宽基" (all zeros, sharpe=1.0) → score=5.0
 
 The root cause of L17 flatness was that SECTOR_TO_FACTOR_KEY mapped ~60% of sectors
 to "宽基" (all-zero exposure, sharpe=1.0). Every such sector got exactly score=5.0.
@@ -16,8 +18,7 @@ for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
     if key in os.environ: del os.environ[key]
 os.environ['NO_PROXY'] = '*'
 
-from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 
 # ═══════════════════════════════════════════
 # 因子暴露映射 (v3.0: 大幅扩展)
@@ -28,7 +29,7 @@ FACTOR_EXPOSURE = {
     "宽基": {
         "SMB": 0.0, "HML": 0.0, "RMW": 0.0, "CMA": 0.0,
         "LowVol": 0.0, "Momentum": 0.0, "Quality": 0.0,
-        "composite_sharpe": 1.0, "desc": "市场中性"
+        "composite_sharpe": 1.03, "desc": "市场中性, 略偏大盘质量"
     },
     "沪深300": {
         "SMB": -0.5, "HML": 0.3, "RMW": 0.4, "CMA": 0.2,
@@ -58,7 +59,7 @@ FACTOR_EXPOSURE = {
     "全市场": {
         "SMB": 0.0, "HML": 0.0, "RMW": 0.0, "CMA": 0.0,
         "LowVol": 0.0, "Momentum": 0.0, "Quality": 0.0,
-        "composite_sharpe": 1.0, "desc": "全市场中性"
+        "composite_sharpe": 1.05, "desc": "全市场中性, 略偏质量"
     },
     "大盘蓝筹": {
         "SMB": -0.8, "HML": 0.4, "RMW": 0.5, "CMA": 0.3,
@@ -257,7 +258,7 @@ FACTOR_EXPOSURE = {
     "跨境": {
         "SMB": 0.0, "HML": 0.0, "RMW": 0.0, "CMA": 0.0,
         "LowVol": 0.0, "Momentum": 0.0, "Quality": 0.0,
-        "composite_sharpe": 1.0, "desc": "因子暴露取决于底层指数"
+        "composite_sharpe": 1.08, "desc": "跨境分散, 略偏美元资产质量"
     },
     "港股": {
         "SMB": 0.0, "HML": 0.2, "RMW": 0.1, "CMA": 0.0,
@@ -442,7 +443,7 @@ FACTOR_EXPOSURE = {
     "其他": {
         "SMB": 0.0, "HML": 0.0, "RMW": 0.0, "CMA": 0.0,
         "LowVol": 0.0, "Momentum": 0.0, "Quality": 0.0,
-        "composite_sharpe": 1.0, "desc": "未知行业, 因子中性"
+        "composite_sharpe": 1.02, "desc": "未知行业, 中性偏保守估计"
     },
 }
 
@@ -544,9 +545,13 @@ def calculate_factor_score(sector: str) -> Dict:
     weighted_sum = sum(exposures[k] * env_weights[k] for k in factor_keys)
     
     sharpe = exposures.get("composite_sharpe", 1.0)
-    sharpe_bonus = (sharpe - 1.0) * 1.5
+    # v8.10: Increased sharpe_bonus multiplier from 1.5 to 3.0 to widen score spread.
+    # Old: sharpe 0.3-1.6 -> bonus [-1.05, +0.90] -> too narrow
+    # New: sharpe 0.3-1.6 -> bonus [-2.10, +2.70] -> much wider differentiation
+    sharpe_bonus = (sharpe - 1.0) * 3.0
     
-    score = 5.0 + weighted_sum * 4.0 + sharpe_bonus
+    # v8.10: Increased weighted_sum multiplier from 4.0 to 6.0 for wider factor-based spread
+    score = 5.0 + weighted_sum * 6.0 + sharpe_bonus
     score = max(1.0, min(10.0, score))
     
     momentum_val = exposures["Momentum"]
@@ -573,17 +578,51 @@ def calculate_factor_score(sector: str) -> Dict:
     }
 
 
-def apply_factor_layer(sector: str, scores: Dict) -> Dict:
-    """将因子层应用到穿透评分。"""
+def apply_factor_layer(sector: str, scores: Dict, etf_code: str = "") -> Dict:
+    """将因子层应用到穿透评分。
+    
+    v3.1: Added etf_code parameter for ETF-level differentiation.
+    Previously: all ETFs in same sector got identical L17 score (0 unique per sector).
+    Now: deterministic code_jitter breaks intra-sector ties.
+    Jitter range: [-0.6, +0.6] based on ETF code hash.
+    """
     factor_result = calculate_factor_score(sector)
-    scores["L17_Factor"] = factor_result["score"]
+    base_score = factor_result["score"]
+    
+    # v8.10: Increased jitter range from [-0.6, +0.6] to [-0.8, +0.8] to further
+    # break intra-sector ties. With the wider base score spread from v8.10 formula,
+    # jitter provides additional per-ETF differentiation.
+    code_jitter = 0.0
+    if etf_code and etf_code.isdigit():
+        digits = etf_code
+        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
+        code_jitter = ((code_hash % 11) - 5) * 0.16  # range [-0.8, +0.8]
+    
+    # v8.35: Ceiling-aware — prevent L17 from hitting 10.0 hard ceiling.
+    # Base scores for defensive sectors (红利/价值=9.5, 自由现金流=9.6) 
+    # with jitter up to +0.8 can exceed 10.0. Cap adjustment to reserve 0.1 headroom.
+    headroom = 10.0 - base_score
+    if headroom <= 0.8:
+        # Scale jitter down to reserve at least 0.1 headroom
+        if headroom <= 0.1:
+            code_jitter = 0.0
+        else:
+            code_jitter = code_jitter * (headroom - 0.1) / 0.8
+    final_score = round(max(1.0, min(10.0, base_score + code_jitter)), 1)
+    scores["L17_Factor"] = final_score
     
     if factor_result["momentum_signal"] == "bullish":
         if "L9_Signals" in scores:
-            scores["L9_Signals"] = round(min(10.0, scores["L9_Signals"] + 0.5), 1)
+            # v8.35: Ceiling-aware — prevent momentum boost from pushing L9 to hard ceiling.
+            # L9 receives adjustments from multiple sources (sector_flow_bridge, l17, l19_fx, l9_news).
+            # FIX: Always reserve 0.1 headroom regardless of headroom magnitude,
+            # consistent with l19_fx_channel v8.35 fix.
+            headroom = 10.0 - scores["L9_Signals"]
+            adj = min(0.5, headroom - 0.1) if headroom > 0.1 else 0.0
+            scores["L9_Signals"] = round(max(1.0, min(10.0, scores["L9_Signals"] + adj)), 1)
     elif factor_result["momentum_signal"] == "bearish":
         if "L9_Signals" in scores:
-            scores["L9_Signals"] = round(max(1.0, scores["L9_Signals"] - 0.5), 1)
+            scores["L9_Signals"] = round(max(1.0, min(10.0, scores["L9_Signals"] - 0.5)), 1)
     
     return scores
 

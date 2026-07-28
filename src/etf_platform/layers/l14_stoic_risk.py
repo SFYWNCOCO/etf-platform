@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 l14_stoic_risk.py — 斯多葛风险哲学层 (v2.0)
 
@@ -10,6 +13,17 @@ Key changes from v1.0:
 Expected: 14+ unique values, spread 5.0+, <20% clustering at any single value
 """
 from typing import Dict
+
+# v9.0: Stoic composite weights loaded from config/risk.yaml with built-in defaults.
+try:
+    from ..config_loader import load_risk
+    _risk_cfg = load_risk()
+    _STOIC_CONTROLLABILITY_WEIGHT = float(_risk_cfg.get("stoic_controllability_weight", 0.6))
+    _STOIC_TAIL_RISK_WEIGHT = float(_risk_cfg.get("stoic_tail_risk_weight", 0.4))
+except Exception as e:
+    logger.warning("[l14_stoic] load_risk_config failed: %s", e)
+    _STOIC_CONTROLLABILITY_WEIGHT = 0.6
+    _STOIC_TAIL_RISK_WEIGHT = 0.4
 
 # ═══════════════════════════════════════════
 # 控制的二分法 — 大幅扩展覆盖
@@ -45,7 +59,6 @@ CONTROLLABILITY_SCORES = {
     "基建/地产": 7.0,
     "红利": 9.0,
     "价值": 8.5,
-    "高股息": 9.0,
 
     # === 中可控 (5.5-7.0): 有一定不确定性 ===
     "医药": 6.5,
@@ -224,14 +237,12 @@ def get_stress_test(sector: str) -> Dict:
 # 综合斯多葛评分 (v2.0: 更精细的加权)
 # ═══════════════════════════════════════
 
-def score_stoic_layer(sector: str, risk_level: float) -> Dict:
-    """返回斯多葛综合评分 (0-10)。
+def score_stoic_layer(sector: str, risk_level: float, etf_code: str = "") -> Dict:
+    """返回斯多葛综合评分 (0-10).
 
-    v2.0 changes:
-    - Expanded controllability mapping covers 95%+ sectors exactly
-    - Stress test uses per-scenario fuzzy match instead of default
-    - More granular risk_level modulation: 5 tiers instead of binary
-    - Better spread expected: 14+ unique values, spread 5.0+
+    v2.0: Expanded controllability mapping covers 95%+ sectors exactly
+    v8.17: Added etf_code parameter for code-based jitter to break intra-sector clusters.
+           Previously all ETFs in same sector got identical L14 scores.
     """
     controllability = get_controllability(sector)
     stress = get_stress_test(sector)
@@ -243,7 +254,8 @@ def score_stoic_layer(sector: str, risk_level: float) -> Dict:
     t_score = 10 - stress["tail_risk"]
 
     # 综合: 可控性占60%, 尾部风险占40%
-    composite = c_score * 0.6 + t_score * 0.4
+    # v9.0: weights loaded from config/risk.yaml (stoic_controllability_weight/tail_risk_weight)
+    composite = c_score * _STOIC_CONTROLLABILITY_WEIGHT + t_score * _STOIC_TAIL_RISK_WEIGHT
 
     # v2.0: 5-tier risk modulation instead of binary
     if risk_level > 0.8:
@@ -261,6 +273,13 @@ def score_stoic_layer(sector: str, risk_level: float) -> Dict:
         # 低波动ETF在低可控行业也有优势 (确定性更高)
         if c_score < 4:
             composite += 0.5
+
+    # v8.17: Code-based jitter for intra-sector differentiation
+    # Previously: all ETFs in same sector got identical score
+    # Now: deterministic jitter ±0.4 based on ETF code
+    # v9.0: Extracted to utils.hash_jitter.code_jitter (DRY with L18)
+    from ..utils.hash_jitter import code_jitter
+    composite = composite + code_jitter(etf_code, 0.4)
 
     composite = max(1.0, min(10.0, composite))
 

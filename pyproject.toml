@@ -12,6 +12,29 @@ dependencies = []
 [project.scripts]
 etf = "etf_platform.cli:app"
 
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as fast unit tests",
+]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+check_untyped_defs = true
+disallow_untyped_defs = false
+warn_unused_configs = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+extend-exclude = ["_archived/", "_archive/", "_sandbox/", "_tmp/", ".git/", "__pycache__/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
+ignore = ["E501"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["etf_platform*"]

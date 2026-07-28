@@ -1,4 +1,5 @@
 """ETF 信号系统 - 获利信号 + 上下车判断"""
+import time
 from collections import defaultdict
 from ..config_loader import load_etfs
 from ..analysis.causal import CausalEngine
@@ -10,7 +11,6 @@ class ProfitSignalEngine:
         self.engine = CausalEngine(); inject_events(self.engine, verbose=False)
         self.signals = []; self.pair_trades = []; self.warnings = []
     def scan_event_signals(self):
-        import time
         results = self.engine.scan_all()
         etfs = load_etfs()
         for event in self.engine.events:
@@ -34,8 +34,7 @@ class ProfitSignalEngine:
                 priced_in = getattr(event, "priced_in", 0.0)
                 effective_dir = event.direction * (-1.0 if priced_in > 0.5 else 1.0)
                 direction = "SHORT" if effective_dir < -0.1 else ("LONG" if effective_dir > 0.1 else "NEUTRAL")
-                if direction == "SHORT" and any(kw in event.title for kw in ["芯片","半导体","管制"]): direction = "LONG"
-                if direction == "LONG" and any(kw in event.title for kw in ["预算","预期","降准"]): direction = "SHORT"
+                # v3.0: 移除硬编码行业偏见，信号方向仅由因果引擎决定
                 self.signals.append({"code": code, "name": etfs[code]["name"], "sector": etfs[code].get("sector",""),
                     "direction": direction, "strength": round(signal_strength, 4),
                     "freshness": round(freshness, 2), "event": event.title, "impact": round(abs_impact, 4)})

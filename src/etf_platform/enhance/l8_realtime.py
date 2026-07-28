@@ -1,5 +1,4 @@
 """L8 Capital Flow enhancer: replaces inferred data with real-time data."""
-import time
 from ..data.manager import get_price
 
 
@@ -8,10 +7,10 @@ def enhance_l8(penetration_result: dict) -> dict:
     layers = penetration_result.get("layers", {})
     scores = penetration_result.get("layer_scores", {})
     
-    # Find L8 key
+    # Find L8 key (v16.20: 修复——原"资金"匹配失败因为key是"L8_CapitalFlow")
     l8_key = None
     for k in layers:
-        if "L8" in k and "资金" in k:
+        if "L8" in k:
             l8_key = k
             break
     
@@ -25,13 +24,16 @@ def enhance_l8(penetration_result: dict) -> dict:
     # Get real-time data
     try:
         price_data, source_name = get_price(etf_code)
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError):
         return penetration_result
     
     if not price_data or price_data.price <= 0:
         return penetration_result
     
     l8_data = layers[l8_key]
+    # v16.20: layers值可能是float(score)而非dict, 需要兼容
+    if not isinstance(l8_data, dict):
+        l8_data = {}
     
     # Build enhanced L8 data
     amount_yi = price_data.amount / 1e8 if price_data.amount else 0

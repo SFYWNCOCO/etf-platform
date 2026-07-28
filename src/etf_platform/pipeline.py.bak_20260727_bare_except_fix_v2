@@ -1,0 +1,576 @@
+"""Unified L1-L13 penetration pipeline — no etf_system dependency."""
+from .config_loader import load_etfs
+
+
+def _score_from_risk(risk_level: float, base: float = 5.0, invert: bool = True, soft_floor: bool = True) -> float:
+    """Convert risk_level (0-1) to layer score (0-10).
+    invert=True: high risk → low score (safer ETF scores higher)
+    invert=False: high risk → high score (more volatile ETF scores higher)
+    soft_floor=True: floor at 1.0 for non-L1 layers.
+    soft_floor=False: no floor (for L1_ETF which must reflect true risk_level)."""
+    if invert:
+        val = (1.0 - risk_level) * 10
+    else:
+        val = risk_level * 10
+    if soft_floor:
+        val = max(1.0, val)
+    return round(min(10.0, val), 1)
+
+
+# ── Step helpers ────────────────────────────────────────────────
+
+def _init_base_scores(rl: float, profile: str) -> dict:
+    """Initial base scores from risk level + investor profile."""
+    if profile == "激进":
+        return {
+            "L1_ETF": _score_from_risk(rl, invert=False, soft_floor=False),
+            "L3_Material": _score_from_risk(rl, invert=True),
+            "L4_SupplyChain": _score_from_risk(rl, invert=True),
+            "L5_Tech": _score_from_risk(rl, invert=True),
+            "L6_Politics": _score_from_risk(rl, invert=True),
+            "L7_Irreplaceable": _score_from_risk(rl, invert=True),
+            "L8_CapitalFlow": _score_from_risk(rl, invert=False),
+            "L9_Signals": _score_from_risk(rl, invert=False),
+        }
+    return {
+        "L1_ETF": _score_from_risk(rl, invert=False, soft_floor=False),
+        "L3_Material": _score_from_risk(rl),
+        "L4_SupplyChain": _score_from_risk(rl),
+        "L5_Tech": _score_from_risk(rl),
+        "L6_Politics": _score_from_risk(rl),
+        "L7_Irreplaceable": _score_from_risk(rl),
+        "L8_CapitalFlow": _score_from_risk(rl),
+        "L9_Signals": _score_from_risk(rl),
+    }
+
+
+def _apply_material_bridge(scores: dict, code: str, sector: str) -> dict:
+    """Material/Personnel/Tech bridge (deep.py -> L3-L7)."""
+    try:
+        from .analysis.material_bridge import apply_to_layers
+        return apply_to_layers(code, scores, sector)
+    except (ImportError, AttributeError):
+        return scores
+
+
+def _apply_sector_scores(scores: dict, sector: str, rl: float) -> None:
+    """v5.5: Sector-informed L3-L7 scores replace risk_level derivation."""
+    try:
+        from .analysis.layer_sector_scores import get_sector_layer_scores
+        scores.update(get_sector_layer_scores(sector, rl))
+    except (ImportError, AttributeError):
+        try:
+            from .analysis.layer_factors import apply_factors
+            scores.update(apply_factors(sector, scores))
+    except (ImportError, AttributeError):
+            pass
+
+
+def _apply_multi_signal(scores: dict, code: str, sector: str, info: dict) -> None:
+    """v2.0: Multi-signal ETF-level diff (replaces v7.5 fee+type micro-adj)."""
+    try:
+        from .analysis.multi_signal_differentiator import differentiate
+        scores.update(differentiate(code, sector, scores, info))
+    except Exception:
+        pass
+
+
+def _apply_l2_holdings(scores: dict, code: str, sector: str, rl: float, fee: float) -> None:
+    """v5.5: L2 Holdings penetration."""
+    try:
+        from .analysis.l2_holdings_bridge import apply_l2_score
+        scores.update(apply_l2_score(code, sector, scores, risk_level=rl, fee=fee))
+    except Exception:
+        scores["L2_Holdings"] = 5.0
+
+
+def _apply_demand(scores: dict, sector: str, rl: float) -> None:
+    """Add demand layers (L10+L11)."""
+    try:
+        from .analysis.demand import score_demand_climate, score_sector_demand_risk
+        scores["L10_Demand"] = score_demand_climate(sector, risk_level=rl).get("score", 5.0)
+        scores["L11_SectorRisk"] = score_sector_demand_risk(sector, risk_level=rl).get("score", 5.0)
+    except Exception:
+        scores["L10_Demand"] = 5.0
+        scores["L11_SectorRisk"] = 5.0
+
+
+def _apply_macro_climate(scores: dict, sector: str) -> None:
+    """Macro climate adjustment for L10 demand."""
+    try:
+        from .analysis.macro_climate import apply_to_demand
+        scores["L10_Demand"] = apply_to_demand(sector, scores["L10_Demand"])
+    except Exception:
+        pass
+
+
+def _apply_chain_penalty(scores: dict, code: str) -> None:
+    """Chain risk adjustment for semiconductor/AI ETFs."""
+    try:
+        from .analysis.chain import evaluate_etf_risk
+        cr = evaluate_etf_risk(code)
+        if cr and cr.get("score", 0) >= 2.0:
+            penalty = min(cr["score"] * 0.2, 1.5)
+            for layer in ["L3_Material", "L4_SupplyChain", "L5_Tech", "L6_Politics"]:
+                scores[layer] = round(max(1.0, scores[layer] - penalty), 1)
+    except Exception:
+        pass
+
+
+def _apply_soft_floor(scores: dict) -> None:
+    """Soft floor for supply-side layers."""
+    SOFT_FLOOR = 2.0
+    for supply_layer in ["L3_Material", "L4_SupplyChain", "L5_Tech", "L6_Politics", "L7_Irreplaceable"]:
+        if supply_layer in scores and scores[supply_layer] < SOFT_FLOOR:
+            scores[supply_layer] = SOFT_FLOOR
+
+
+def _apply_sector_flow(scores: dict, info: dict, rl: float, code: str, sector: str = "") -> None:
+    """Sector flow bridge: real L8/L9 from Eastmoney fund flows."""
+    try:
+        from .analysis.sector_flow_bridge import get_bridge
+        bridge = get_bridge()
+        etf_type = info.get("type", "")
+        etf_fee = info.get("fee", 0.005)
+        flow_scores = bridge.score(sector, risk_level=rl, etf_type=etf_type, fee=etf_fee, etf_code=code)
+        scores["L8_CapitalFlow"] = flow_scores["L8"]
+        scores["L9_Signals"] = flow_scores["L9"]
+    except Exception:
+        pass
+
+
+def _apply_l12_political_risk(scores: dict, sector: str) -> None:
+    """L12 Political Risk (sector-based)."""
+    try:
+        from .analysis.political_risk import calculate_political_risk_score
+        pr_info = calculate_political_risk_score(sector)
+        scores["L12_PoliticalRisk"] = pr_info.get("adjusted_score", 5.0)
+    except Exception:
+        pass
+
+
+def _apply_l13_macro_cycle(scores: dict, sector: str, rl: float) -> dict:
+    """L13 MacroCycle — Kondratiev+Kuznets+Juglar (k001+k002)."""
+    cycle_info = {}
+    try:
+        from .layers.l12_macro_cycle import score_cycle_layer
+        cycle_info = score_cycle_layer(sector, rl)
+        scores["L13_MacroCycle"] = cycle_info["score"]
+    except Exception:
+        pass
+    return cycle_info
+
+
+def _apply_factor_momentum(scores: dict, sector: str) -> None:
+    """Factor momentum adjustment — Fama-French (k003)."""
+    try:
+        from .layers.l13_factor_loading import score_factor_adjustment
+        factor_adj = score_factor_adjustment(sector)
+        for layer in ["L5_Tech", "L7_Irreplaceable"]:
+            if layer in scores and isinstance(scores[layer], (int, float)):
+                scores[layer] = round(max(1.0, min(10.0, scores[layer] + factor_adj)), 1)
+    except Exception:
+        pass
+
+
+def _apply_stoic_risk(scores: dict, sector: str, rl: float) -> None:
+    """L14 Stoic Risk — dichotomy of control + negative visualization (k004)."""
+    try:
+        from .layers.l14_stoic_risk import score_stoic_layer
+        stoic = score_stoic_layer(sector, rl)
+        scores["L14_StoicRisk"] = stoic["score"]
+        if stoic.get("controllability", 5) >= 7:
+            scores["L1_ControllabilityBonus"] = 0.5
+    except Exception:
+        pass
+
+
+def _apply_state_similarity(scores: dict, sector: str) -> None:
+    """L15 State Similarity — market state recognition (k005)."""
+    try:
+        from .layers.l15_state_similarity import score_state_similarity
+        state = score_state_similarity(sector)
+        scores["L15_StateSim"] = state["score"]
+    except Exception:
+        pass
+
+
+def _apply_live_signals(scores: dict, sector: str = "", is_cross: bool = False) -> None:
+    """L16 Live Signals — premium/liquidity/quality (k006+k007+k008+k009)."""
+    try:
+        from .layers.l16_live_signals import get_live_signals
+        live = get_live_signals(sector, is_cross_border=is_cross)
+        scores["L16_LiveSignals"] = live["score"]
+    except Exception:
+        pass
+
+
+def _apply_quantitative_factor(scores: dict, sector: str) -> None:
+    """L17 Quantitative Factor — Fama-French + custom factors (akshare实证校准)."""
+    try:
+        from .layers.l17_quantitative_factor import apply_factor_layer
+        scores.update(apply_factor_layer(sector, scores))
+    except Exception:
+        scores["L17_Factor"] = 5.5
+
+
+def _apply_var_risk(scores: dict, sector: str) -> None:
+    """L18 VaR Risk — Value at Risk + stress testing (akshare波动率)."""
+    try:
+        from .layers.l18_var_risk import apply_var_layer
+        scores.update(apply_var_layer(sector, scores))
+    except Exception:
+        scores["L18_VaR"] = 5.5
+
+
+def _apply_fx_channel(scores: dict, sector: str, etf_type: str) -> None:
+    """L19 FX Channel — exchange rate impact on cross-border ETFs."""
+    try:
+        from .layers.l19_fx_channel import apply_fx_layer
+        scores.update(apply_fx_layer(sector, scores, etf_type))
+    except Exception:
+        scores["L19_FXChannel"] = 5.5
+
+
+def _apply_option_volatility(scores: dict, sector: str) -> None:
+    """L20 Option Volatility — implied vol + option strategy recommendation."""
+    try:
+        from .layers.l20_option_volatility import apply_option_layer
+        scores.update(apply_option_layer(sector, scores))
+    except Exception:
+        scores["L20_OptionVol"] = 5.5
+
+
+def _apply_behavioral_psychology(scores: dict, details: dict, sector: str, rl: float) -> None:
+    """L21 Behavioral Psychology — bias + overconfidence (k010)."""
+    try:
+        from .layers.l21_investment_psychology import score_l21_layers
+        l21 = score_l21_layers(sector, risk_level=rl)
+        scores["L21_Behavior"] = l21.get("score", 5.5)
+        if l21.get("bias_detail"):
+            details["L21_BiasDetail"] = l21["bias_detail"]
+    except Exception:
+        scores["L21_Behavior"] = 5.5
+        details["L21_BiasDetail"] = "unknown"
+
+
+def _apply_pendulum(scores: dict, details: dict, sector: str, rl: float) -> None:
+    """L22 Market Pendulum — fear/greed swing (k011)."""
+    try:
+        from .layers.l22_market_pendulum import score_pendulum_layer
+        pendulum = score_pendulum_layer(sector, risk_level=rl)
+        scores["L22_Pendulum"] = pendulum.get("score", 5.0)
+        if pendulum.get("detail"):
+            details["L22_Pendulum"] = pendulum["detail"]
+    except Exception:
+        scores["L22_Pendulum"] = 5.0
+
+
+def _apply_valuation(scores: dict, details: dict, code: str, sector: str, name: str, rl: float) -> None:
+    """L23 Valuation — PE/PB/dividend yield vs sector median."""
+    try:
+        from .layers.l23_valuation import compute_valuation_layer
+        val = compute_valuation_layer(code, sector, name, risk_level=rl)
+        scores["L23_Valuation"] = val.get("L23_Valuation", 5.0)
+        if val.get("L23_Detail"):
+            details["L23_Valuation"] = val["L23_Detail"]
+    except Exception:
+        scores["L23_Valuation"] = 5.0
+
+
+def _apply_microstructure(scores: dict, details: dict, sector: str, rl: float) -> None:
+    """L23 Microstructure — OBI/turnover anomaly (k012)."""
+    try:
+        from .layers.l23_microstructure import score_microstructure
+        micro = score_microstructure(sector, risk_level=rl)
+        scores["L23_Microstructure"] = micro.get("score", 5.0)
+        if micro.get("detail"):
+            details["L23_Microstructure"] = micro["detail"]
+    except Exception:
+        scores["L23_Microstructure"] = 5.0
+
+
+def _apply_dip_flow(scores: dict, details: dict, code: str, sector: str, rl: float, live: bool = False) -> None:
+    """L24 Dip Flow — premium/discount signal."""
+    try:
+        from .analysis.dip_monitor import score_dip_layer
+        from .analysis.premium_cache import get_premium_pct
+        premium_pct = get_premium_pct(code, sector=sector, live=live)
+        # live=False且缓存空时: 用L16行业溢价估计做fallback, 避免L24永远5.0
+        if premium_pct is None:
+            try:
+                from .layers.l16_live_signals import SECTOR_PREMIUM_ESTIMATES
+                premium_pct = SECTOR_PREMIUM_ESTIMATES.get(sector, SECTOR_PREMIUM_ESTIMATES.get("default", 0.0))
+            except Exception:
+                premium_pct = 0.0
+        dip = score_dip_layer(code=code, sector=sector, premium_pct=premium_pct)
+        scores["L24_DipFlow"] = dip.get("score", 5.0)
+        if dip.get("signal"):
+            details["L24_DipFlow"] = dip["signal"]
+    except Exception:
+        scores["L24_DipFlow"] = 5.0
+
+
+def _apply_regime_factor(scores: dict, details: dict, sector: str) -> None:
+    """L33 Regime Factor — dynamic factor alignment by QVIX regime."""
+    try:
+        from .layers.l33_regime_factor import score_l33_layer
+        regime = score_l33_layer(sector, qvix_regime="normal")
+        scores["L33_RegimeFactor"] = regime.get("score", 5.0)
+        if regime.get("detail"):
+            details["L33_Detail"] = regime["detail"]
+    except Exception:
+        scores["L33_RegimeFactor"] = 5.0
+
+
+def _apply_kb_catalyst(scores: dict, details: dict, sector: str) -> None:
+    """L34 KB Catalyst — 知识库催化剂信号层(k033/k053/k090/k092/k094/k098/k117/k118/k122/k123/k124/k125/k126/k260)."""
+    try:
+        from .layers.l34_kb_catalyst import score_l34_layer
+        catalyst = score_l34_layer(sector)
+        scores["L34_KBCatalyst"] = catalyst.get("score", 5.0)
+        if catalyst.get("detail"):
+            details["L34_CatalystDetail"] = catalyst["detail"]
+    except Exception:
+        scores["L34_KBCatalyst"] = 5.0
+
+
+def _apply_liquidity_arbitrage(scores: dict, details: dict, etf_type: str, sector: str) -> None:
+    """L25 Liquidity & Arbitrage — ETF流动性与套利机制(k261)."""
+    try:
+        from .layers.l25_liquidity_arbitrage import score_l25_layer
+        liq = score_l25_layer(etf_type=etf_type, sector=sector)
+        scores["L25_LiquidityArb"] = liq.get("score", 5.0)
+        if liq.get("detail"):
+            details["L25_LiquidityDetail"] = liq["detail"]
+    except Exception:
+        scores["L25_LiquidityArb"] = 5.0
+
+
+def _apply_volatility_regime(scores: dict, details: dict, sector: str) -> None:
+    """L26 Volatility Regime — 波动率制度+GARCH信号(k063+k091)."""
+    try:
+        from .layers.l26_volatility_regime import score_l26_layer
+        vol = score_l26_layer(sector=sector)
+        scores["L26_VolRegime"] = vol.get("score", 5.0)
+        if vol.get("detail"):
+            details["L26_VolDetail"] = vol["detail"]
+    except Exception:
+        scores["L26_VolRegime"] = 5.0
+
+
+def _apply_factor_smart_beta(scores: dict, details: dict, sector: str, regime: str = "sideways") -> None:
+    """L27 Factor Smart Beta — 因子投资与Smart Beta(k042+k229)."""
+    try:
+        from .layers.l27_factor_smart_beta import score_l27_layer
+        factor = score_l27_layer(sector=sector, regime=regime)
+        scores["L27_FactorBeta"] = factor.get("score", 5.0)
+        if factor.get("detail"):
+            details["L27_FactorDetail"] = factor["detail"]
+    except Exception:
+        scores["L27_FactorBeta"] = 5.0
+
+
+def _compute_composite_score(scores: dict) -> float:
+    """Weighted composite: exclude bonus/non-score keys, fall back to arithmetic mean."""
+    EXCLUDE_KEYS = {"L1_ControllabilityBonus", "L21_BiasDetail", "L22_Detail",
+                    "L23_ValuationDetail", "L23_MicrostructureDetail",
+                    "L24_DipFlow", "L24_DipSignal", "L33_Detail",
+                    "L34_CatalystDetail", "L25_LiquidityDetail",
+                    "L26_VolDetail", "L27_FactorDetail"}
+    numeric = {k: v for k, v in scores.items()
+               if k not in EXCLUDE_KEYS and isinstance(v, (int, float))}
+    if not numeric:
+        return 0.0
+    # Equal-weight composite (pipeline doesn't own screener's variance-based weights)
+    return round(sum(numeric.values()) / len(numeric), 2)
+
+
+def _build_result(code: str, name: str, sector: str, info: dict, rl: float,
+                  scores: dict, cycle_info: dict, profile: str,
+                  layer_details: dict) -> dict:
+    """Assemble final result dictionary."""
+    composite = _compute_composite_score(scores)
+    return {
+        "etf_code": code,
+        "name": name,
+        "sector": sector,
+        "type": info.get("type", ""),
+        "leverage": info.get("leverage", 1.0),
+        "risk_level": rl,
+        "layer_scores": scores,
+        "layer_details": layer_details,
+        "layers": {},
+        "cycle_info": cycle_info,
+        "pipeline_version": "1.3.0-MAPREDUCE+DEBATE",
+        "score": round(sum(v for v in scores.values() if isinstance(v, (int, float))) / max(len(scores), 1), 1),
+        "composite_score": composite,
+        "profile": profile,
+    }
+
+
+def _enhance_news(scores: dict, code: str) -> None:
+    """L9 News enhancement (always attempt — sector-cached, fast)."""
+    try:
+        from .enhance.l9_news import enhance_l9
+        result = enhance_l9({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
+        scores.update(result.get("layer_scores", {}))
+    except Exception:
+        pass
+
+
+def _enhance_realtime(scores: dict, code: str) -> None:
+    """L8 Live enhancement (real-time price data — only when live=True)."""
+    try:
+        from .enhance.l8_realtime import enhance_l8
+        result = enhance_l8({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
+        scores.update(result.get("layer_scores", {}))
+    except Exception:
+        pass
+
+
+def _run_live_adjustments(scores: dict, sector: str) -> None:
+    """Live data adjustments."""
+    try:
+        from .analysis.layer_live_adjustments import apply_live_adjustments
+        scores.update(apply_live_adjustments(sector, scores))
+    except Exception:
+        pass
+
+
+# ═══════════════════════════════════════
+# Public API
+# ═══════════════════════════════════════
+
+def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
+    """Run full 30+ layer penetration pipeline for a single ETF code."""
+    etfs = load_etfs()
+    info = etfs.get(code, {})
+    if not info:
+        return {"etf_code": code, "error": "ETF not found", "layer_scores": {}}
+
+    rl = info.get("risk_level", 0.5)
+    sector = info.get("sector", "未知行业")
+    name = info.get("name", code)
+
+    # Step 1: Initialize base scores
+    scores = _init_base_scores(rl, profile)
+    layer_details: dict = {}
+
+    # Step 2: Bridge layers (material, sector, multi-signal, L2 holdings)
+    scores = _apply_material_bridge(scores, code, sector)
+    _apply_sector_scores(scores, sector, rl)
+    _apply_multi_signal(scores, code, sector, info)
+    _apply_l2_holdings(scores, code, sector, rl, info.get("fee", 0.005))
+
+    # Step 3: Demand + macro climate
+    _apply_demand(scores, sector, rl)
+    _apply_macro_climate(scores, sector)
+
+    # Step 4: Chain risk penalty
+    _apply_chain_penalty(scores, code)
+
+    # Step 5: Material bridge second pass
+    scores = _apply_material_bridge(scores, code, sector)
+
+    # Step 6: Live data adjustments
+    _run_live_adjustments(scores, sector)
+
+    # Step 7: Soft floor
+    _apply_soft_floor(scores)
+
+    # Step 8: Sector flow bridge (L8/L9)
+    _apply_sector_flow(scores, info, rl, code, sector)
+
+    # Step 9: Layers L12-L15
+    _apply_l12_political_risk(scores, sector)
+    cycle_info = _apply_l13_macro_cycle(scores, sector, rl)
+    _apply_factor_momentum(scores, sector)
+    _apply_stoic_risk(scores, sector, rl)
+    _apply_state_similarity(scores, sector)
+
+    # Step 10: L16 Live Signals
+    is_cross = "QDII" in info.get("type", "") or info.get("access") == "qdii"
+    _apply_live_signals(scores, sector, is_cross)
+
+    # Step 11: Layers L17-L20
+    _apply_quantitative_factor(scores, sector)
+    _apply_var_risk(scores, sector)
+    _apply_fx_channel(scores, sector, info.get("type", ""))
+    _apply_option_volatility(scores, sector)
+
+    # Step 12: Layers L21-L24 + L33 + L25-L27 (KB-driven)
+    _apply_behavioral_psychology(scores, layer_details, sector, rl)
+    _apply_pendulum(scores, layer_details, sector, rl)
+    _apply_valuation(scores, layer_details, code, sector, name, rl)
+    _apply_microstructure(scores, layer_details, sector, rl)
+    _apply_dip_flow(scores, layer_details, code, sector, rl, live=live)
+    _apply_regime_factor(scores, layer_details, sector)
+    _apply_kb_catalyst(scores, layer_details, sector)
+    _apply_liquidity_arbitrage(scores, layer_details, info.get("type", ""), sector)
+    _apply_volatility_regime(scores, layer_details, sector)
+    _apply_factor_smart_beta(scores, layer_details, sector, regime=cycle_info.get("regime", "sideways"))
+
+    # Step 13: Enhancements
+    _enhance_news(scores, code)
+    if live:
+        _enhance_realtime(scores, code)
+
+    # Step 14: Build result
+    return _build_result(code, name, sector, info, rl, scores, cycle_info, profile, layer_details)
+
+
+def format_full(result: dict) -> str:
+    """Format full pipeline layers as text report."""
+    code = result.get("etf_code", "?")
+    name = result.get("name", code)
+    sector = result.get("sector", "?")
+    scores = result.get("layer_scores", {})
+    lines = [
+        f"ETF: {code} {name}",
+        f"Sector: {sector} | Risk: {result.get('risk_level', '?')}",
+        f"Composite: {result.get('composite_score', result.get('score', 0)):.2f}/10",
+        "-" * 40,
+    ]
+    for k, v in sorted(scores.items()):
+        lines.append(f"  {k}: {v}")
+    return "\n".join(lines)
+
+
+def batch_full(limit: int = 50, sort_by: str = "score", codes: list = None,
+               live: bool = False, profile: str = "均衡",
+               skip_tournament: bool = True, parallel: bool = False,
+               max_workers: int = 6) -> list:
+    """Batch run for multiple ETFs with full 30+ layer pipeline.
+    
+    Args:
+        parallel: If True, run ETFs concurrently via ThreadPoolExecutor.
+        max_workers: Max concurrent pipeline runs (default 6, safe for HTTP-bound layers).
+    """
+    etfs = load_etfs()
+    if codes:
+        target = codes
+    else:
+        target = [c for c in etfs if c.isdigit()][:limit]
+
+    def _run_one(code: str) -> dict:
+        try:
+            return run_full(code, live=live, profile=profile)
+        except Exception:
+            return {"etf_code": code, "error": "pipeline_failed", "layer_scores": {}}
+
+    if parallel and len(target) > 3:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        results = []
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(target))) as ex:
+            futures = {ex.submit(_run_one, code): code for code in target}
+            for f in as_completed(futures):
+                r = f.result()
+                if not r.get("error"):
+                    results.append(r)
+    else:
+        results = [_run_one(code) for code in target]
+
+    if sort_by == "score":
+        results.sort(key=lambda x: x.get("score", 0), reverse=True)
+    return results

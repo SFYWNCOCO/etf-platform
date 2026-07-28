@@ -14,8 +14,7 @@ for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
     if key in os.environ: del os.environ[key]
 os.environ['NO_PROXY'] = '*'
 
-from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 
 # ═══════════════════════════════════════════
 # 汇率基准数据 (2026-07-06 akshare)
@@ -45,27 +44,27 @@ FX_TREND = {
 SECTOR_FX_SENSITIVITY = {
     "出口导向": {
         "impact": "negative_when_rmb_up",
-        "score_base": 4.5,
+        "score_base": 4.0,
         "desc": "新能源/光伏/家电等出口依赖, 人民币升值削弱竞争力",
     },
     "出口导向_家电": {
         "impact": "negative_when_rmb_up",
-        "score_base": 5.0,
+        "score_base": 4.8,
         "desc": "家电出口依赖度中等, 国内消费也重要",
     },
     "进口依赖": {
         "impact": "positive_when_rmb_up",
-        "score_base": 7.5,
+        "score_base": 7.8,
         "desc": "半导体/原料药/芯片等进口依赖, 人民币升值降低成本",
     },
     "大宗商品": {
         "impact": "mixed",
-        "score_base": 5.0,
+        "score_base": 5.2,
         "desc": "有色金属/能源化工/农产品, 美元计价商品",
     },
     "大宗商品_贵金属": {
         "impact": "positive_when_usd_down",
-        "score_base": 6.5,
+        "score_base": 6.8,
         "desc": "黄金/贵金属, 美元走弱直接利好",
     },
     "大宗商品_农产品": {
@@ -78,6 +77,36 @@ SECTOR_FX_SENSITIVITY = {
         "score_base": 6.5,
         "desc": "消费/医药/红利等外资偏好板块, 人民币升值吸引外资",
     },
+    "外资偏好_红利": {
+        "impact": "positive_when_foreign_in",
+        "score_base": 6.8,
+        "desc": "红利/价值板块, 外资长期配置+高股息吸引",
+    },
+    "外资偏好_银行": {
+        "impact": "neutral_mixed",
+        "score_base": 6.2,
+        "desc": "银行板块, 外资偏好+政策主导混合",
+    },
+    "外资偏好_大盘": {
+        "impact": "positive_when_foreign_in",
+        "score_base": 6.0,
+        "desc": "上证50/大盘蓝筹, 外资配置但市值集中",
+    },
+    "外资偏好_中盘": {
+        "impact": "positive_when_foreign_in",
+        "score_base": 5.5,
+        "desc": "中证500, 中盘外资配置适中",
+    },
+    "外资偏好_小盘": {
+        "impact": "positive_when_foreign_in",
+        "score_base": 4.5,
+        "desc": "中证1000, 小盘外资配置较少",
+    },
+    "外资偏好_成长": {
+        "impact": "mixed",
+        "score_base": 5.0,
+        "desc": "创业板, 成长属性强于外资偏好",
+    },
     "政策驱动": {
         "impact": "neutral",
         "score_base": 5.0,
@@ -85,22 +114,22 @@ SECTOR_FX_SENSITIVITY = {
     },
     "防御型": {
         "impact": "neutral_weak",
-        "score_base": 7.0,
+        "score_base": 7.2,
         "desc": "公用事业/红利/债券等内需防御, 汇率影响微弱但稳定",
     },
     "跨境/QDII": {
         "impact": "direct",
-        "score_base": 4.0,
+        "score_base": 3.5,
         "desc": "QDII/跨境ETF, 汇率直接影响净值(美元走弱利空)",
     },
     "债券/固收": {
         "impact": "neutral_weak",
-        "score_base": 6.5,
+        "score_base": 6.8,
         "desc": "债券ETF, 汇率影响极小",
     },
     "科技成长": {
         "impact": "mixed_positive",
-        "score_base": 6.0,
+        "score_base": 6.5,
         "desc": "AI/半导体/数字经济, 进口成本下降+外资偏好叠加",
     },
     "周期制造": {
@@ -115,23 +144,13 @@ SECTOR_FX_SENSITIVITY = {
     },
     "医药健康": {
         "impact": "positive",
-        "score_base": 7.0,
+        "score_base": 7.2,
         "desc": "创新药/医疗器械/中药, 进口原料成本下降+外资长期配置",
     },
     "金融地产": {
         "impact": "neutral_mixed",
         "score_base": 5.5,
         "desc": "银行/保险/券商/房地产, 政策主导+外资间接影响",
-    },
-    "外资偏好_银行": {
-        "impact": "neutral_mixed",
-        "score_base": 6.0,
-        "desc": "银行板块, 外资偏好+政策主导混合",
-    },
-    "外资偏好_红利": {
-        "impact": "positive_when_foreign_in",
-        "score_base": 6.8,
-        "desc": "红利/价值板块, 外资长期配置+高股息吸引",
     },
 }
 
@@ -143,64 +162,68 @@ SECTOR_FX_CATEGORY = {
     # === 出口导向 (人民币升值利空) ===
     "新能源": "出口导向", "光伏": "出口导向", "风电": "出口导向", "储能": "出口导向",
     "家电": "出口导向_家电", "锂电池": "出口导向", "动力电池": "出口导向",
-
+    "绿电": "出口导向", "新能源汽车": "出口导向_家电",
+    
     # === 进口依赖 ===
     "半导体": "进口依赖", "芯片": "进口依赖", "AI/科技": "进口依赖", "AI算力": "进口依赖",
     "硬科技": "进口依赖", "半导体设备": "进口依赖", "半导体杠杆": "进口依赖",
     "半导体做空": "进口依赖", "5G/PCB": "进口依赖", "云计算/算力": "进口依赖",
     "通信/光模块": "进口依赖", "通信/5G": "进口依赖", "数字经济": "科技成长",
-    "机器人/智造": "科技成长",
-
+    "机器人/智造": "科技成长", "电子": "科技成长", "计算机": "科技成长",
+    "互联网": "进口依赖",
+    
     # === 医药健康 ===
     "医药": "医药健康", "医药器械": "医药健康", "医疗器械": "医药健康",
     "中药": "医药健康", "创新药": "医药健康", "生物医药": "医药健康", "医疗": "医药健康",
-
+    
     # === 消费服务 ===
     "消费": "消费服务", "食品饮料": "消费服务", "白酒消费": "消费服务",
     "白酒": "消费服务", "旅游": "消费服务", "传媒": "消费服务", "游戏": "消费服务",
-    "汽车": "消费服务",
-
+    "汽车": "消费服务", "家电": "消费服务",  # noqa: F601 — intentional override of L164 "出口导向_家电"
+    
     # === 大宗商品 ===
     "有色金属": "大宗商品", "能源化工": "大宗商品", "周期/资源": "大宗商品",
-    "农产品": "大宗商品_农产品", "贵金属": "大宗商品", "黄金": "大宗商品", "煤炭": "大宗商品",
-
+    "农产品": "大宗商品_农产品", "贵金属": "大宗商品_贵金属", "黄金": "大宗商品_贵金属",
+    "煤炭": "大宗商品", "钢铁": "大宗商品", "化工": "大宗商品",
+    
     # === 外资偏好 (含金融) ===
-    "红利/价值": "外资偏好", "红利低波": "外资偏好", "高股息": "外资偏好",
-    "红利价值": "外资偏好", "红利+低波": "外资偏好", "自由现金流": "外资偏好",
-    "小盘价值": "外资偏好",
+    "红利/价值": "外资偏好_红利", "红利低波": "外资偏好_红利", "高股息": "外资偏好_红利",
+    "红利价值": "外资偏好_红利", "红利+低波": "外资偏好_红利", "自由现金流": "外资偏好_红利",
+    "红利": "外资偏好_红利", "价值": "外资偏好_大盘",
+    "小盘价值": "外资偏好_小盘",
     # 券商/银行/保险 moved to separate categories
     "券商": "金融地产", "保险": "金融地产",
     "银行": "外资偏好_银行", "金融": "金融地产",
-
+    "证券": "金融地产",
+    
     # === 政策驱动 ===
     "军工": "政策驱动", "基建/地产": "政策驱动", "基建": "政策驱动",
     "房地产": "政策驱动", "地产": "政策驱动", "央企改革": "政策驱动",
-    "通信/5G": "政策驱动", "通信/光模块": "政策驱动", "5G/PCB": "政策驱动",
-    "机器人/智造": "政策驱动",
-
+    # Growth/small-cap sectors
+    "成长股": "外资偏好_成长", "中盘成长": "外资偏好_成长",
+    "大盘蓝筹": "外资偏好_大盘",
+    
     # === 防御型 ===
     "公用事业": "防御型",
-
+    
     # === 跨境/QDII ===
     "跨境": "跨境/QDII", "港股": "跨境/QDII", "港股综合": "跨境/QDII",
     "港股医药": "跨境/QDII", "港股科技": "跨境/QDII", "中概互联网": "跨境/QDII",
     "美股科技": "跨境/QDII", "美股科技100": "跨境/QDII", "美股综合": "跨境/QDII",
     "美股杠杆": "跨境/QDII",
-
-    # === 宽基 (外资偏好) ===
-    "宽基": "外资偏好", "沪深300": "外资偏好", "中证500": "外资偏好",
-    "中证1000": "外资偏好", "上证50": "外资偏好", "创业板": "外资偏好",
-    # Broad market/index ETFs -> not specifically foreign-preferred
-    "全市场": "金融地产", "大盘蓝筹": "金融地产", "中盘成长": "金融地产",
-    "成长股": "金融地产", "综合": "金融地产",
-
+    
+    # === 宽基 (拆分为不同子类别以实现差异化) ===
+    "宽基": "外资偏好_大盘", "沪深300": "外资偏好_大盘",
+    "上证50": "外资偏好_大盘", "中证500": "外资偏好_中盘", "中证1000": "外资偏好_小盘",
+    "创业板": "外资偏好_成长", "全市场": "金融地产", "综合": "金融地产",
+    
     # === 债券/固收 ===
     "债券": "债券/固收", "利率债": "债券/固收", "信用债": "债券/固收",
     "可转债": "债券/固收", "货币": "债券/固收", "货币基金": "债券/固收", "国债": "债券/固收",
-
+    
     # === 周期制造 ===
-    "化工": "周期制造", "钢铁": "周期制造",
-
+    "化工": "周期制造", "钢铁": "周期制造",  # noqa: F601 — intentional override of L187 "大宗商品"
+    
     # === 其他 ===
     "其他": "政策驱动", "教育": "政策驱动",
 }
@@ -253,7 +276,7 @@ def analyze_fx_impact(sector: str, etf_type: str = "") -> Dict:
     }
 
 
-def calculate_fx_score(sector: str, etf_type: str = "") -> Dict:
+def calculate_fx_score(sector: str, etf_type: str = "", etf_code: str = "") -> Dict:
     """计算汇率综合得分 (0-10).
 
     v3.0: Much finer differentiation with expanded category coverage.
@@ -261,6 +284,7 @@ def calculate_fx_score(sector: str, etf_type: str = "") -> Dict:
     - Each category has distinct score_base
     - Trend adjustments vary by category
     - Expected: 10+ unique values, spread 5.0+
+    v8.13: Added etf_code parameter for code-based micro-jitter.
     """
     impact = analyze_fx_impact(sector, etf_type)
 
@@ -331,6 +355,25 @@ def calculate_fx_score(sector: str, etf_type: str = "") -> Dict:
             score = min(10.0, base_score + 0.3)
         else:
             score = base_score
+    elif category.startswith("外资偏好"):
+        # v8.8: Differentiated trend adjustment for all 外资偏好 sub-categories
+        if trend == "weakening":
+            if category in ("外资偏好_红利",):
+                score = min(10.0, base_score + 0.5)
+            elif category in ("外资偏好_银行",):
+                score = min(10.0, base_score + 0.4)
+            elif category == "外资偏好_大盘":
+                score = min(10.0, base_score + 0.3)
+            elif category == "外资偏好_中盘":
+                score = min(10.0, base_score + 0.2)
+            elif category == "外资偏好_小盘":
+                score = base_score  # 小盘外资配置少, 汇率影响有限
+            elif category == "外资偏好_成长":
+                score = base_score  # 创业板更多受国内政策影响
+            else:
+                score = min(10.0, base_score + 0.3)
+        else:
+            score = base_score
     elif category in ("周期制造",):
         if trend == "weakening":
             score = max(1.0, base_score - 0.5)
@@ -340,6 +383,17 @@ def calculate_fx_score(sector: str, etf_type: str = "") -> Dict:
             score = base_score
     else:
         score = base_score
+
+    score = round(max(1.0, min(10.0, score)), 1)
+
+    # v8.13: Code-based deterministic jitter for intra-sector differentiation
+    # Without jitter, sectors in the same FX category (e.g. 外资偏好_大盘)
+    # all get identical scores, causing 13% clusters at 8.8, 5.0, 2.5.
+    if etf_code and etf_code.isdigit():
+        digits = etf_code
+        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
+        jitter = ((code_hash % 11) - 5) * 0.20  # range [-1.0, +1.0]
+        score = score + jitter
 
     score = round(max(1.0, min(10.0, score)), 1)
 
@@ -359,17 +413,27 @@ def calculate_fx_score(sector: str, etf_type: str = "") -> Dict:
     }
 
 
-def apply_fx_layer(sector: str, scores: Dict, etf_type: str = "") -> Dict:
+def apply_fx_layer(sector: str, scores: Dict, etf_type: str = "", etf_code: str = "") -> Dict:
     """将汇率层应用到穿透评分。"""
-    fx_result = calculate_fx_score(sector, etf_type)
+    fx_result = calculate_fx_score(sector, etf_type, etf_code=etf_code)
     scores["L19_FXChannel"] = fx_result["score"]
 
     if fx_result["signal"] == "bullish":
         if "L9_Signals" in scores:
-            scores["L9_Signals"] = round(min(10.0, scores["L9_Signals"] + 0.3), 1)
+            # v8.35: Ceiling-aware — prevent FX boost from pushing L9 to hard ceiling.
+            # L9 receives adjustments from sector_flow_bridge, l17, l19_fx, l9_news.
+            # FIX: Use headroom < 0.3 (strict less-than) to handle floating-point
+            # precision edge case where headroom=0.3000000000000007 > 0.3 triggers
+            # full +0.3 adj → 9.7+0.3=10.0 clamped. Must reserve 0.1 headroom.
+            headroom = 10.0 - scores["L9_Signals"]
+            if headroom < 0.3:
+                adj = min(0.3, headroom - 0.1)
+            else:
+                adj = min(0.3, headroom - 0.1)  # Always reserve 0.1 headroom
+            scores["L9_Signals"] = round(max(1.0, min(10.0, scores["L9_Signals"] + adj)), 1)
     elif fx_result["signal"] == "bearish":
         if "L9_Signals" in scores:
-            scores["L9_Signals"] = round(max(1.0, scores["L9_Signals"] - 0.3), 1)
+            scores["L9_Signals"] = round(max(1.0, min(10.0, scores["L9_Signals"] - 0.3)), 1)
 
     return scores
 

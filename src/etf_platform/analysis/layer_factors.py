@@ -7,8 +7,6 @@ sector-archetype multipliers to each layer based on industry characteristics.
 No API dependency - works purely from sector classification.
 Applied AFTER base _score_from_risk but BEFORE material_bridge.
 """
-import json, io
-from pathlib import Path
 
 # Sector -> {layer: multiplier} where 1.0 is neutral
 # >1.0 = this sector gets a BUMP on this layer (e.g., tech sector -> L5 boosted)
@@ -96,7 +94,17 @@ def apply_factors(sector: str, base_scores: dict) -> dict:
     for lk, fk in zip(layer_keys, factor_keys):
         if lk in adjusted:
             mult = factors.get(fk, 1.0)
-            adjusted[lk] = round(max(1.0, min(10.0, adjusted[lk] * mult)), 1)
+            raw = adjusted[lk] * mult
+            # v7.5: Cap factor multiplication to prevent ceiling saturation
+            # If raw exceeds 10.0, use linear interpolation instead of clamp
+            # This preserves differentiation between high-scoring ETFs
+            if raw > 10.0:
+                # Scale down proportionally: map [base, base*mult] → [base, 10.0]
+                # This way a 1.15x factor on 9.2 → 9.8 instead of clamped 10.0
+                ratio = 10.0 / raw
+                adjusted[lk] = round(max(1.0, min(10.0, raw * ratio)), 1)
+            else:
+                adjusted[lk] = round(max(1.0, min(10.0, raw)), 1)
 
     return adjusted
 

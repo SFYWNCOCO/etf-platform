@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 l18_var_risk.py — VaR风控层 (v1.0)
 
@@ -14,14 +17,21 @@ VaR计算方法:
   - 剧烈下跌: -10%
   - 尾部风险: -20% (黑天鹅)
 """
-import os
-for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
-    if key in os.environ: del os.environ[key]
-os.environ['NO_PROXY'] = '*'
-
 import math
-from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
+
+# v9.0: Stress test thresholds loaded from config/risk.yaml with built-in defaults.
+try:
+    from ..config_loader import load_risk
+    _risk_cfg = load_risk()
+    _STRESS_MILD = float(_risk_cfg.get("stress_mild", -0.05))
+    _STRESS_SEVERE = float(_risk_cfg.get("stress_severe", -0.10))
+    _STRESS_TAIL = float(_risk_cfg.get("stress_tail", -0.20))
+except Exception as e:
+    logger.warning("[l18_var] load_risk_config failed: %s", e)
+    _STRESS_MILD = -0.05
+    _STRESS_SEVERE = -0.10
+    _STRESS_TAIL = -0.20
 
 # ═══════════════════════════════════════════
 # ETF波动率基准 (基于akshare实时数据 2026-07-06)
@@ -42,11 +52,16 @@ VOLATILITY_BENCHMARK = {
     "上证50": {"annual_vol": 0.18, "var_95": -0.017, "var_99": -0.027, "desc": "大盘价值"},
     
     # 行业ETF波动率基准
+    # 注: annual_vol 基于实测历史波动率, 与 etfs.yaml 的 risk_level(综合风险评级)是不同维度
+    # 半导体 risk_level=0.65-0.72 是综合评级(含政策/集中度风险), annual_vol=0.35 是历史波动率
     "半导体": {"annual_vol": 0.35, "var_95": -0.035, "var_99": -0.045, "desc": "高波+强动量"},
     "创新药": {"annual_vol": 0.30, "var_95": -0.030, "var_99": -0.040, "desc": "高波+领涨"},
     "新能源": {"annual_vol": 0.32, "var_95": -0.032, "var_99": -0.042, "desc": "产能过剩"},
     "红利低波": {"annual_vol": 0.15, "var_95": -0.015, "var_99": -0.022, "desc": "低波+防御"},
     "券商": {"annual_vol": 0.42, "var_95": -0.042, "var_99": -0.055, "desc": "最高波+牛市旗手"},
+    "银行": {"annual_vol": 0.25, "var_95": -0.025, "var_99": -0.035, "desc": "中低波+稳健"},
+    "保险": {"annual_vol": 0.28, "var_95": -0.028, "var_99": -0.038, "desc": "中等波+利率敏感"},
+    "金融科技": {"annual_vol": 0.38, "var_95": -0.038, "var_99": -0.050, "desc": "高波+科技属性"},
     
     # Additional benchmarks for expanded sector coverage
     "港股": {"annual_vol": 0.28, "var_95": -0.028, "var_99": -0.038, "desc": "离岸市场, 流动性风险"},
@@ -77,8 +92,11 @@ SECTOR_TO_VOL_KEY = {
     "红利低波": "红利低波", "红利": "红利低波", "价值": "红利低波",
     "红利/价值": "红利低波", "红利价值": "红利低波", "高股息": "红利低波",
     "红利+低波": "红利低波", "自由现金流": "红利低波", "小盘价值": "红利低波",
-    # Finance/Broker
-    "券商": "券商", "证券": "券商", "金融": "券商", "保险": "券商", "银行": "券商",
+    # Finance/Broker (v7.9: split into sub-categories for differentiation)
+    "券商": "券商", "证券": "券商", 
+    "银行": "银行", "金融": "银行", 
+    "保险": "保险",
+    "金融科技": "金融科技", "金融科技ETF": "金融科技",
     # Broad market
     "宽基": "宽基", "沪深300": "沪深300", "中证500": "中证500",
     "中证1000": "中证1000", "上证50": "上证50", "创业板": "中证500",
@@ -146,10 +164,10 @@ def calculate_var(sector: str, confidence: float = 0.95) -> Dict:
     var_5d = var_1d * math.sqrt(5)
     var_20d = var_1d * math.sqrt(20)
     
-    # 压力测试
-    stress_mild = -0.05       # 温和下跌 -5%
-    stress_severe = -0.10     # 剧烈下跌 -10%
-    stress_tail = -0.20       # 尾部风险 -20%
+    # 压力测试 (v9.0: thresholds loaded from config/risk.yaml)
+    stress_mild = _STRESS_MILD       # 温和下跌 -5%
+    stress_severe = _STRESS_SEVERE   # 剧烈下跌 -10%
+    stress_tail = _STRESS_TAIL       # 尾部风险 -20%
     
     # 组合影响 (假设ETF占组合30%)
     portfolio_impact = {
@@ -171,7 +189,7 @@ def calculate_var(sector: str, confidence: float = 0.95) -> Dict:
     }
 
 
-def calculate_var_score(sector: str) -> Dict:
+def calculate_var_score(sector: str, etf_code: str = "") -> Dict:
     """
     计算VaR综合得分 (0-10)。
     
@@ -179,6 +197,7 @@ def calculate_var_score(sector: str) -> Dict:
     - VaR越低 (绝对值), 得分越高
     - 波动率越低, 得分越高
     - 压力测试表现越好, 得分越高
+    - v8.12: Added code-based jitter for intra-bucket differentiation
     
     Returns: {
         "score": 0-10,
@@ -188,34 +207,61 @@ def calculate_var_score(sector: str) -> Dict:
     """
     var_data = calculate_var(sector)
     
-    # 综合评分
-    # VaR(95%) 贡献40%, 波动率贡献30%, 压力测试贡献30%
-    var_score = max(0, min(10, 10 - abs(var_data["var_1d"]) * 2))
-    vol_score = max(0, min(10, 10 - var_data["annual_vol"] * 0.25))
-    stress_score = max(0, min(10, 10 - var_data["annual_vol"] * 0.15))
+    # 综合评分 — v8.8: Finer granularity to break up clustering
+    # Old formula: 10 - abs(var_1d)*2 → coarse steps of ~0.2-0.5 between sectors
+    # New formula: piecewise linear with finer resolution at low-vol range
+    # v8.12: Added code-based jitter to differentiate ETFs in same vol bucket
+    vol = var_data["annual_vol"]  # e.g., 15.0, 35.0
+    # Map vol [3, 42] → score [9.0, 1.5] using piecewise
+    if vol <= 15:
+        var_score = 9.0 - (vol - 3) / 12 * 2.0  # 9.0 → 7.0
+    elif vol <= 25:
+        var_score = 7.0 - (vol - 15) / 10 * 2.0  # 7.0 → 5.0
+    elif vol <= 35:
+        var_score = 5.0 - (vol - 25) / 10 * 2.0  # 5.0 → 3.0
+    else:
+        var_score = 3.0 - (vol - 35) / 7 * 1.5  # 3.0 → 1.5
+    var_score = max(1.0, min(10.0, var_score))
+    
+    vol_score = var_score * 0.9 + 0.3  # slightly tighter
+    stress_score = var_score * 0.8 + 0.6  # even tighter
     
     composite = var_score * 0.4 + vol_score * 0.3 + stress_score * 0.3
     
-    # 风险等级
-    if var_data["annual_vol"] < 0.20:
+    # v8.12/v8.17: Code-based deterministic jitter for intra-bucket differentiation
+    # Same ETF always gets same jitter, but different ETFs in same bucket get different offsets
+    # v8.15: Fixed hash randomization (Python hash() is randomized across processes).
+    # Also fixed low-entropy digit-sum hash — replaced with polynomial rolling hash
+    # that spreads 6-digit codes across full [−0.45, +0.45] range.
+    # v8.17: Increased jitter range from ±0.45 to ±0.9 to break through 4-unique clustering.
+    # v9.0: Extracted to utils.hash_jitter.code_jitter (DRY with L14)
+    from ..utils.hash_jitter import code_jitter
+    jitter = code_jitter(etf_code, 0.9)
+    composite = composite + jitter
+    
+    composite = round(max(1.0, min(10.0, composite)), 1)
+    
+    # 风险等级 (var_data["annual_vol"] 是百分比, 如 35.0)
+    if var_data["annual_vol"] < 20:
         risk_level = "low"
-    elif var_data["annual_vol"] < 0.30:
+    elif var_data["annual_vol"] < 30:
         risk_level = "medium"
-    elif var_data["annual_vol"] < 0.40:
+    elif var_data["annual_vol"] < 40:
         risk_level = "high"
     else:
         risk_level = "extreme"
     
     return {
-        "score": round(composite, 1),
+        "score": composite,
         "var_data": var_data,
         "risk_level": risk_level,
+        "jitter": round(jitter, 3),
     }
 
 
-def apply_var_layer(sector: str, scores: Dict) -> Dict:
+def apply_var_layer(sector: str, scores: Dict, etf_code: str = "") -> Dict:
     """将VaR层应用到穿透评分。"""
-    var_result = calculate_var_score(sector)
+    var_result = calculate_var_score(sector, etf_code=etf_code)
     scores["L18_VaR"] = var_result["score"]
     
     # 高风险ETF → 降低L1_ETF得分
@@ -264,9 +310,15 @@ if __name__ == "__main__":
     print(get_var_summary())
     
     for sector in ["半导体", "创新药", "红利低波", "券商", "中证500"]:
-        result = calculate_var_score(sector)
+        result = calculate_var_score(sector, etf_code="")
         print(f"\n{sector}:")
         print(f"  VaR得分: {result['score']}")
         print(f"  风险等级: {result['risk_level']}")
         vd = result["var_data"]
         print(f"  年化波动: {vd['annual_vol']}%, VaR(95%): {vd['var_1d']}%")
+    
+    # v8.12: Test code-based jitter differentiation
+    print("\n=== v8.12: Code jitter test ===")
+    for code in ["510300", "159338", "159732", "159996", "159262", "159201"]:
+        result = calculate_var_score("消费", etf_code=code)
+        print(f"  {code}: score={result['score']}, jitter={result['jitter']}")

@@ -1,7 +1,10 @@
 """AKShare data source - 3rd fallback (auto-maintained Python package)."""
 import time
+import logging
 from typing import Optional, List, Dict
 from .base import PriceSource, PriceSnapshot, DataHealth, SourceStatus
+
+logger = logging.getLogger(__name__)
 
 try:
     import akshare
@@ -19,8 +22,8 @@ class AKShareSource(PriceSource):
         if not _HAS_AKSHARE:
             return None
         try:
-            # Use akshare's ETF realtime function
-            df = akshare.fund_etf_fund_daily_em()
+            # Use akshare's ETF realtime function - fund_etf_spot_em provides real-time trading data
+            df = akshare.fund_etf_spot_em()
             if df is None or df.empty:
                 return None
             row = df[df["代码"] == code]
@@ -37,7 +40,8 @@ class AKShareSource(PriceSource):
                 turnover_rate=float(row.get("换手率", 0) or 0),
                 source=self.name,
             )
-        except Exception:
+        except Exception as e:
+            logger.warning("akshare_source: fetch failed: %s", e)
             return None
 
     def get_prices(self, codes: List[str]) -> Dict[str, Optional[PriceSnapshot]]:
@@ -46,7 +50,7 @@ class AKShareSource(PriceSource):
             return {}
         result = {}
         try:
-            df = akshare.fund_etf_fund_daily_em()
+            df = akshare.fund_etf_spot_em()
             if df is None or df.empty:
                 return result
             for code in codes:
@@ -65,7 +69,8 @@ class AKShareSource(PriceSource):
                     turnover_rate=float(row.get("换手率", 0) or 0),
                     source=self.name,
                 )
-        except Exception:
+        except Exception as e:
+            logger.debug("get_prices batch fetch failed: %s", e)
             pass
         return result
 

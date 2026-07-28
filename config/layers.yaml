@@ -1,0 +1,116 @@
+# Layer → category mapping for composite weighted score.
+# Used by pipeline._weighted_composite() to map 21+ layers into 8 categories
+# (供给侧/资金面/信号面/需求面/周期面/风控面/增强面/行为面).
+#
+# Same 8-dimension categories as decision/screener.py
+# Added: L21_Behavior entries from k180 investment psychology layer
+# Added: three_layer_index for k105 defensive/cycle/growth architecture
+
+layer_to_category:
+  # === 供给侧 ===
+  L3_Material: 供给侧
+  L4_SupplyChain: 供给侧
+  L5_Tech: 供给侧
+  L6_Politics: 供给侧
+  L7_Irreplaceable: 供给侧
+  # === 资金面 ===
+  L8_CapitalFlow: 资金面
+  L24_DipFlow: 资金面
+  # === 信号面 ===
+  L9_Signals: 信号面
+  L16_LiveSignals: 信号面
+  L23_Micro: 信号面
+  # === 需求面 ===
+  L10_Demand: 需求面
+  L11_SectorRisk: 需求面
+  # === 周期面 ===
+  L12_PoliticalRisk: 周期面
+  L13_MacroCycle: 周期面
+  L22_Pendulum: 周期面
+  # === 风控面 ===
+  L14_StoicRisk: 风控面
+  L18_VaR: 风控面
+  L20_OptionVol: 风控面
+  # === 增强面 ===
+  L15_StateSim: 增强面
+  L17_Factor: 增强面
+  L19_FXChannel: 增强面
+  # === 行为面 (k180 investment psychology) ===
+  L21_Behavior: 行为面
+  L21_Herding: 行为面
+  L21_Disposition: 行为面
+  L21_Overreaction: 行为面
+  L21_Contrarian: 行为面
+  L21_Attention: 行为面
+
+three_layer_index:
+  防御核心:
+    keywords:
+      - "黄金"
+      - "国债"
+      - "红利低波"
+      - "红利/价值"
+      - "红利价值"
+      - "高股息"
+      - "公用事业"
+      - "食品饮料"
+      - "消费"
+      - "白酒"
+      - "医药"
+      - "宽基"
+      - "沪深300"
+      - "上证50"
+      - "大盘蓝筹"
+      - "货币"
+      - "货币基金"
+      - "利率债"
+      - "信用债"
+    max_weight: 0.40
+    description: "任何宏观情景都能活——黄金/国债/红利/公用事业/消费刚需"
+  
+  周期进攻:
+    keywords:
+      - "有色"
+      - "有色金属"
+      - "煤炭"
+      - "能源化工"
+      - "军工"
+      - "航空航天"
+      - "券商"
+      - "证券"
+      - "银行"
+      - "保险"
+      - "化工"
+      - "钢铁"
+      - "农产品"
+      - "稀土"
+    max_weight: 0.30
+    description: "宏观顺风时放大收益——有色/能源/军工/资源品/券商"
+  
+  成长弹性:
+    keywords:
+      - "AI"
+      - "芯片"
+      - "半导体"
+      - "硬科技"
+      - "通信"
+      - "光模块"
+      - "5G"
+      - "云计算"
+      - "数字经济"
+      - "机器人"
+      - "智能制造"
+      - "创新药"
+      - "新能源"
+      - "光伏"
+      - "风电"
+      - "储能"
+      - "锂电"
+      - "港股科技"
+      - "中概互联网"
+      - "创业板"
+      - "科创"
+      - "美股科技"
+      - "美股科技100"
+    max_weight: 0.30
+    description: "产业爆发+估值修复——AI/半导体/创新药/新能源/港股科技"

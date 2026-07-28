@@ -8,9 +8,13 @@ PMI < 50 → contraction → cyclical sectors get demand penalty
 Social financing ↓ → tight credit → capital-intensive sectors get penalty
 PPI ↓ → deflation → commodity sectors get penalty
 """
-import json, io, time
-from datetime import datetime, timedelta
+import json
+import io
+import logging
+from datetime import datetime
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).parent.parent.parent.parent / "data" / "screener_cache"
 
@@ -26,7 +30,8 @@ def _fetch_pmi():
         last = df.dropna(subset=["今值"]).tail(1)
         if not last.empty:
             return float(last.iloc[0]["今值"])
-    except:
+    except Exception as e:
+        logger.debug("PMI fetch failed: %s", e)
         pass
     return 50.0  # neutral default
 
@@ -38,7 +43,8 @@ def _fetch_social_financing():
         last = df.tail(3)
         vals = [float(last.iloc[i]["社会融资规模增量"]) for i in range(len(last))]
         return sum(vals) / len(vals)  # 3-month avg
-    except:
+    except Exception as e:
+        logger.debug("social financing fetch failed: %s", e)
         pass
     return 30000  # neutral default
 
@@ -52,7 +58,8 @@ def get_macro_adjustment(force_refresh=False):
             cached_date = data.get("_date", "")
             if cached_date == datetime.now().strftime("%Y-%m"):
                 return data
-        except:
+        except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError) as e:
+            logger.debug("macro cache load failed: %s", e)
             pass
 
     pmi = _fetch_pmi()

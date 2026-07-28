@@ -432,7 +432,7 @@ etfs:
     risk_level: 0.28
     access: buyable
   '510880':
-    name: 红利ETF
+    name: 红利ETF华夏
     type: 策略
     sector: 高股息
     fee: 0.005
@@ -520,7 +520,7 @@ etfs:
     risk_level: 0.35
     access: buyable
   '512170':
-    name: 医疗ETF
+    name: 医疗ETF汇添富
     type: 行业A
     sector: 医药
     fee: 0.005
@@ -584,7 +584,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '512880':
-    name: 证券ETF
+    name: 证券ETF国泰
     type: 行业A
     sector: 券商
     fee: 0.005
@@ -864,7 +864,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '515880':
-    name: 通信ETF
+    name: 通信ETF华夏
     type: 行业A
     sector: 通信/光模块
     fee: 0.005
@@ -912,7 +912,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '518880':
-    name: 黄金ETF
+    name: 黄金ETF华安
     type: 商品
     sector: 贵金属
     fee: 0.005
@@ -936,7 +936,7 @@ etfs:
     risk_level: 0.28
     access: buyable
   '562390':
-    name: 中药ETF
+    name: 中药ETF富国
     type: 行业A
     sector: 中药
     fee: 0.005
@@ -2536,7 +2536,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '159647':
-    name: 中药ETF
+    name: 中药ETF工银
     type: 行业A
     sector: 医药
     fee: 0.005
@@ -2680,7 +2680,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '159695':
-    name: 通信ETF
+    name: 通信ETF广发
     type: 行业A
     sector: 通信/5G
     fee: 0.005
@@ -2728,7 +2728,7 @@ etfs:
     risk_level: 0.25
     access: buyable
   '159708':
-    name: 红利ETF
+    name: 红利ETF鹏华
     type: 策略
     sector: 红利/价值
     fee: 0.005
@@ -3056,7 +3056,7 @@ etfs:
     risk_level: 0.2
     access: buyable
   '159828':
-    name: 医疗ETF
+    name: 医疗ETF易方达
     type: 行业A
     sector: 医药
     fee: 0.005
@@ -3120,7 +3120,7 @@ etfs:
     risk_level: 0.4
     access: buyable
   '159841':
-    name: 证券ETF
+    name: 证券ETF南方
     type: 行业A
     sector: 金融
     fee: 0.005
@@ -3344,7 +3344,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '159934':
-    name: 黄金ETF
+    name: 黄金ETF广发
     type: 行业A
     sector: 周期/资源
     fee: 0.005
@@ -3800,7 +3800,7 @@ etfs:
     risk_level: 0.22
     access: buyable
   '512900':
-    name: 证券ETF南方
+    name: 证券ETF南方(512900)
     type: 行业A
     sector: 金融
     fee: 0.005
@@ -4738,3 +4738,5 @@ etfs:
 _meta:
   count: 592
   generated: '2026-06-25'
+  delisted_codes: []
+  delisted_note: 'TODO: 人工维护已退市ETF代码列表(幸存者偏差防护)'

@@ -15,7 +15,7 @@ def _resolve_etf_system():
         return _ETFDIR
 
     candidates = [
-        Path(__file__).resolve().parent.parent.parent.parent.parent / "etf_system",
+        Path(__file__).resolve().parent.parent.parent.parent / "etf_system",
         Path(__file__).resolve().parent.parent.parent.parent / "etf_system",
     ]
     for c in candidates:
@@ -53,7 +53,7 @@ class EastMoneySource(PriceSource):
                 self._fetcher_error = "ETFDataFetcher not in data_fetcher"
                 return None
             self._fetcher = module.ETFDataFetcher()
-        except Exception as e:
+        except (ImportError, AttributeError, OSError, ValueError, TypeError) as e:
             self._fetcher_error = str(e)[:100]
             return None
 
@@ -77,7 +77,7 @@ class EastMoneySource(PriceSource):
                 amount=float(item.get("amount", 0) or 0),
                 source=self.name,
             )
-        except Exception:
+        except (OSError, ValueError, KeyError, TypeError):
             return None
 
     def get_prices(self, codes: List[str]) -> Dict[str, Optional[PriceSnapshot]]:
@@ -102,7 +102,7 @@ class EastMoneySource(PriceSource):
                 else:
                     result[code] = None
             return result
-        except Exception:
+        except (OSError, ValueError, KeyError, TypeError):
             return {}
 
     def health(self) -> DataHealth:
@@ -113,6 +113,6 @@ class EastMoneySource(PriceSource):
             if result and result.price > 0:
                 return DataHealth(self.name, SourceStatus.HEALTHY, latency)
             return DataHealth(self.name, SourceStatus.DEGRADED, latency, error="No valid price")
-        except Exception as e:
+        except (OSError, ValueError, KeyError, TypeError) as e:
             latency = (time.time() - t0) * 1000
             return DataHealth(self.name, SourceStatus.FAILED, latency, error=str(e))

@@ -8,9 +8,7 @@
 5. Tail Risk (EVT+NN): 尾部风险穿透
 """
 
-import json
 from datetime import datetime
-from typing import Optional, Dict, Any
 
 
 # Historical analogies
@@ -65,7 +63,7 @@ def step_back_question(etf_name, sector):
     for key, q in questions.items():
         if key in sector or key in etf_name:
             return q
-        return f"{etf_name}的本质是什么? 市场当前在定价什么核心矛盾?"
+    return f"{etf_name}的本质是什么? 市场当前在定价什么核心矛盾?"
 
 
 def bull_case(etf_name, sector, scores):

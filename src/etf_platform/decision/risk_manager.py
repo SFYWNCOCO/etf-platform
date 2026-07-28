@@ -1,11 +1,11 @@
-"""
+r"""
 risk_manager.py — stop-loss and drawdown control for ETF screener
 ==================================================================
 v5.6: Tracks positions, enforces -15% individual stop-loss and -20% portfolio max DD.
 File-based persistence: D:\龙虾\.openclaw\etf-platform\data\positions.json
 """
 
-import json, os
+import json
 from pathlib import Path
 from datetime import datetime
 
@@ -21,7 +21,7 @@ def _load_positions() -> dict:
     try:
         with open(POSITIONS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception:
+    except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError):
         return {"positions": {}, "portfolio_peak": 1.0, "history": []}
 
 
@@ -48,7 +48,12 @@ def update_positions(recommendations: list, prices: dict):
     for code, pos in list(data["positions"].items()):
         if code in prices and prices[code] > 0:
             pos["current_price"] = prices[code]
-            pos["pnl_pct"] = round((prices[code] / pos["entry_price"] - 1) * 100, 2)
+            # M-16 fix: use Decimal for financial calculations to avoid float precision issues
+            from decimal import Decimal, ROUND_HALF_UP
+            entry = Decimal(str(pos["entry_price"]))
+            current = Decimal(str(prices[code]))
+            pnl = ((current / entry) - 1) * 100
+            pos["pnl_pct"] = float(pnl.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
             pos["last_updated"] = today
             total_value += prices[code] * pos.get("shares", 1)
             total_entry += pos["entry_price"] * pos.get("shares", 1)
@@ -57,6 +62,9 @@ def update_positions(recommendations: list, prices: dict):
     for rec in recommendations[:3]:
         code = rec.get("code", "")
         if code not in data["positions"] and code in prices and prices[code] > 0:
+            # v5.6: Use entry price as weight proxy for PnL calc
+            # shares=1 is intentional (equal-weight tracking). 
+            # Weighted PnL uses entry_price * shares as weight.
             data["positions"][code] = {
                 "name": rec.get("name", code),
                 "entry_price": prices[code],
@@ -132,14 +140,18 @@ def get_position_summary() -> str:
         return "无持仓"
     
     lines = []
-    total_pnl = 0
+    total_weight = 0
+    weighted_pnl = 0
     for code, pos in data["positions"].items():
         pnl = pos.get("pnl_pct", 0)
-        total_pnl += pnl
+        entry = pos.get("entry_price", 1.0)
+        weight = entry * pos.get("shares", 1)  # v5.6: entry-price-weighted
+        weighted_pnl += pnl * weight
+        total_weight += weight
         icon = "🔴" if pnl < -10 else ("🟡" if pnl < 0 else "🟢")
         lines.append(f"  {icon} {pos['name']}: {pnl:+.1f}% (入场{pos.get('entry_date','?')})")
     
-    avg_pnl = total_pnl / len(data["positions"]) if data["positions"] else 0
+    avg_pnl = weighted_pnl / total_weight if total_weight > 0 else 0
     icon = "🔴" if avg_pnl < -10 else ("🟡" if avg_pnl < 0 else "🟢")
-    lines.insert(0, f"持仓 ({icon} 均{avg_pnl:+.1f}%):")
+    lines.insert(0, f"持仓 ({icon} 加权均{avg_pnl:+.1f}%):")
     return "\n".join(lines)

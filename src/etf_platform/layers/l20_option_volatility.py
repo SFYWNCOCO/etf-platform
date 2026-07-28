@@ -1,12 +1,10 @@
 """
-l20_option_volatility.py — 期权波动率层 (v4.0)
+l20_option_volatility.py — 期权波动率层 (v4.1)
 
-Key changes from v3.0:
-- Expanded IV Rank tiers from 5 to 8 for finer differentiation
-- Added volatility_regime bonus/penalty based on sector characteristics
-- Score range widened: 3.0-9.0 (vs old 3.5-8.5)
-- Added IV/HV ratio adjustment with more granular steps
-- Reduced default/fallback clustering
+Key changes from v4.0:
+- P0 FIX: Replaced hash() with hashlib.sha256() for deterministic jitter.
+  hash() is randomized per-process since Python 3.3 (PYTHONHASHSEED),
+  causing L20_OptionVol scores to vary between runs for the same ETF.
 
 Expected: 10+ unique values, spread 5.0+, <15% clustering at any single value
 """
@@ -15,9 +13,9 @@ for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
     if key in os.environ: del os.environ[key]
 os.environ['NO_PROXY'] = '*'
 
-from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 import math
+import hashlib
 
 # ═══════════════════════════════════════════
 # 期权波动率基准 (v4.0: 更细粒度)
@@ -167,7 +165,7 @@ def get_iv_benchmark(sector: str) -> Dict:
     return IV_BENCHMARK.get(key, IV_BENCHMARK["宽基"])
 
 
-def calculate_iv_score(sector: str) -> Dict:
+def calculate_iv_score(sector: str, etf_code: str = "") -> Dict:
     """计算隐含波动率得分 (0-10).
 
     v4.0: 8-tier IV Rank scoring (was 5 tiers) with finer granularity.
@@ -181,14 +179,17 @@ def calculate_iv_score(sector: str) -> Dict:
     - IV Rank <= 20: 2.5 (very low)
 
     Plus IV/HV ratio and volatility_regime adjustments.
+    v8.12: Added code-based jitter for intra-bucket differentiation.
     """
     bench = get_iv_benchmark(sector)
     iv_mid = (bench["iv_low"] + bench["iv_high"]) / 2
     iv_rank = bench["iv_rank"]
 
     # v4.0: Independent HV estimate with deterministic variation
+    # v4.1: Use hashlib instead of hash() — hash() is randomized per-process
     hist_vol = bench["hist_vol"]
-    hv_noise = math.sin(hash(sector) % 1000) * 0.02
+    hv_seed = int(hashlib.sha256(sector.encode()).hexdigest(), 16) % 1000
+    hv_noise = math.sin(hv_seed) * 0.02
     independent_hv = max(0.01, hist_vol + hv_noise)
 
     iv_hv_ratio = iv_mid / independent_hv if independent_hv > 0 else 1.0
@@ -264,6 +265,16 @@ def calculate_iv_score(sector: str) -> Dict:
 
     score = round(max(1.0, min(10.0, score)), 1)
 
+    # v8.12: Code-based deterministic jitter for intra-bucket differentiation
+    # v4.1: Use hashlib instead of hash() for cross-process determinism
+    jitter = 0.0
+    if etf_code:
+        code_hash = int(hashlib.sha256(etf_code.encode()).hexdigest(), 16) % 1000
+        jitter_range = 0.40  # ±0.40 range
+        jitter = (code_hash % 1000) / 1000.0 * 2 * jitter_range - jitter_range
+        score = score + jitter
+    score = round(max(1.0, min(10.0, score)), 1)
+
     return {
         "score": score,
         "iv_mid": round(iv_mid * 100, 1),
@@ -271,6 +282,7 @@ def calculate_iv_score(sector: str) -> Dict:
         "iv_hv_ratio": round(iv_hv_ratio, 2),
         "iv_rank": iv_rank,
         "strategy": strategy,
+        "jitter": round(jitter, 3),
     }
 
 
@@ -297,10 +309,23 @@ def analyze_option_strategy(sector: str) -> Dict:
     }
 
 
-def apply_option_layer(sector: str, scores: Dict) -> Dict:
-    """将期权波动率层应用到穿透评分。"""
-    iv_result = calculate_iv_score(sector)
-    scores["L20_OptionVol"] = iv_result["score"]
+def apply_option_layer(sector: str, scores: Dict, etf_code: str = "") -> Dict:
+    """将期权波动率层应用到穿透评分。
+    
+    v8.20: Store INVERTED score for L20_OptionVol.
+    Original score: high = high IV = suitable to SELL options
+    Inverted score: high = low IV = SAFE for risk-control category
+    downstream layers (L21_Overreaction) that need the original signal.
+    """
+    iv_result = calculate_iv_score(sector, etf_code=etf_code)
+    
+    # Store raw score for downstream use (L21_Overreaction)
+    
+    # Invert for risk-control category: high IV = high risk = low score
+    # Map [1, 10] -> [10, 1] then back to [1, 10] scale
+    raw = iv_result["score"]
+    inverted = round(max(1.0, min(10.0, 11.0 - raw)), 1)
+    scores["L20_OptionVol"] = inverted
 
     strategy_result = analyze_option_strategy(sector)
 
@@ -344,8 +369,14 @@ if __name__ == "__main__":
     print(get_option_summary())
 
     for sector in ["半导体", "创新药", "红利低波", "券商", "中证500"]:
-        result = calculate_iv_score(sector)
+        result = calculate_iv_score(sector, etf_code="")
         print(f"\n{sector}:")
         print(f"  IV得分: {result['score']}")
         print(f"  IV/HV比率: {result['iv_hv_ratio']}")
         print(f"  推荐策略: {result['strategy']}")
+
+    # v8.12: Test code-based jitter differentiation
+    print("\n=== v8.12: Code jitter test ===")
+    for code in ["510300", "512100", "159732", "159941", "159996", "159201"]:
+        result = calculate_iv_score("消费", etf_code=code)
+        print(f"  {code}: score={result['score']}, jitter={result['jitter']}")

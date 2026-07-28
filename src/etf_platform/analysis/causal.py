@@ -3,7 +3,7 @@
 Layer 0: 基础材料(e) → Layer 1: 事件(I0+direction) → Layer 2: 上游(d)
 → Layer 3: 中游(g) → Layer 4: 成分股(b) → Layer 5: ETF(a) + 人员(z) 跨层穿透
 """
-import math, time
+import time
 from functools import lru_cache
 from ..config_loader import load_etfs
 

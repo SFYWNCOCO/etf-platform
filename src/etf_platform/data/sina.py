@@ -1,7 +1,8 @@
 """Sina Finance data source - stable fallback for price data."""
 import urllib.request
+import urllib.error
 import time
-from typing import Optional, List, Dict
+from typing import Optional
 from .base import PriceSource, PriceSnapshot, DataHealth, SourceStatus
 
 SINA_URL = "https://hq.sinajs.cn/list="
@@ -28,7 +29,7 @@ class SinaSource(PriceSource):
             })
             with urllib.request.urlopen(req, timeout=10) as resp:
                 text = resp.read().decode("gbk")
-        except Exception:
+        except (urllib.error.URLError, OSError, ValueError, KeyError):
             return None
 
         # Parse sina CSV format: "var hq_str_sh159995="name,open,pre_close,price,high,low,...""
@@ -70,6 +71,6 @@ class SinaSource(PriceSource):
                 return DataHealth(self.name, SourceStatus.HEALTHY, latency)
             return DataHealth(self.name, SourceStatus.DEGRADED, latency,
                             error="No valid price")
-        except Exception as e:
+        except (urllib.error.URLError, OSError, ValueError, KeyError) as e:
             latency = (time.time() - t0) * 1000
             return DataHealth(self.name, SourceStatus.FAILED, latency, error=str(e))

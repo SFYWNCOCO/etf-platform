@@ -5,7 +5,8 @@
 
 依赖: data/etf_decisions_log.json (首次运行自动创建示例)
 """
-import json, os, datetime
+import json
+import datetime
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"

@@ -1,7 +1,7 @@
 """Abstract base classes for data sources."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from enum import Enum
 
 
@@ -11,7 +11,7 @@ class SourceStatus(Enum):
     FAILED = "failed"            # 完全不可用
 
 
-@dataclass
+@dataclass(slots=True)
 class DataHealth:
     """Health check result for a data source."""
     source_name: str
@@ -21,7 +21,7 @@ class DataHealth:
     details: Optional[Dict] = None
 
 
-@dataclass
+@dataclass(slots=True)
 class PriceSnapshot:
     """Real-time price data for a single ETF."""
     code: str
@@ -38,7 +38,7 @@ class PriceSnapshot:
     source: str = "unknown"
 
 
-@dataclass
+@dataclass(slots=True)
 class NewsItem:
     """A single news/catalyst item."""
     title: str
@@ -70,7 +70,7 @@ class PriceSource(ABC):
         for code in codes:
             try:
                 result[code] = self.get_price(code)
-            except Exception as e:
+            except (OSError, ValueError, KeyError, TypeError):
                 result[code] = None
         return result
 

@@ -13,16 +13,25 @@ Caching: TTL=86400 (24h). All fetches wrapped in try/except, failures return 0 a
 
 import time
 import json
+import logging
 from pathlib import Path
-from collections import defaultdict
+
+logger = logging.getLogger(__name__)
 
 _CACHE_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "live_cache"
 _CACHE_DIR.mkdir(parents=True, exist_ok=True)
 _CACHE_TTL = 86400  # 24 hours
 
 
+def _sanitize_key(key: str) -> str:
+    """Sanitize cache key to avoid path separator issues on Windows.
+    Chinese chars and '/' in sector names become '_' in cache filenames."""
+    return ''.join(c if c.isalnum() or c in ('_','-',' ') else '_' for c in key)
+
+
 def _cache_get(key: str) -> dict | None:
-    path = _CACHE_DIR / f"{key}.json"
+    safe_key = _sanitize_key(key)
+    path = _CACHE_DIR / f"{safe_key}.json"
     if not path.exists():
         return None
     age = time.time() - path.stat().st_mtime
@@ -31,12 +40,13 @@ def _cache_get(key: str) -> dict | None:
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception:
+    except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError):
         return None
 
 
 def _cache_set(key: str, data: dict):
-    path = _CACHE_DIR / f"{key}.json"
+    safe_key = _sanitize_key(key)
+    path = _CACHE_DIR / f"{safe_key}.json"
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, default=str)
 
@@ -86,7 +96,8 @@ def _get_commodity_trend(symbol: str) -> float:
         # Normalize: >+5% change = strong signal
         signal = max(-1.0, min(1.0, pct_change / 10.0))
         return round(signal, 3)
-    except Exception:
+    except Exception as e:
+        logger.warning("[layer_live] commodity signal failed for %s: %s", symbol, e)
         return 0.0
 
 
@@ -101,7 +112,8 @@ def _get_pmi_signal() -> float:
         # PMI 50 = neutral, 55+ = expansion, <45 = contraction
         signal = (latest - 50) / 10.0
         return round(max(-1.0, min(1.0, signal)), 3)
-    except Exception:
+    except Exception as e:
+        logger.warning("[layer_live] PMI signal failed: %s", e)
         return 0.0
 
 
@@ -116,7 +128,8 @@ def _get_sector_momentum(sector: str) -> float:
         pct = (closes.iloc[-1] / closes.iloc[0] - 1) * 100
         signal = max(-1.0, min(1.0, pct / 15.0))
         return round(signal, 3)
-    except Exception:
+    except Exception as e:
+        logger.warning("[layer_live] sector momentum failed for %s: %s", sector, e)
         return 0.0
 
 
@@ -172,6 +185,7 @@ def apply_live_adjustments(sector: str, layer_scores: dict) -> dict:
             if layer in layer_scores and adj != 0:
                 old = layer_scores[layer]
                 layer_scores[layer] = round(max(1.0, min(10.0, old + adj)), 1)
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
+        logger.debug("apply_live_adjustments failed: %s", e)
         pass
     return layer_scores

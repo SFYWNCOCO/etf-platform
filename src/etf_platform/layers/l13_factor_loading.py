@@ -13,7 +13,7 @@ A股三大特色: 壳价值污染、散户主导、政策干预
   - CMA (投资): 低投资组合 - 高投资组合
   - LowVol (低波动): 低波动率溢价
 """
-from typing import Dict, List, Optional
+from typing import Dict
 
 # ═══════════════════════════════════════════
 # 行业→因子暴露映射 (经验估计)

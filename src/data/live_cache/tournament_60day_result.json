@@ -1,0 +1,113 @@
+{
+  "regime": "fearful",
+  "candidates": 60,
+  "strategies_run": [
+    "zscore_multi",
+    "momentum",
+    "mean_reversion",
+    "capital_flow"
+  ],
+  "ensemble_picks": [
+    {
+      "code": "512010",
+      "name": "医药ETF易方达",
+      "sector": "医药",
+      "ensemble_score": 1.0,
+      "contributing_strategies": [
+        "momentum"
+      ],
+      "strategy_weights": {
+        "momentum": 0.1
+      }
+    },
+    {
+      "code": "159206",
+      "name": "卫星ETF永赢",
+      "sector": "军工",
+      "ensemble_score": 1.0,
+      "contributing_strategies": [
+        "mean_reversion"
+      ],
+      "strategy_weights": {
+        "mean_reversion": 0.4
+      }
+    },
+    {
+      "code": "513350",
+      "name": "标普油气ETF富国",
+      "sector": "周期/资源",
+      "ensemble_score": 0.992,
+      "contributing_strategies": [
+        "zscore_multi",
+        "momentum",
+        "capital_flow"
+      ],
+      "strategy_weights": {
+        "zscore_multi": 0.25,
+        "momentum": 0.1,
+        "capital_flow": 0.25
+      }
+    }
+  ],
+  "performance_matrix": {
+    "zscore_multi": {
+      "fearful": {
+        "win_rate": 66.7,
+        "avg_return_pct": 4.52,
+        "sharpe": 0.721,
+        "sample_count": 3,
+        "wins": 2,
+        "losses": 1
+      }
+    },
+    "momentum": {
+      "fearful": {
+        "win_rate": 100.0,
+        "avg_return_pct": 4.22,
+        "sharpe": 0.879,
+        "sample_count": 3,
+        "wins": 3,
+        "losses": 0
+      }
+    },
+    "mean_reversion": {
+      "fearful": {
+        "win_rate": 0.0,
+        "avg_return_pct": -24.28,
+        "sharpe": -6.398,
+        "sample_count": 3,
+        "wins": 0,
+        "losses": 3
+      }
+    },
+    "capital_flow": {
+      "fearful": {
+        "win_rate": 33.3,
+        "avg_return_pct": 0.79,
+        "sharpe": 0.103,
+        "sample_count": 3,
+        "wins": 1,
+        "losses": 2
+      }
+    }
+  },
+  "weights_used": {
+    "mean_reversion": 0.4,
+    "zscore_multi": 0.25,
+    "momentum": 0.1,
+    "capital_flow": 0.25
+  },
+  "zscore_top3": [
+    "513350",
+    "159570",
+    "159981"
+  ],
+  "ensemble_top3": [
+    "512010",
+    "159206",
+    "513350"
+  ],
+  "overlap": 1,
+  "elapsed_seconds": 0.0,
+  "timestamp": "2026-07-18T21:51:29.680458"
+}

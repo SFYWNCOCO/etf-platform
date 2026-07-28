@@ -5,7 +5,7 @@ from ..config_loader import load_etfs, load_general
 from ..analysis.chain import evaluate_etf_risk
 from ..analysis.insight import tail_risk_assessment
 import math
-from .cvar_portfolio import optimize_gaussian, student_t_cvar
+from .cvar_portfolio import optimize_gaussian
 
 PORTFOLIO_PROFILES = {
     "conservative": {
@@ -95,13 +95,14 @@ def allocate(analyst_results, budget=1000, profile="balanced", max_positions=5, 
         scores_val = [max(s["score"], 0.01) for s in candidates]
         # Use scores as return proxies, estimate covariance from score dispersion
         mean_s = sum(scores_val) / n
-        # Simple covariance proxy: diagonal based on score variance, off-diagonal 50%
+        # NOTE: covariance proxy using score dispersion, NOT historical return covariance.
+        # This is a known limitation — real covariance requires historical return data.
         var_s = sum((s - mean_s)**2 for s in scores_val) / max(n-1, 1)
         cov = [[var_s if i == j else var_s * 0.5 for j in range(n)] for i in range(n)]
         try:
             w_cvar, info = optimize_gaussian(scores_val, cov, alpha=0.95)
             weights = w_cvar
-        except Exception:
+        except (KeyError, ValueError, TypeError, AttributeError, ImportError):
             weights = [1.0/n] * n  # fallback to equal weight
     else:
         scores = [max(s["score"], 0.01) for s in candidates]
@@ -110,28 +111,33 @@ def allocate(analyst_results, budget=1000, profile="balanced", max_positions=5, 
         total_exp = sum(exp_s)
         weights = [e / total_exp for e in exp_s]
     max_pct = pf["max_single_pct"]
-    for i, w in enumerate(weights):
-        if w > max_pct:
-            weights[i] = max_pct
-            excess = w - max_pct
-            others = [i2 for i2 in range(len(weights)) if i2 != i]
-            if others:
-                per_other = excess / len(others)
-                for oi in others: weights[oi] += per_other
+    for _ in range(10):  # 最多 10 次迭代收敛
+        capped = False
+        for i, w in enumerate(weights):
+            if w > max_pct:
+                weights[i] = max_pct
+                capped = True
+        if not capped:
+            break
+        s = sum(weights)
+        if s > 0:
+            weights = [w/s if w < max_pct else max_pct for w in weights]
     allocated = []
     remaining = float(budget)
     for i, (s, w) in enumerate(zip(candidates, weights)):
         if i == max_positions - 1 or i == len(candidates) - 1:
-            amount = round(remaining, 0)
+            amount = max(round(remaining, 0), 0)  # 不允许负数
         else:
             amount = round(budget * w, 0)
-            amount = max(amount, min_pos)
-        amount = min(amount, remaining)
-        pct_actual = amount / budget * 100
+            amount = min(amount, remaining)  # 不超过剩余
+            amount = max(amount, 0)  # 不为负
+            if amount < min_pos and remaining >= min_pos:
+                amount = min_pos  # 满足最小持仓要求(仅当剩余足够)
+        pct_actual = amount / budget * 100 if budget > 0 else 0
         allocated.append({"code": s["code"], "name": s["name"], "score": s["score"],
                           "weight_pct": round(w * 100, 1), "amount": int(amount),
                           "pct": round(pct_actual, 1)})
-        remaining -= amount
+        remaining = max(remaining - amount, 0)  # 剩余不为负
     return allocated
 
 def generate_portfolio_report(analyst_results, budget=1000, profile="balanced", method="softmax"):

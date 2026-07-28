@@ -1,10 +1,16 @@
 """Valuation & fundamentals for ETFs.
 Sources: fund daily API, K-line data, static index mapping."""
+import logging
+import re
+import urllib.request
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict
+import urllib.error
+
+logger = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(slots=True)
 class FundSnapshot:
     """Complete fund snapshot combining multiple data sources."""
     code: str = ""
@@ -62,7 +68,8 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
     
     # 1. NAV data from fund daily API (fast)
     try:
-        import akshare, warnings
+        import akshare
+        import warnings
         warnings.filterwarnings("ignore")
         df = akshare.fund_etf_fund_daily_em()
         row = df[df.iloc[:, 0].astype(str) == code]
@@ -78,9 +85,10 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
             snap.daily_return = float(ret_str.replace("%", ""))
             snap.name = str(r.iloc[1]) if len(r) > 1 else ""
             snap.fund_type = str(r.iloc[2]) if len(r) > 2 else ""
-    except Exception:
+    except Exception as e:
+        logger.debug("fund NAV fetch failed: %s", e)
         pass
-    
+
     # 2. Stage returns from K-line
     try:
         trend = get_trend(code)
@@ -89,9 +97,10 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
             snap.change_3m = trend.change_60d
             # approx 6m from available data
             snap.change_6m = round(trend.change_60d * 2.5, 1) if trend.data_days > 120 else trend.change_60d
-    except Exception:
+    except (urllib.error.URLError, OSError, ValueError, KeyError) as e:
+        logger.debug("stage returns fetch failed: %s", e)
         pass
-    
+
     # 3. Static info
     snap.tracking_index = TRACKING_INDEX_MAP.get(code, "")
     
@@ -102,7 +111,6 @@ def get_holdings(code: str) -> List[Dict]:
     """Get top holdings via web scraping.
     Uses direct HTTP to 天天基金网 holdings page.
     Returns empty list if unavailable."""
-    import urllib.request, re
     url = f"https://fundf10.eastmoney.com/ccmx_{code}.html"
     try:
         req = urllib.request.Request(url, headers={
@@ -128,5 +136,5 @@ def get_holdings(code: str) -> List[Dict]:
             holdings.append({"code": code, "name": name})
         
         return holdings
-    except Exception:
+    except (urllib.error.URLError, OSError, ValueError, KeyError):
         return []

@@ -18,9 +18,13 @@ Usage:
   python -m etf_platform.archive.collector --quick  # Quick (skip prices/news)
 """
 from datetime import datetime, date
-import json, os, time
+import json
+import time
+import logging
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 ARCHIVE_ROOT = Path(__file__).resolve().parent.parent.parent.parent / "data" / "archive"
@@ -71,7 +75,7 @@ def collect_rotation() -> dict:
             "leaders": result.get("leaders", []) if isinstance(result, dict) else [],
             "laggards": result.get("laggards", []) if isinstance(result, dict) else [],
         }
-    except Exception as e:
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {"timestamp": _now_iso(), "error": str(e)[:200], "sectors": []}
 
 
@@ -143,7 +147,7 @@ def collect_recommendations(profiles: list = None) -> dict:
                 },
                 "total_etfs": len(ranked),
             }
-        except Exception as e:
+        except (KeyError, ValueError, TypeError, AttributeError) as e:
             result["profiles"][profile] = {"error": str(e)[:200], "top10": []}
     
     return result
@@ -152,7 +156,7 @@ def collect_recommendations(profiles: list = None) -> dict:
 def collect_qvix() -> dict:
     """Capture QVIX market sentiment data."""
     try:
-        from ..analysis.qvix_regime import get_regime, get_weight_shift
+        from ..analysis.qvix_regime import get_regime
         regime = get_regime()
         return {
             "timestamp": _now_iso(),
@@ -162,7 +166,7 @@ def collect_qvix() -> dict:
             "qvix_gem": regime.get("qvix_gem", 0),
             "interpretation": regime.get("interpretation", ""),
         }
-    except Exception as e:
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {"timestamp": _now_iso(), "error": str(e)[:200]}
 
 
@@ -190,7 +194,7 @@ def collect_prices(codes: list = None) -> dict:
                     "position_pct": round(trend.position_pct, 1),
                     "max_drawdown": round(trend.max_drawdown, 2),
                 }
-        except Exception:
+        except (KeyError, ValueError, TypeError, AttributeError):
             result["prices"][code] = None
     
     return result
@@ -208,10 +212,10 @@ def collect_news() -> dict:
                 result["headlines"][kw] = [
                     {"title": n.title[:80], "source": n.source} for n in items
                 ]
-            except Exception:
+            except (KeyError, ValueError, TypeError, AttributeError):
                 result["headlines"][kw] = []
         return result
-    except Exception as e:
+    except (KeyError, ValueError, TypeError, AttributeError) as e:
         return {"timestamp": _now_iso(), "error": str(e)[:200]}
 
 
@@ -268,7 +272,7 @@ def _update_index(snapshot: dict):
         try:
             with open(index_file, "r", encoding="utf-8") as f:
                 index = json.load(f)
-        except Exception:
+        except (json.JSONDecodeError, IOError, OSError, KeyError, ValueError):
             index = []
     
     date_str = snapshot["date"]
@@ -333,7 +337,8 @@ def load_events(limit: int = 50, event_type: str = None) -> list:
                     ev = json.loads(line)
                     if event_type is None or ev.get("type") == event_type:
                         events.append(ev)
-                except Exception:
+                except (json.JSONDecodeError, KeyError, ValueError) as e:
+                    logger.debug("Failed to parse event line: %s", e)
                     pass
     return events[-limit:]
 

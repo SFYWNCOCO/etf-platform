@@ -1,0 +1,26 @@
+{
+  "512890": {
+    "L23_Valuation": 5.7,
+    "L23_PENALTY": 0.0,
+    "valuation_details": {
+      "pe": 7.4,
+      "pb": 0.8,
+      "dividend_yield": null,
+      "pe_score": 5.7,
+      "pb_score": 6.3,
+      "div_score": 5.0,
+      "source": "constituent_weighted (4 stocks)"
+    },
+    "_meta": {
+      "fetched_at": 1784743510.198439,
+      "source": "baidu_constituent",
+      "ttl_seconds": 21600
+    },
+    "raw_data": {
+      "code": "512890",
+      "pe_ratio": 7.36,
+      "pb_ratio": 0.8,
+      "source": "constituent_weighted (4 stocks)"
+    }
+  }
+}

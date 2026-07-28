@@ -19,7 +19,7 @@ def select(mode="balanced", top_n=10):
         from ..decision.screener import recommend
         scored = recommend(top_n=min(100, len(etfs)))
         score_map = {r["code"]: r["composite_score"] for r in scored}
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError):
         score_map = {}
     results = []
     for code, info in etfs.items():

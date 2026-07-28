@@ -1,8 +1,11 @@
 """ETF screener: scan all buyable ETFs, rank by composite score, output top N."""
 import time
 import json
+import logging
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict
+
+logger = logging.getLogger(__name__)
 
 # v5.5: Module-level import to avoid NameError when invoked outside package context
 try:
@@ -74,7 +77,7 @@ def _detect_dead_layers(results: list) -> set:
     for layer, vals in layer_vals.items():
         if len(vals) < 2:
             dead.add(layer)
-        elif max(vals) - min(vals) < 0.5:  # Less than 0.5 range = effectively dead
+        elif max(vals) - min(vals) < 1.0:  # Less than 1.0 range = effectively dead
             dead.add(layer)
     return dead
 
@@ -297,6 +300,17 @@ def _generate_reason(result: dict, trend: dict = None) -> str:
         parts.append(f"行业健康({l11})")
     elif l11 <= 3:
         parts.append(f"行业危险({l11})")
+    # Live signals
+    if result.get("premium"):
+        pp = result["premium"]
+        parts.append(f"折溢价:{pp.get('signal','normal')}({pp.get('premium_pct',0):+.2f}%)")
+    if result.get("flow_signal") and result["flow_signal"] != "neutral":
+        parts.append(f"资金流:{result['flow_signal']}")
+    if result.get("ranking"):
+        rk = result["ranking"]
+        parts.append(f"同类排名:{rk.get('quartile','?')}({rk.get('percentile',0):.0f}%分位)")
+    if result.get("overlap_warning"):
+        parts.append(f"⚠️{result['overlap_warning']}")
     # News count
     news_cnt = result.get("_news_count", 0)
     if news_cnt > 0:
@@ -391,7 +405,6 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
     from ..pipeline import batch_full
     from ..config_loader import load_etfs
     from ..enhance.l8_realtime import enhance_l8
-    from ..enhance.l9_news import enhance_l9
     from ..data.kline import get_trend
     from ..data.manager import get_news
 
@@ -520,10 +533,10 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
     try:
         import akshare as ak
         spot_df = ak.fund_etf_spot_em()
-        print(f"  获取实时数据(行情+折溢价)+趋势+新闻动态评分...")
+        print("  获取实时数据(行情+折溢价)+趋势+新闻动态评分...")
     except Exception:
         spot_df = None
-        print(f"  获取实时数据+趋势+新闻动态评分...")
+        print("  获取实时数据+趋势+新闻动态评分...")
     
     # v5.6: Build index first - O(n) instead of O(n*m)
     raw_index = {}
@@ -592,6 +605,63 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
                         item["composite_score"] += pp["penalty"]
                     except Exception:
                         pass
+                    # Ranking integration (Phase 2)
+                    try:
+                        from ..analysis.ranking import RankingManager
+                        rank_mgr = RankingManager()
+                        rank_df = rank_mgr.fetch_index_funds()
+                        if not rank_df.empty:
+                            rankings = rank_mgr.get_ranking_for_etf(rank_df, code, periods=["近1年", "近3月"])
+                            if rankings:
+                                # Use longest available period
+                                rk = rankings[0]
+                                item["ranking"] = {
+                                    "period": rk.period,
+                                    "return_rate": rk.return_rate,
+                                    "rank": rk.rank,
+                                    "total_count": rk.total_count,
+                                    "percentile": rk.percentile,
+                                    "quartile": rk.quartile,
+                                }
+                                # Ranking score adjustment: top quartile bonus, bottom quartile penalty
+                                if rk.quartile == "优秀":
+                                    item["composite_score"] += 0.3
+                                elif rk.quartile == "不佳":
+                                    item["composite_score"] -= 0.3
+                    except Exception as e:
+                        logger.debug(f"ranking integration failed for {code}: {e}")
+                    # Holdings overlap warning (Phase 2)
+                    try:
+                        from ..analysis.holdings_overlap import HoldingsOverlapAnalyzer
+                        from ..analysis.holdings_fetcher import get_top_holdings, get_sector_exposure
+                        overlap_analyzer = HoldingsOverlapAnalyzer()
+                        holdings_a = get_top_holdings(code, top_n=20)
+                        sector_a = get_sector_exposure(code)
+                        if holdings_a and sector_a:
+                            # Compare against top recommended ETFs already in result
+                            for other in result:
+                                if other.get("code") == code:
+                                    continue
+                                other_code = other.get("code", "")
+                                other_sector = other.get("sector", "")
+                                if not other_code or other_sector == item.get("sector", ""):
+                                    continue
+                                holdings_b = get_top_holdings(other_code, top_n=20)
+                                sector_b = get_sector_exposure(other_code)
+                                if holdings_b and sector_b:
+                                    overlap = overlap_analyzer.analyze_pair(
+                                        holdings_a, holdings_b,
+                                        etf_a_name=code, etf_b_name=other_code,
+                                        sector_a=sector_a, sector_b=sector_b,
+                                    )
+                                    if overlap.overlap_ratio > 0.5:
+                                        item["overlap_warning"] = (
+                                            f"与{other_code}持仓重叠{overlap.overlap_ratio:.0%}"
+                                        )
+                                        item["composite_score"] -= 0.2
+                                        break
+                    except Exception as e:
+                        logger.debug(f"overlap integration failed for {code}: {e}")
                 except Exception as e:
                     print(f"    ⚠ enhance failed for {code}: {e}")
                 break
@@ -636,7 +706,7 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
     # v5.6: Risk manager — stop-loss and portfolio drawdown checks
     risk_flags = None
     try:
-        from .risk_manager import check_risk_flags, update_positions, get_position_summary
+        from .risk_manager import check_risk_flags, update_positions
         risk_flags = check_risk_flags()
         if risk_flags and risk_flags.get("message"):
             print(f"\n  {'⚠️' if risk_flags.get('stop_loss_hit') or risk_flags.get('portfolio_dd_critical') else '⚡'} 风控: {risk_flags['message']}")

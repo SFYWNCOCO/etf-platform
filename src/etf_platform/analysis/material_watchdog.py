@@ -16,11 +16,15 @@
   python -m etf_platform.analysis.material_watchdog confirm <名称>  # 确认并注册
 """
 
-import json, os, re, sys, time
+import json
+import sys
+import logging
 from datetime import datetime
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parent.parent.parent.parent.parent
+logger = logging.getLogger(__name__)
+
+BASE = Path(__file__).resolve().parent.parent.parent.parent
 DISCOVERY_LOG = BASE / "etf-platform" / "data" / "material_discoveries.json"
 QUICK_ADD_YAML = BASE / "etf-platform" / "config" / "material_quick_add.yaml"
 
@@ -117,7 +121,8 @@ def load_discoveries():
     if DISCOVERY_LOG.exists():
         try:
             return json.loads(DISCOVERY_LOG.read_text(encoding="utf-8"))
-        except:
+        except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError) as e:
+            logger.debug("load_discoveries failed: %s", e)
             pass
     return {"discovered": {}, "confirmed": [], "last_scan": ""}
 
@@ -134,7 +139,7 @@ def scan_news(limit=20):
     try:
         from ..data.manager import get_news
         news_items = get_news("材料 突破 量产 国产替代 新技术", limit=limit)
-    except Exception:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError):
         print("  ⚠️ 新闻源不可用，使用关键词库扫描")
         news_items = []
 

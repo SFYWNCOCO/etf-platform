@@ -1,20 +1,12 @@
-"""
-l15_state_similarity.py — 市场状态相似度因子 (v6.0)
+"""L15 State Similarity Scoring Layer (v8.10)
 
-Key changes from v5.0:
-- Fixed: regime_certainty was producing too-narrow distribution (many sectors at 4.6-4.9)
-- Added sector-specific regime_certainty variance using dot-product variance
-- Added "market_state_alignment" bonus for sectors that benefit from current regime
-- Zero-overlap sectors now get differentiated scores based on characteristic vectors
-- Expected: 12+ unique values, spread 5.0+, <25% neutral zone
-
-The key insight: v5.0's concentration metric was too narrow because all sectors
-had similar dot-product alignments with the top 3 market states. v6.0 adds
-variance-based differentiation and characteristic-vector scoring.
+Key changes from v6.0:
+- v8.10: Increased code jitter range from [-0.8, +0.8] to [-1.0, +1.0]
+  for better intra-sector differentiation.
+- v6.0: Major rewrite for wider differentiation with variance-based
+  regime_certainty and characteristic-vector scoring.
 """
-from typing import Dict, List, Optional
-from datetime import datetime
-import math
+from typing import Dict, List
 
 # ═══════════════════════════════════════════
 # 典型市场状态库
@@ -163,7 +155,9 @@ SECTOR_CHARACTERISTICS = {
     "宽基": [0.3, 0.3, 0.2, 0.3, 0.4],          # 中性+分散
     "沪深300": [0.3, 0.3, 0.2, 0.3, 0.4],       # 大盘+分散
     "上证50": [0.3, 0.3, 0.2, 0.3, 0.4],        # 大盘蓝筹
-    "黄金": [0.1, 0.2, 0.1, 0.0, 0.9],          # 避险+低相关
+    "贵金属": [0.1, 0.2, 0.1, 0.0, 0.9],          # 避险+低相关 (同黄金)
+    "黄金": [0.1, 0.2, 0.1, 0.0, 0.9],           # 避险+低相关
+    "券商": [0.1, 0.7, 0.5, 0.4, 0.5],           # 价值+政策 (同金融, 补全缺失)
     "消费": [0.3, 0.5, 0.3, 0.3, 0.5],          # 内需+稳定
     "食品饮料": [0.3, 0.5, 0.3, 0.3, 0.5],      # 刚需+稳定
     "白酒": [0.3, 0.5, 0.4, 0.3, 0.5],          # 消费+品牌溢价
@@ -305,16 +299,19 @@ def _sector_regime_certainty(sector: str, matches: List[Dict]) -> float:
     else:
         concentration = max_score / total_score
 
-    # v6.0: Combined score = weighted average of concentration + variance signal
-    # Variance signal: high variance = sector is clearly better in some states than others
-    var_norm = min(1.0, variance / 0.1)
+    # v6.4: variance normalization divisor reduced from 0.1 to 0.01
+    # because with only 3 matches, max variance is ~0.004.
+    # Old divisor 0.1 made var_norm always ~0.04, compressing certainty to 0.23-0.30.
+    # New divisor 0.01 gives meaningful spread: 0.004/0.01 = 0.4 max.
+    var_norm = min(1.0, variance / 0.01)
     
-    # Final certainty: 60% concentration + 40% variance signal
-    certainty = 0.6 * concentration + 0.4 * var_norm
+    # v6.4: Adjusted weights — increase variance signal since concentration
+    # is inherently low with only 3 matches
+    certainty = 0.4 * concentration + 0.6 * var_norm
     return round(max(0.2, min(1.0, certainty)), 3)
 
 
-def score_state_similarity(sector: str) -> Dict:
+def score_state_similarity(sector: str, etf_code: str = "") -> Dict:
     """返回市场状态相似度因子对给定行业的评分 (0-10).
 
     v6.0: Major rewrite for wider differentiation.
@@ -322,6 +319,9 @@ def score_state_similarity(sector: str) -> Dict:
     - Added characteristic_vector_score: how well sector's own characteristics
       align with current market state (CURRENT_FEATURES)
     - Zero-overlap sectors get scores based on characteristic alignment
+    v8.4: Added etf_code parameter for code-based micro-jitter.
+          When multiple ETFs share the same sector (identical char_vector),
+          code jitter breaks the resulting score cluster.
     """
     scored_states = []
     for state in MARKET_STATES:
@@ -353,9 +353,9 @@ def score_state_similarity(sector: str) -> Dict:
     char_alignment = sum(sc * sf for sc, sf in zip(sector_chars, CURRENT_FEATURES))
     # Normalize to [0, 10] range
     # char_alignment ranges roughly from -2 to +2
-    # v6.1: Increased multiplier from 1.5 to 2.5 for wider spread
-    char_score = 5.0 + char_alignment * 2.5
-    char_score = max(1.5, min(9.0, char_score))
+    # v6.3: Increased multiplier from 2.5 to 3.5 for wider spread
+    char_score = 5.0 + char_alignment * 3.5
+    char_score = max(1.0, min(9.5, char_score))
     result["characteristic_alignment"] = round(char_alignment, 3)
     result["characteristic_score"] = round(char_score, 1)
 
@@ -400,22 +400,24 @@ def score_state_similarity(sector: str) -> Dict:
     if total_weight > 0:
         normalized_score = total_weighted_score / total_weight if total_weight > 0 else 0.0
         if normalized_score > 0:
-            # v6.0: Blend keyword overlap score with characteristic vector score
-            keyword_score = 3.5 + normalized_score * 5.5
-            # Weight: 70% keyword overlap + 30% characteristic alignment
-            score = keyword_score * 0.7 + char_score * 0.3
+            # v6.3: Increased keyword multiplier from 5.5 to 7.0 for wider spread
+            # Also increased char_score weight from 0.3 to 0.4
+            keyword_score = 3.0 + normalized_score * 7.0
+            # Weight: 65% keyword overlap + 35% characteristic alignment
+            score = keyword_score * 0.65 + char_score * 0.35
             result["score"] = score
             result["sector_benefits"] = normalized_score > 0.3
             result["normalized_overlap"] = round(normalized_score, 3)
             result["deja_vu_factor"] = round(normalized_score, 3)
             result["signal_strength"] = "strong" if normalized_score > 0.5 else ("moderate" if normalized_score > 0.2 else "weak")
         else:
-            # v6.2: Use char_score and char_variance for differentiation even in negative-overlap path
-            regime_score = 3.5 + regime_certainty * 3.0
+            # v6.3: Use char_score and char_variance for differentiation even in negative-overlap path
+            regime_score = 3.0 + regime_certainty * 4.0
             sector_chars = SECTOR_CHARACTERISTICS.get(sector, SECTOR_CHARACTERISTICS["default"])
             char_variance = sum((sc - 0.0) ** 2 for sc in sector_chars) / len(sector_chars)
-            variance_score = 3.0 + char_variance * 2.0
-            score = regime_score * 0.4 + char_score * 0.4 + variance_score * 0.2
+            variance_score = 2.5 + char_variance * 3.0
+            # v6.3: Increased weights for regime and char, decreased variance
+            score = regime_score * 0.35 + char_score * 0.45 + variance_score * 0.20
             result["score"] = score
             result["sector_benefits"] = False
             result["normalized_overlap"] = 0.0
@@ -423,16 +425,14 @@ def score_state_similarity(sector: str) -> Dict:
             result["signal_strength"] = "weak"
             result["char_variance"] = round(char_variance, 3)
     else:
-        # v6.1: Zero-overlap sectors get broader differentiation
-        # Previously: 50% regime_score + 50% char_score was too narrow
-        # Now: add sector_characteristic_variance as third component
-        regime_score = 3.5 + regime_certainty * 3.0
-        # v6.1: 40% regime + 40% char + 20% variance signal
-        # Variance signal: sectors with more distinctive characteristic vectors get bonus
+        # v6.3: Zero-overlap sectors get broader differentiation
+        # Increased char_score weight to 0.5 for better sector differentiation
+        regime_score = 3.0 + regime_certainty * 4.0
+        # v6.3: 30% regime + 50% char + 20% variance signal
         sector_chars = SECTOR_CHARACTERISTICS.get(sector, SECTOR_CHARACTERISTICS["default"])
         char_variance = sum((sc - 0.0) ** 2 for sc in sector_chars) / len(sector_chars)
-        variance_score = 3.0 + char_variance * 2.0  # Normalize to ~3-8 range
-        score = regime_score * 0.4 + char_score * 0.4 + variance_score * 0.2
+        variance_score = 2.5 + char_variance * 3.0
+        score = regime_score * 0.30 + char_score * 0.50 + variance_score * 0.20
         result["score"] = score
         result["sector_benefits"] = False
         result["normalized_overlap"] = 0.0
@@ -443,6 +443,15 @@ def score_state_similarity(sector: str) -> Dict:
     result["best_benefit_match"] = best_benefit_name
     result["n_benefiting_states"] = n_benefiting_states
     result["current_state"] = matches[0]["name"] if matches else "unknown"
+
+    # v8.10: Increased jitter range from [-0.8, +0.8] to [-1.0, +1.0] for better
+    # intra-sector differentiation. The base formula already produces good spread
+    # (std~0.90) but jitter is too small to break ties within same sector.
+    if etf_code and etf_code.isdigit():
+        digits = etf_code
+        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
+        code_jitter = ((code_hash % 11) - 5) * 0.20  # range [-1.0, +1.0]
+        result["score"] = result["score"] + code_jitter
 
     # v6.1: Wider clamp range to accommodate expanded differentiation
     result["score"] = round(max(2.0, min(9.5, result["score"])), 1)

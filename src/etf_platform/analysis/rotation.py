@@ -2,7 +2,10 @@
 
 Detects capital flows between sectors by comparing short-term vs medium-term momentum.
 """
+import logging
 import urllib.request
+
+logger = logging.getLogger(__name__)
 
 SECTORS = {
     "半导体":  ["sz159995","sz512480"],
@@ -35,8 +38,8 @@ def fetch_prices():
         "Referer": "https://finance.sina.com.cn",
         "User-Agent": "Mozilla/5.0"
     })
-    resp = urllib.request.urlopen(req, timeout=10)
-    raw = resp.read().decode("gbk")
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        raw = resp.read().decode("gbk")
     
     results = {}
     for line in raw.strip().split(";"):
@@ -57,7 +60,8 @@ def fetch_prices():
                 "high": high, "low": low,
                 "volume": volume, "amount_yi": round(amount / 1e8, 2),
             }
-        except (ValueError, IndexError):
+        except (ValueError, IndexError) as e:
+            logger.debug("price parse failed: %s", e)
             continue
     return results
 

@@ -10,27 +10,28 @@
   python -m etf_platform.hook_harness backtest # 回测后评估
 """
 
-import json, os, re, sys
+import json
+import os
+import re
+import sys
+import threading
 from datetime import datetime
 from pathlib import Path
 
-OPENCLAW = Path(__file__).resolve().parent.parent.parent.parent
+OPENCLAW = Path(__file__).resolve().parent.parent.parent
 CORRECTIONS = OPENCLAW / "corrections.md"
 FW_REG = OPENCLAW / "framework_registry.json"
 FEEDBACK = OPENCLAW / "feedback_anchor.jsonl"
 HARNESS_LOG = OPENCLAW / "etf-platform" / "data" / "harness_events.jsonl"
 
 
+# MN-06 fix: simplified BOM handling — utf-8-sig already strips BOM automatically
 def load_json(path, default=None):
     try:
         with open(path, "r", encoding="utf-8-sig") as f:
             return json.load(f)
-    except:
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.loads(f.read().lstrip("\ufeff"))
-        except:
-            return default if default is not None else {}
+    except (IOError, OSError, json.JSONDecodeError):
+        return default if default is not None else {}
 
 
 def save_json(path, data):
@@ -46,25 +47,30 @@ def record_event(event_type, payload):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
+# C-04 fix: file lock for thread/process-safe updates
+_fw_lock = threading.Lock()
+
 def update_thompson_frameworks(framework_name, wins_delta=0, losses_delta=0):
-    fw = load_json(FW_REG, {})
-    frameworks = fw.get("frameworks", {})
+    """C-04 fix: use file lock to prevent read-modify-write race condition."""
+    with _fw_lock:
+        fw = load_json(FW_REG, {})
+        frameworks = fw.get("frameworks", {})
 
-    if framework_name not in frameworks:
-        frameworks[framework_name] = {"wins": 0, "losses": 0, "alpha": 1, "beta": 1, "scope": "etf"}
+        if framework_name not in frameworks:
+            frameworks[framework_name] = {"wins": 0, "losses": 0, "alpha": 1, "beta": 1, "scope": "etf"}
 
-    f = frameworks[framework_name]
-    f["wins"] = f.get("wins", 0) + wins_delta
-    f["losses"] = f.get("losses", 0) + losses_delta
-    f["alpha"] = f["wins"] + 1
-    f["beta"] = f["losses"] + 1
-    f["win_rate"] = round(f["alpha"] / (f["alpha"] + f["beta"]), 3) if (f["alpha"] + f["beta"]) > 0 else 0.5
-    f["updated"] = datetime.now().isoformat()
+        f = frameworks[framework_name]
+        f["wins"] = f.get("wins", 0) + wins_delta
+        f["losses"] = f.get("losses", 0) + losses_delta
+        f["alpha"] = f["wins"] + 1
+        f["beta"] = f["losses"] + 1
+        f["win_rate"] = round(f["alpha"] / (f["alpha"] + f["beta"]), 3) if (f["alpha"] + f["beta"]) > 0 else 0.5
+        f["updated"] = datetime.now().isoformat()
 
-    fw["frameworks"] = frameworks
-    fw["updated"] = datetime.now().isoformat()
-    fw["etf_hook_last_run"] = datetime.now().isoformat()
-    save_json(FW_REG, fw)
+        fw["frameworks"] = frameworks
+        fw["updated"] = datetime.now().isoformat()
+        fw["etf_hook_last_run"] = datetime.now().isoformat()
+        save_json(FW_REG, fw)
 
 
 def write_correction(title, root_cause, fix, lesson):
@@ -90,19 +96,24 @@ def write_correction(title, root_cause, fix, lesson):
     return num
 
 
+# C-04 fix: lock for JSONL append operations
+_feedback_lock = threading.Lock()
+
 def append_feedback(signal_type, context, fw_names):
-    entry = {
-        "epoch": datetime.now().strftime("%Y%m"),
-        "session": f"etf-auto-{datetime.now().strftime('%Y%m%d_%H%M')}",
-        "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-        "type": signal_type,
-        "user_said": "[ETF平台自动信号]",
-        "context": context,
-        "frameworks": fw_names,
-        "action": "win" if signal_type == "acceptance" else ("loss" if signal_type == "correction" else "observation"),
-    }
-    with open(FEEDBACK, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    """C-04 fix: use lock to prevent interleaved JSONL writes."""
+    with _feedback_lock:
+        entry = {
+            "epoch": datetime.now().strftime("%Y%m"),
+            "session": f"etf-auto-{datetime.now().strftime('%Y%m%d_%H%M')}",
+            "ts": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+            "type": signal_type,
+            "user_said": "[ETF平台自动信号]",
+            "context": context,
+            "frameworks": fw_names,
+            "action": "win" if signal_type == "acceptance" else ("loss" if signal_type == "correction" else "observation"),
+        }
+        with open(FEEDBACK, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
 # ═══════════════════════════════════════════
@@ -190,7 +201,7 @@ def hook_daily_summary():
                             f"| 决策胜率: {dec_text}",
                             ["ETF筛选器", "事件驱动策略"])
 
-    except Exception as e:
+    except (KeyError, ValueError, TypeError, AttributeError, ImportError) as e:
         record_event("hook_error", {"error": str(e)[:200]})
 
 

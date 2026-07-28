@@ -1,0 +1,46 @@
+# Profile-aware weighted composite score weights.
+# Maps 8-dimension category → weight for each investor profile.
+# Used by pipeline._weighted_composite() to solve CLT compression
+# (21 layers avg → std~0.22) by concentrating signal on discriminating layers.
+#
+# Categories: 供给侧/资金面/信号面/需求面/周期面/风控面/增强面/行为面
+
+保守:
+  供给侧: 0.18
+  资金面: 0.08
+  信号面: 0.03
+  需求面: 0.28
+  周期面: 0.05
+  风控面: 0.20
+  增强面: 0.10
+  行为面: 0.08
+
+均衡:
+  供给侧: 0.18
+  资金面: 0.15
+  信号面: 0.10
+  需求面: 0.18
+  周期面: 0.08
+  风控面: 0.12
+  增强面: 0.10
+  行为面: 0.09
+
+进取:
+  供给侧: 0.10
+  资金面: 0.25
+  信号面: 0.15
+  需求面: 0.10
+  周期面: 0.05
+  风控面: 0.04
+  增强面: 0.12
+  行为面: 0.19
+
+激进:
+  供给侧: 0.08
+  资金面: 0.30
+  信号面: 0.15
+  需求面: 0.05
+  周期面: 0.03
+  风控面: 0.03
+  增强面: 0.10
+  行为面: 0.26

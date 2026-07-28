@@ -1,0 +1,391 @@
+{
+  "analysis_version": "1.0",
+  "timestamp": "2026-07-18T22:11:24",
+  "elapsed_seconds": 42.2,
+  "sample_count": 120,
+  "qvix_regime": "fearful",
+  "factor_definitions": {
+    "trend_momentum": "Z(change_20d) — 趋势动量",
+    "risk_adj_momentum": "Z(change_20d / volatility) — 风险调整动量",
+    "quality_elastic": "Z(-pipeline_score) — 质量弹性(低分=高弹性)",
+    "behavioral": "Z(behavioral_alpha - 50) — 行为Alpha",
+    "oversold_depth": "Z(-change_20d) — 超跌深度(博弈反弹)",
+    "drawdown_recov": "Z(-max_drawdown) — 回撤修复潜力",
+    "sector_flow": "Z(sector_return_pct) — 行业资金流"
+  },
+  "correlations": {
+    "overall": {
+      "trend_momentum": {
+        "n": 120,
+        "pearson_r": 0.8986,
+        "p_pearson": 0.0,
+        "spearman_rho": 0.8757,
+        "p_spearman": 0.0
+      },
+      "risk_adj_momentum": {
+        "n": 120,
+        "pearson_r": 0.6531,
+        "p_pearson": 0.0,
+        "spearman_rho": 0.7807,
+        "p_spearman": 0.0
+      },
+      "quality_elastic": {
+        "n": 120,
+        "pearson_r": -0.0376,
+        "p_pearson": 0.6832,
+        "spearman_rho": -0.0755,
+        "p_spearman": 0.4127
+      },
+      "behavioral": {
+        "n": 120,
+        "pearson_r": 0.0,
+        "spearman_rho": 0.0,
+        "p_pearson": 1.0,
+        "p_spearman": 1.0,
+        "note": "constant_input"
+      },
+      "oversold_depth": {
+        "n": 120,
+        "pearson_r": -0.8986,
+        "p_pearson": 0.0,
+        "spearman_rho": -0.8757,
+        "p_spearman": 0.0
+      },
+      "drawdown_recov": {
+        "n": 120,
+        "pearson_r": -0.7395,
+        "p_pearson": 0.0,
+        "spearman_rho": -0.6805,
+        "p_spearman": 0.0
+      },
+      "sector_flow": {
+        "n": 120,
+        "pearson_r": 0.4621,
+        "p_pearson": 0.0,
+        "spearman_rho": 0.2546,
+        "p_spearman": 0.005
+      }
+    },
+    "by_regime": {
+      "fearful": {
+        "trend_momentum": {
+          "n": 120,
+          "pearson_r": 0.8986,
+          "p_pearson": 0.0,
+          "spearman_rho": 0.8757,
+          "p_spearman": 0.0
+        },
+        "risk_adj_momentum": {
+          "n": 120,
+          "pearson_r": 0.6531,
+          "p_pearson": 0.0,
+          "spearman_rho": 0.7807,
+          "p_spearman": 0.0
+        },
+        "quality_elastic": {
+          "n": 120,
+          "pearson_r": -0.0376,
+          "p_pearson": 0.6832,
+          "spearman_rho": -0.0755,
+          "p_spearman": 0.4127
+        },
+        "behavioral": {
+          "n": 120,
+          "pearson_r": 0.0,
+          "spearman_rho": 0.0,
+          "p_pearson": 1.0,
+          "p_spearman": 1.0,
+          "note": "constant_input"
+        },
+        "oversold_depth": {
+          "n": 120,
+          "pearson_r": -0.8986,
+          "p_pearson": 0.0,
+          "spearman_rho": -0.8757,
+          "p_spearman": 0.0
+        },
+        "drawdown_recov": {
+          "n": 120,
+          "pearson_r": -0.7395,
+          "p_pearson": 0.0,
+          "spearman_rho": -0.6805,
+          "p_spearman": 0.0
+        },
+        "sector_flow": {
+          "n": 120,
+          "pearson_r": 0.4621,
+          "p_pearson": 0.0,
+          "spearman_rho": 0.2546,
+          "p_spearman": 0.005
+        }
+      }
+    }
+  },
+  "weight_recommendations": {
+    "total_samples": 120,
+    "regimes_seen": [
+      "fearful"
+    ],
+    "regime_counts": {
+      "fearful": 120
+    },
+    "top_factors_by_ic": [
+      {
+        "factor": "trend_momentum",
+        "ic": 0.8757
+      },
+      {
+        "factor": "oversold_depth",
+        "ic": 0.8757
+      },
+      {
+        "factor": "risk_adj_momentum",
+        "ic": 0.7807
+      },
+      {
+        "factor": "drawdown_recov",
+        "ic": 0.6805
+      },
+      {
+        "factor": "sector_flow",
+        "ic": 0.2546
+      },
+      {
+        "factor": "quality_elastic",
+        "ic": 0.0755
+      },
+      {
+        "factor": "behavioral",
+        "ic": 0.0
+      }
+    ],
+    "recommendations": [
+      {
+        "factor": "trend_momentum",
+        "ic_abs": 0.8757,
+        "strength": "强",
+        "current_weight": 0.25,
+        "suggested_weight": 0.247,
+        "delta": -0.003,
+        "direction": "维持",
+        "significant": true
+      },
+      {
+        "factor": "oversold_depth",
+        "ic_abs": 0.8757,
+        "strength": "强",
+        "current_weight": 0.12,
+        "suggested_weight": 0.247,
+        "delta": 0.127,
+        "direction": "增加",
+        "significant": true
+      },
+      {
+        "factor": "risk_adj_momentum",
+        "ic_abs": 0.7807,
+        "strength": "强",
+        "current_weight": 0.25,
+        "suggested_weight": 0.22,
+        "delta": -0.03,
+        "direction": "减少",
+        "significant": true
+      },
+      {
+        "factor": "drawdown_recov",
+        "ic_abs": 0.6805,
+        "strength": "强",
+        "current_weight": 0.07,
+        "suggested_weight": 0.192,
+        "delta": 0.122,
+        "direction": "增加",
+        "significant": true
+      },
+      {
+        "factor": "sector_flow",
+        "ic_abs": 0.2546,
+        "strength": "强",
+        "current_weight": 0.1,
+        "suggested_weight": 0.072,
+        "delta": -0.028,
+        "direction": "减少",
+        "significant": true
+      },
+      {
+        "factor": "quality_elastic",
+        "ic_abs": 0.0755,
+        "strength": "弱",
+        "current_weight": 0.15,
+        "suggested_weight": 0.021,
+        "delta": -0.129,
+        "direction": "减少",
+        "significant": false
+      },
+      {
+        "factor": "behavioral",
+        "ic_abs": 0.0,
+        "strength": "弱",
+        "current_weight": 0.15,
+        "suggested_weight": 0.0,
+        "delta": -0.15,
+        "direction": "减少",
+        "significant": false
+      }
+    ],
+    "notes": [
+      "警告: trend_momentum与risk_adj_momentum高度正相关，两者合计权重50%可能过度暴露于单一方向",
+      "注意: 以下因子IC接近零(['behavioral'])，预测力极弱，建议大幅降权或移除"
+    ]
+  },
+  "raw_records_sample": [
+    {
+      "code": "159131",
+      "sector": "AI/科技",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -17.42,
+        "risk_adj_momentum": -0.281,
+        "quality_elastic": -5.9,
+        "behavioral": 0.0,
+        "oversold_depth": 17.42,
+        "drawdown_recov": 19.6,
+        "sector_flow": 0
+      },
+      "change_10d": -12.58
+    },
+    {
+      "code": "159201",
+      "sector": "其他",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -1.42,
+        "risk_adj_momentum": -0.059,
+        "quality_elastic": -5.0,
+        "behavioral": 0.0,
+        "oversold_depth": 1.42,
+        "drawdown_recov": 20.0,
+        "sector_flow": 0
+      },
+      "change_10d": 1.09
+    },
+    {
+      "code": "159206",
+      "sector": "军工",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -23.81,
+        "risk_adj_momentum": -0.325,
+        "quality_elastic": -5.9,
+        "behavioral": 0.0,
+        "oversold_depth": 23.81,
+        "drawdown_recov": 36.2,
+        "sector_flow": 0
+      },
+      "change_10d": -27.8
+    },
+    {
+      "code": "159227",
+      "sector": "军工",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -17.65,
+        "risk_adj_momentum": -0.34,
+        "quality_elastic": -6.0,
+        "behavioral": 0.0,
+        "oversold_depth": 17.65,
+        "drawdown_recov": 32.8,
+        "sector_flow": 0
+      },
+      "change_10d": -19.08
+    },
+    {
+      "code": "159259",
+      "sector": "其他",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -22.7,
+        "risk_adj_momentum": -0.326,
+        "quality_elastic": -4.9,
+        "behavioral": 0.0,
+        "oversold_depth": 22.7,
+        "drawdown_recov": 25.0,
+        "sector_flow": 0
+      },
+      "change_10d": -17.13
+    },
+    {
+      "code": "159263",
+      "sector": "红利/价值",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": 1.94,
+        "risk_adj_momentum": 0.096,
+        "quality_elastic": -6.3,
+        "behavioral": 0.0,
+        "oversold_depth": -1.94,
+        "drawdown_recov": 13.8,
+        "sector_flow": 0
+      },
+      "change_10d": 2.9
+    },
+    {
+      "code": "159326",
+      "sector": "公用事业",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -27.49,
+        "risk_adj_momentum": -0.599,
+        "quality_elastic": -6.1,
+        "behavioral": 0.0,
+        "oversold_depth": 27.49,
+        "drawdown_recov": 31.0,
+        "sector_flow": 0
+      },
+      "change_10d": -20.26
+    },
+    {
+      "code": "159399",
+      "sector": "其他",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -1.65,
+        "risk_adj_momentum": -0.073,
+        "quality_elastic": -5.1,
+        "behavioral": 0.0,
+        "oversold_depth": 1.65,
+        "drawdown_recov": 20.0,
+        "sector_flow": 0
+      },
+      "change_10d": 2.25
+    },
+    {
+      "code": "159506",
+      "sector": "医药",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": 11.96,
+        "risk_adj_momentum": 0.215,
+        "quality_elastic": -6.1,
+        "behavioral": 0.0,
+        "oversold_depth": -11.96,
+        "drawdown_recov": 29.3,
+        "sector_flow": 0
+      },
+      "change_10d": -3.15
+    },
+    {
+      "code": "159516",
+      "sector": "半导体",
+      "regime": "fearful",
+      "factors": {
+        "trend_momentum": -53.91,
+        "risk_adj_momentum": -0.26,
+        "quality_elastic": -5.5,
+        "behavioral": 0.0,
+        "oversold_depth": 53.91,
+        "drawdown_recov": 64.8,
+        "sector_flow": -7.33
+      },
+      "change_10d": -59.48
+    }
+  ]
+}

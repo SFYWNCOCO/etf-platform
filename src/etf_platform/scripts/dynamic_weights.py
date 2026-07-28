@@ -1,16 +1,22 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """dynamic_weights.py — 根据市场状态动态调整评级权重"""
-import json, os
+import json
+import os
+import urllib.request
 
 import pathlib; CACHE_DIR = str(pathlib.Path(__file__).resolve().parent.parent.parent.parent / "data_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 def em_api(url):
-    import urllib.request, json
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         resp = urllib.request.urlopen(req, timeout=10)
         return json.loads(resp.read().decode("utf-8"))
-    except: return None
+    except Exception as e:
+        logger.warning("[dynamic_weights] fetch_market_index failed: %s", e)
+        return None
 
 def get_market_state():
     """判断市场状态（恐慌/正常/狂热）"""
@@ -94,7 +100,8 @@ def load_dynamic_weights(profile="balanced"):
         with open(path) as f:
             data = json.load(f)
         return data["weights"]
-    except:
+    except Exception as e:
+        logger.warning("[dynamic_weights] load_weights_yaml failed: %s", e)
         return adjust_weights(profile)["weights"]
 
 if __name__ == "__main__":

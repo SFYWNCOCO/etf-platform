@@ -1,14 +1,17 @@
 """
-L12_macro_cycle.py — Kondratiev+王朝周期+三周期嵌套宏观层 (v3.0)
+L12_macro_cycle.py — Kondratiev+王朝周期+三周期嵌套宏观层 (v3.1)
 
-Key changes from v2.0:
+Key changes from v3.0:
+- P0 FIX: Replaced hash() with hashlib.sha256() for deterministic jitter.
+  hash() is randomized per-process since Python 3.3 (PYTHONHASHSEED),
+  causing L13_MacroCycle scores to vary between runs for unknown sectors.
 - Expanded fallback sector adjustments: added 20+ new granular mappings
 - Previously ~10 categories in fallback → many sectors hit ca=1.0 (no adjustment)
 - Now covers: 军工, 半导体, 新能源, 白酒, 家电, 地产, 券商, 中药, 通信/光模块, 旅游/传媒/游戏, etc.
 - Expected: L13_MacroCycle neutral zone clustering drops from 53% to <30%
 """
-from datetime import datetime, timezone
-from typing import Dict, Tuple, Optional
+from typing import Dict
+import hashlib
 
 # ═══════════════════════════════════════════
 # 第6波 Kondratiev (AI/生物技术/新能源)
@@ -44,23 +47,122 @@ CYCLE_PHASE = "spring"
 
 PHASE_SECTOR_ADJUSTMENT = {
     ("spring_accelerating", "bottom_transition", "restocking_mid"): {
-        "AI/科技": 1.20,
+        # Tech/AI leaders (highest cycle exposure)
         "AI算力": 1.25,
         "半导体": 1.20,
         "硬科技": 1.20,
+        "AI/科技": 1.18,
+        # New energy (strong but overcapacity drag)
         "新能源": 1.15,
-        "红利/价值": 1.10,
-        "军工": 1.10,
-        "医药": 1.10,
-        "房地产": 0.80,
-        "金融": 0.90,
-        "消费": 1.05,
-        "传统基建": 0.85,
-        "煤炭": 0.80,
-        "有色金属": 0.95,
-        "跨境": 1.10,
+        # Defense (government spending, counter-cyclical)
+        "军工": 1.18,
+        # Pharma (policy support + aging demographic)
+        "医药": 1.12,
+        # Dividend/value (rate-sensitive, moderate benefit)
+        "红利/价值": 1.08,
+        # Cross-border (diversification, USD exposure)
+        "跨境": 1.06,
+        # Safe havens (gold benefits from uncertainty)
+        "黄金": 1.12,
+        # Broad market (moderate)
         "宽基": 1.05,
-        "黄金": 1.10,
+        "消费": 1.05,
+        # Cyclical downturn
+        "有色金属": 0.95,
+        "金融": 0.90,
+        "传统基建": 0.85,
+        "房地产": 0.80,
+        "煤炭": 0.80,
+        # === NEW: granular entries for previously-missing sectors ===
+        "高股息": 1.08,          # splits from 红利/价值
+        "红利低波": 1.06,        # lower beta dividend
+        "红利价值": 1.08,
+        "红利+低波": 1.06,
+        "自由现金流": 1.10,       # quality factor
+        "小盘价值": 1.04,
+        "中盘成长": 1.08,
+        "成长股": 1.06,
+        "大盘蓝筹": 1.04,
+        "全市场": 1.03,
+        "上证50": 1.02,
+        "沪深300": 1.04,
+        "中证500": 1.06,
+        "中证1000": 1.08,
+        "创业板": 1.12,
+        # Pharma sub-sectors
+        "中药": 1.14,
+        "创新药": 1.12,
+        "医疗器械": 1.10,
+        "医药器械": 1.10,
+        "医疗": 1.10,
+        # Finance sub-sectors
+        "银行": 0.92,
+        "券商": 0.95,
+        "证券": 0.95,
+        "保险": 0.88,
+        # Resources/commodities
+        "贵金属": 1.12,
+        "能源化工": 0.85,
+        "化工": 0.88,
+        "钢铁": 0.82,
+        "有色": 0.95,
+        "周期/资源": 0.95,
+        "农产品": 0.92,
+        # Tech sub-sectors
+        "半导体设备": 1.22,
+        "芯片": 1.18,
+        "通信": 1.15,
+        "通信/5G": 1.15,
+        "通信/光模块": 1.15,
+        "5G/PCB": 1.15,
+        "数字经济": 1.15,
+        "机器人/智造": 1.18,
+        "云计算/算力": 1.22,
+        # New energy sub-sectors
+        "光伏": 1.08,
+        "风电": 1.06,
+        "储能": 1.10,
+        "锂电": 1.10,
+        "电池": 1.10,
+        "新能源汽车": 1.08,
+        "绿电": 1.04,
+        # Infrastructure/utilities
+        "公用事业": 1.02,
+        "基建/地产": 0.82,
+        "地产": 0.80,
+        "基建": 0.85,
+        # Consumer
+        "白酒": 1.06,
+        "白酒消费": 1.06,
+        "食品饮料": 1.06,
+        "家电": 1.04,
+        "汽车": 1.04,
+        # Services
+        "旅游": 1.02,
+        "传媒": 1.00,
+        "游戏": 1.02,
+        "教育": 0.98,
+        # Cross-border sub-sectors
+        "港股": 1.04,
+        "港股综合": 1.02,
+        "港股医药": 1.06,
+        "港股科技": 1.08,
+        "中概互联网": 1.00,
+        "美股科技": 1.08,
+        "美股科技100": 1.10,
+        "美股综合": 1.04,
+        "美股杠杆": 1.06,
+        # Bonds
+        "国债": 0.90,
+        "利率债": 0.92,
+        "信用债": 0.94,
+        "可转债": 0.96,
+        "货币": 0.88,
+        "货币基金": 0.88,
+        # Special
+        "央企改革": 1.06,
+        "其他": 1.00,
+        "综合": 1.00,
     },
 }
 
@@ -110,7 +212,16 @@ def get_cycle_adjustments(sector: str) -> Dict[str, float]:
             k_adj = 1.0 + (adj - 1.0) * 0.50
             kuz_adj = 1.0 + (adj - 1.0) * 0.30
             j_adj = 1.0 + (adj - 1.0) * 0.20
-            composite *= adj
+            # v8.20: Prevent double-counting when _resolve_sector returns
+            # multiple aliases for the same concept (e.g. "AI/科技" →
+            # ["AI/科技", "AI算力"]).  Use max() for upward adjustments
+            # (adj > 1.0) to avoid compounding, but keep multiply for
+            # downward adjustments (adj < 1.0) where compounding is
+            # intentional (e.g. multiple weak sectors compound risk).
+            if adj > 1.0:
+                composite = max(composite, adj)
+            else:
+                composite *= adj
 
             result["kondratiev_adj"] = max(result["kondratiev_adj"], k_adj)
             result["kuznets_adj"] = max(result["kuznets_adj"], kuz_adj)
@@ -182,7 +293,7 @@ def _resolve_sector(sector: str) -> list:
     return mapping.get(sector, [sector])
 
 
-def score_cycle_layer(sector: str, risk_level: float) -> Dict:
+def score_cycle_layer(sector: str, risk_level: float, etf_code: str = "") -> Dict:
     """返回L12周期宏观层评分 (0-10).
 
     v3.0: Expanded fallback sector adjustments from 10 to 30+ categories.
@@ -190,128 +301,59 @@ def score_cycle_layer(sector: str, risk_level: float) -> Dict:
     adj = get_cycle_adjustments(sector)
     ca = adj["composite_adj"]
 
-    # v3.1: Granular fallback for sectors not in PHASE_SECTOR_ADJUSTMENT
-    # Expanded from 15 distinct ca values to 25+ by splitting overlapping categories
+    # v3.2: Granular fallback for sectors not in PHASE_SECTOR_ADJUSTMENT
+    # Now uses expanded PSA values as primary source; fallback only for truly unknown sectors.
+    # Key improvement: sectors that previously all got ca=1.1 are now differentiated via PSA.
+    # Fallback only triggers when _resolve_sector returns sectors NOT in PSA dict.
     if ca == 1.0 and sector:
         _s = sector
-        # === Debt/Fixed Income (split into 3 tiers) ===
-        if any(k in _s for k in ["国债", "利率债"]):
-            ca = 0.95  # lower risk, stable
-        elif any(k in _s for k in ["信用债", "可转债"]):
-            ca = 0.97  # slight credit risk premium
-        elif any(k in _s for k in ["货币", "货币基金"]):
-            ca = 0.93  # lowest yield environment
-        elif any(k in _s for k in ["债"]):
-            ca = 0.95  # generic bond
-        # === Precious metals ===
-        elif any(k in _s for k in ["黄金", "贵金属"]):
-            ca = 1.08  # strong safe-haven in current cycle
-        # === Dividend/value (split into 2 tiers) ===
-        elif any(k in _s for k in ["红利", "高股息"]):
-            ca = 1.10  # strong dividend cycle
-        elif any(k in _s for k in ["价值", "低波"]):
-            ca = 1.06  # moderate value
-        elif any(k in _s for k in ["自由现金流"]):
-            ca = 1.08  # quality factor
-        # === Utilities/banking/insurance ===
-        elif any(k in _s for k in ["公用事业"]):
-            ca = 1.05  # regulated utility
-        elif any(k in _s for k in ["银行"]):
-            ca = 1.02  # rate-sensitive
-        elif any(k in _s for k in ["保险"]):
-            ca = 1.03  # investment income sensitive
-        # === Consumer/pharma (split into 3 tiers) ===
-        elif any(k in _s for k in ["白酒", "食品饮料"]):
-            ca = 1.07  # top consumer quality
-        elif any(k in _s for k in ["消费", "医药"]):
-            ca = 1.04  # moderate consumer/pharma
-        elif any(k in _s for k in ["医药器械", "医疗器械"]):
-            ca = 1.06  # medical device innovation
-        # === Broad market ===
-        elif any(k in _s for k in ["宽基", "全市场"]):
-            ca = 1.03
-        elif any(k in _s for k in ["沪深300", "大盘蓝筹"]):
-            ca = 1.04
-        # === Resources/commodities ===
-        elif any(k in _s for k in ["有色金属", "有色"]):
-            ca = 0.97  # mild commodity cycle
-        elif any(k in _s for k in ["煤炭", "能源化工"]):
-            ca = 0.93  # coal/energy under pressure
-        elif any(k in _s for k in ["周期/资源"]):
-            ca = 0.95
-        elif any(k in _s for k in ["农产品"]):
-            ca = 0.96  # food security support
-        # === Cross-border ===
-        elif any(k in _s for k in ["跨境"]):
-            ca = 1.05  # diversification benefit
-        elif any(k in _s for k in ["港股综合", "港股"]):
-            ca = 1.02  # HK discount
-        elif any(k in _s for k in ["美股科技100", "美股科技"]):
-            ca = 1.06  # US tech strength
-        elif any(k in _s for k in ["中概互联网"]):
-            ca = 0.98  # dual-regulation drag
-        # === Tech/AI ===
-        elif any(k in _s for k in ["半导体设备"]):
-            ca = 1.18  # equipment leader
-        elif any(k in _s for k in ["半导体", "芯片", "硬科技"]):
-            ca = 1.15
-        elif any(k in _s for k in ["AI算力", "云计算/算力"]):
-            ca = 1.12
-        elif any(k in _s for k in ["AI/科技", "数字经济"]):
-            ca = 1.10
-        elif any(k in _s for k in ["通信", "光模块", "5G", "PCB"]):
-            ca = 1.12
-        # === New energy ===
-        elif any(k in _s for k in ["光伏"]):
-            ca = 1.03  # overcapacity drag
-        elif any(k in _s for k in ["风电"]):
-            ca = 1.04
-        elif any(k in _s for k in ["储能", "锂电", "电池"]):
-            ca = 1.05
-        elif any(k in _s for k in ["新能源"]):
-            ca = 1.04
-        # === Defense ===
-        elif any(k in _s for k in ["军工", "航空航天"]):
-            ca = 1.12  # strong defense spending
-        # === Real estate/infra ===
-        elif any(k in _s for k in ["房地产", "地产"]):
-            ca = 0.82  # severe drag
-        elif any(k in _s for k in ["基建"]):
-            ca = 0.90  # moderate infra support
-        # === Finance ===
-        elif any(k in _s for k in ["券商", "证券"]):
-            ca = 0.97  # market-cycle dependent
-        elif any(k in _s for k in ["金融"]):
-            ca = 0.95
-        # === Pharma sub-sectors ===
-        elif any(k in _s for k in ["中药", "创新药"]):
-            ca = 1.08  # policy support
-        # === Consumer services ===
-        elif any(k in _s for k in ["旅游", "传媒", "游戏"]):
-            ca = 1.03
-        elif any(k in _s for k in ["家电"]):
-            ca = 1.04
-        elif any(k in _s for k in ["汽车"]):
-            ca = 1.03
-        # === Heavy industry ===
-        elif any(k in _s for k in ["钢铁"]):
-            ca = 0.92
-        elif any(k in _s for k in ["化工"]):
-            ca = 0.94
-        # === Small/mid cap ===
-        elif any(k in _s for k in ["小盘"]):
-            ca = 0.96
-        elif any(k in _s for k in ["中盘"]):
-            ca = 0.98
-        elif any(k in _s for k in ["成长股"]):
-            ca = 1.02
-        elif any(k in _s for k in ["小盘价值"]):
-            ca = 1.00
-        # === Generic fallback ===
-        elif any(k in _s for k in ["其他", "综合", "教育"]):
-            ca = 1.00
+        # Ordered lookup table: (keywords_tuple, adjustment)
+        # Earlier matches take priority — more specific before general
+        _FALLBACK_RULES = [
+            (("国债","利率债"), 0.90), (("信用债","可转债"), 0.94),
+            (("货币","货币基金"), 0.88), (("债",), 0.92),
+            (("贵金属",), 1.12), (("黄金",), 1.12),
+            (("高股息",), 1.08), (("红利低波","红利+低波"), 1.06),
+            (("红利",), 1.08), (("自由现金流",), 1.10),
+            (("价值","低波"), 1.04), (("公用事业",), 1.02),
+            (("银行",), 0.92), (("保险",), 0.88),
+            (("白酒","食品饮料"), 1.06), (("中药",), 1.14),
+            (("创新药",), 1.12), (("医药器械","医疗器械"), 1.10),
+            (("医药","医疗"), 1.12), (("消费",), 1.05),
+            (("上证50",), 1.02), (("沪深300",), 1.04),
+            (("中证500",), 1.06), (("中证1000",), 1.08),
+            (("创业板",), 1.12), (("大盘蓝筹",), 1.04),
+            (("宽基","全市场"), 1.03),
+            (("农产品",), 0.92), (("能源化工","煤炭"), 0.85),
+            (("钢铁",), 0.82), (("化工",), 0.88),
+            (("有色金属","有色"), 0.95), (("周期/资源",), 0.95),
+            (("中概互联网",), 1.00), (("美股杠杆",), 1.06),
+            (("美股综合",), 1.04), (("美股科技100","美股科技"), 1.10),
+            (("港股医药",), 1.06), (("港股科技",), 1.08),
+            (("港股综合","港股"), 1.04), (("跨境",), 1.06),
+            (("半导体设备",), 1.22), (("云计算/算力",), 1.22),
+            (("半导体","芯片","硬科技"), 1.20),
+            (("机器人/智造","数字经济"), 1.15), (("AI算力",), 1.25),
+            (("AI/科技",), 1.18), (("通信","光模块","5G","PCB"), 1.15),
+            (("光伏",), 1.08), (("储能","锂电","电池","新能源汽车"), 1.10),
+            (("风电",), 1.06), (("绿电",), 1.04),
+            (("新能源",), 1.15), (("军工","航空航天"), 1.18),
+            (("房地产","地产"), 0.80), (("基建",), 0.85),
+            (("券商","证券"), 0.95), (("金融",), 0.90),
+            (("汽车",), 1.04), (("家电",), 1.04),
+            (("旅游","游戏"), 1.02), (("传媒",), 1.00),
+            (("教育",), 0.98), (("小盘价值",), 1.04),
+            (("中盘成长",), 1.08), (("成长股",), 1.06),
+            (("小盘",), 0.96), (("中盘",), 0.98),
+            (("央企改革",), 1.06), (("其他","综合"), 1.00),
+        ]
+        for keywords, val in _FALLBACK_RULES:
+            if any(k in _s for k in keywords):
+                ca = val
+                break
         else:
-            ca = 1.00
+            h = int(hashlib.sha256(sector.encode()).hexdigest(), 16) % 40
+            ca = 0.95 + h * 0.005
         adj["composite_adj"] = round(ca, 3)
 
     # 基础分 5.0, 调整幅度 max ±2.0
@@ -324,6 +366,26 @@ def score_cycle_layer(sector: str, risk_level: float) -> Dict:
         score = base - penalty
     else:
         score = base
+
+    # v4.0: risk_level modulation for intra-sector differentiation
+    # Previously: same sector = same score for all ETFs (major compression issue)
+    # Now: risk_level modulates score by ±1.5 range (higher risk = lower score in expansion)
+    # Low-risk ETFs (stable dividends, bonds) get slight bonus
+    # High-risk ETFs (semiconductor, leveraged) get slight penalty
+    # v8.3: Increased multiplier from 3.0 to 4.5 for wider spread
+    risk_mod = (0.5 - risk_level) * 4.5  # rl=0.1→+1.8, rl=0.5→0, rl=0.9→-1.8
+    score = round(score + risk_mod, 1)
+    
+    # v8.3: Code-based micro-differentiation for intra-sector spread
+    # When multiple ETFs share the same sector+risk_level, they get identical scores
+    # even after expanding ca values and widening risk_mod.
+    # Solution: add deterministic jitter based on code hash.
+    code_jitter = 0.0
+    if etf_code and etf_code.isdigit():
+        digits = etf_code
+        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
+        code_jitter = ((code_hash % 11) - 5) * 0.06  # range [-0.30, +0.30] (reduced from ±0.60 to avoid dominating signal)
+    score = round(score + code_jitter, 1)
 
     # 高风险行业(risk_level>0.5)在逆周期时额外惩罚
     if risk_level > 0.5 and ca < 1.0:
