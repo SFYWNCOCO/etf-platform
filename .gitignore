@@ -42,3 +42,11 @@ config/*.bak*
 # OS
 Thumbs.db
 .DS_Store
+
+# === 备份/归档/临时 (2026-08-03) ===
+_archived/
+data/backup_20260721/
+*.phys_backup
+data/scan_*_latest.json
+data/screener_cache/
+src/data/screener_cache/
