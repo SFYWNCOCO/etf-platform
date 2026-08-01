@@ -1,0 +1,146 @@
+[
+  {
+    "title": "A Cap-Axis Integral Diagnostic of Factor Models",
+    "paper_id": "2607.01765",
+    "url": "https://arxiv.org/abs/2607.01765",
+    "核心方法": "I propose a cap-axis integral diagnostic for factor-model evaluation",
+    "可落地性评分": 2,
+    "具体改进建议": "考虑将论文中的新因子或因子改进方法纳入现有因子库，更新因子计算模块。",
+    "建议修改文件": "models/factors.py",
+    "matched_keywords": [
+      "factor",
+      "factor model"
+    ],
+    "generated_at": "2026-07-05T16:31:20.285070+00:00"
+  },
+  {
+    "title": "Portfolio Optimization under Fast and Slow Latent Mean-Reverting and Momentum Drift",
+    "paper_id": "2607.01705",
+    "url": "https://arxiv.org/abs/2607.01705",
+    "核心方法": "We consider a class of partial-information portfolio optimization problems in which the drift of a risky asset is driven by two latent stochastic factors evolving at distinct time scales",
+    "可落地性评分": 3,
+    "具体改进建议": "评估论文中的投资组合优化方法，看是否能提升当前组合构建策略。",
+    "建议修改文件": "strategies/portfolio.py",
+    "matched_keywords": [
+      "factor",
+      "portfolio",
+      "risk",
+      "momentum"
+    ],
+    "generated_at": "2026-07-05T16:31:23.286158+00:00"
+  },
+  {
+    "title": "Liquidity Premium and Investment Horizons",
+    "paper_id": "2607.01377",
+    "url": "https://arxiv.org/abs/2607.01377",
+    "核心方法": "We estimate Kyle's (1985) price-impact coefficient $λ$ directly from daily equity order flow and test its ability to forecast the cross-section of subsequent stock returns",
+    "可落地性评分": 3,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk",
+      "volatility",
+      "liquidity"
+    ],
+    "generated_at": "2026-07-05T16:31:26.287016+00:00"
+  },
+  {
+    "title": "When large trades are not news: Liquidity tail risk and price discovery",
+    "paper_id": "2607.01198",
+    "url": "https://arxiv.org/abs/2607.01198",
+    "核心方法": "When is a large trade news, and when is it a liquidity shock? We study this question in a sequential competitive limit order book with asymmetric information",
+    "可落地性评分": 2,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk",
+      "liquidity"
+    ],
+    "generated_at": "2026-07-05T16:31:29.287936+00:00"
+  },
+  {
+    "title": "Tail Risk Management with Puts and Trend Following: A CVaR Framework for Crashes and Drawdowns",
+    "paper_id": "2607.00883",
+    "url": "https://arxiv.org/abs/2607.00883",
+    "核心方法": "Tail-risk management is not only an instrument-selection problem",
+    "可落地性评分": 2,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk",
+      "volatility"
+    ],
+    "generated_at": "2026-07-05T16:31:32.288862+00:00"
+  },
+  {
+    "title": "End-to-End Parametric Portfolio Policies for Cross-Asset Futures Timing: When Do AI Models Beat Simple Rules?",
+    "paper_id": "2607.00475",
+    "url": "https://arxiv.org/abs/2607.00475",
+    "核心方法": "Timing-based tilts across asset classes can drive much of the risk and return of a diversified cross-asset portfolio",
+    "可落地性评分": 4,
+    "具体改进建议": "考察论文中的 Transformer 变体，看是否能改进时序预测效果。",
+    "建议修改文件": "models/transformer_model.py",
+    "matched_keywords": [
+      "portfolio",
+      "risk",
+      "transformer",
+      "risk parity",
+      "momentum",
+      "liquidity",
+      "lstm"
+    ],
+    "generated_at": "2026-07-05T16:31:35.289571+00:00"
+  },
+  {
+    "title": "Signature-Based Optimal Execution for Statistical Arbitrage with Path-Dependent Trading Signals",
+    "paper_id": "2606.31387",
+    "url": "https://arxiv.org/abs/2606.31387",
+    "核心方法": "We develop a signature-based framework for optimal execution in statistical arbitrage strategies with path-dependent predictive signals",
+    "可落地性评分": 1,
+    "具体改进建议": "建议深入阅读论文摘要，评估是否对当前策略有改进空间。",
+    "建议修改文件": "README.md",
+    "matched_keywords": [
+      "statistical arbitrage"
+    ],
+    "generated_at": "2026-07-05T16:31:38.290327+00:00"
+  },
+  {
+    "title": "Strategic Risk Reduction: Self-Protection and Self-Insurance",
+    "paper_id": "2606.30363",
+    "url": "https://arxiv.org/abs/2606.30363",
+    "核心方法": "This paper studies how a risk holder should combine self-protection and self-insurance when market insurance is absent",
+    "可落地性评分": 1,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk"
+    ],
+    "generated_at": "2026-07-05T16:31:41.291208+00:00"
+  },
+  {
+    "title": "Hidden Dependence and Aggregate Tail Risk",
+    "paper_id": "2606.30193",
+    "url": "https://arxiv.org/abs/2606.30193",
+    "核心方法": "We study risk aggregation problems for arbitrary non-decreasing aggregation functions and tail risk measures under dependence uncertainty in a distributionally robust setting",
+    "可落地性评分": 1,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk"
+    ],
+    "generated_at": "2026-07-05T16:31:44.292326+00:00"
+  },
+  {
+    "title": "Financial Resilience Evaluation: From Conditional Expectations to Dynamic Convex Risk Measures",
+    "paper_id": "2606.30070",
+    "url": "https://arxiv.org/abs/2606.30070",
+    "核心方法": "Financial resilience concerns the rate at which a position recovers, or further deteriorates, in response to adverse conditions",
+    "可落地性评分": 1,
+    "具体改进建议": "参考论文中的风险管理方法，优化风控模块的参数或逻辑。",
+    "建议修改文件": "core/risk_manager.py",
+    "matched_keywords": [
+      "risk"
+    ],
+    "generated_at": "2026-07-05T16:31:47.293483+00:00"
+  }
+]

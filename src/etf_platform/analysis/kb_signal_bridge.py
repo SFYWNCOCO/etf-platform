@@ -94,9 +94,8 @@ class KBSignalBridge:
             return
         # patterns 格式: [{id, source, domain, signal, trigger, direction, etf_mapping, confidence}]
         for p in self._patterns:
-            source = p.get("source", "")
             # 从 source 文件名提取 sector：k056-behavioral-macro → behavioral macro
-            # 跨域映射见 SCHEMA
+            # 跨域映射见 SCHEMA（sector 推断由 _infer_sectors 完成）
             sectors = self._infer_sectors(p)
             weight = self._category_weight(p)
             for sector in sectors:

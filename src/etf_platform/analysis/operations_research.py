@@ -159,7 +159,6 @@ def ip_etf_selection(
         if len(selected) >= num_select:
             break
         # Check if adding this ETF exceeds risk budget
-        avg_risk = total_risk / max(len(selected), 1)
         new_avg_risk = (total_risk + risk) / max(len(selected) + 1, 1)
         if new_avg_risk <= max_risk or len(selected) < num_select // 2:
             selected.append(code)

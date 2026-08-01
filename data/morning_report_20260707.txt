@@ -1,0 +1,85 @@
+=======================================================
+       ETF MORNING REPORT  2026-07-07 (MONDAY)
+=======================================================
+
+[1] MARKET SENTIMENT (QVIX)
+  QVIX Status: DATA UNAVAILABLE (regime=unknown)
+  Trade Signal: Use standard scoring (no sentiment override)
+  Macro: Kondratiev Wave 6 Spring Accelerating
+  Kuznets: Bottom->Recovery transition
+  Juglar: Restocking mid-late phase (momentum weakening)
+
+[2] KEY ETFS - LAST SESSION (2026-07-06 FRI)
+-------------------------------------------------------
+515030 NEV ETF Huaxia
+  Close: 1.832 | Chg: -2.66% | Amp: 52.78%
+  Range: High 2.207 - Low 1.24 | Turnover: 29.92%
+
+588000 STAR 50 ETF Huaxia
+  Close: 2.116 | Chg: 4.6% | Amp: 64.37%
+  Range: High 2.39 - Low 1.028 | Turnover: 659.11%
+
+512760 Chip ETF Guotai
+  Close: 1.412 | Chg: 5.85% | Amp: 76.42%
+  Range: High 1.638 - Low 0.559 | Turnover: 127.67%
+
+159819 AI ETF E Fund
+  Close: 2.021 | Chg: -1.46% | Amp: 65.86%
+  Range: High 2.266 - Low 0.935 | Turnover: 225.04%
+
+159995 Chip ETF Huaxia
+  Close: 1.505 | Chg: -47.25% | Amp: 153.49%
+  Range: High 3.499 - Low 1.189 | Turnover: 336.99%
+
+[3] AGGRESSIVE PORTFOLIO TOP 10
+-------------------------------------------------------
+  1. [6.5pts/SAFE] 159263 Value ETF E Fund (Dividend/Value)
+     Risk:0.12 | L8:7.2 L9:7.2 | Demand:6 | PolRisk:3.7 | Sig:FLOW+SIG
+  2. [6.2pts/SAFE] 159326 Grid Equipment ETF Huaxia (Utilities)
+     Risk:0.22 | L8:6.6 L9:6.4 | Demand:6.5 | PolRisk:4.1 | Sig:WATCH
+  3. [6.2pts/SAFE] 510880 Dividend ETF (High Dividend)
+     Risk:0.12 | L8:7.1 L9:7.1 | Demand:6 | PolRisk:3.7 | Sig:FLOW+SIG
+  4. [6.1pts/SAFE] 159338 CSI A500 ETF Guotai (Broad Market)
+     Risk:0.22 | L8:8.5 L9:8.2 | Demand:5.5 | PolRisk:3.4 | Sig:FLOW+SIG
+  5. [6.1pts/SAFE] 159506 HK Biotech ETF Fuguo (Pharma)
+     Risk:0.32 | L8:7.1 L9:8.5 | Demand:5.2 | PolRisk:6.6 | Sig:FLOW+SIG
+  6. [6pts/SAFE] 159869 Gaming ETF Huaxia (Consumer)
+     Risk:0.22 | L8:6.9 L9:7.6 | Demand:3.4 | PolRisk:4.2 | Sig:WATCH
+  7. [6pts/SAFE] 512100 CSI 1000 ETF (Small Cap Value)
+     Risk:0.35 | L8:7.1 L9:7 | Demand:5 | PolRisk:5 | Sig:FLOW+SIG
+  8. [5.9pts/BALANCED] 159227 Aerospace ETF Huaxia (Military)
+     Risk:0.35 | L8:7.9 L9:8.4 | Demand:8 | PolRisk:5.1 | Sig:FLOW+SIG
+  9. [5.8pts/BALANCED] 159131 HK Tech ETF Huabao (AI/Tech)
+     Risk:0.55 | L8:4.9 L9:5.7 | Demand:8 | PolRisk:6.3 | Sig:DEMAND
+  10. [5.8pts/BALANCED] 159898 Medical Device ETF (MedTech)
+     Risk:0.28 | L8:6.8 L9:7.8 | Demand:5.6 | PolRisk:5.5 | Sig:WATCH
+
+[4] BALANCED PORTFOLIO TOP 5
+-------------------------------------------------------
+  1. [6.2pts] 512170 Medical ETF (Pharma)
+     Risk:0.3 | L8:7.3 L9:8.7 | Demand:5.4 | Sig:FLOW+SIG STRONG
+  2. [6.1pts] 159263 Value ETF E Fund (Dividend/Value)
+     Risk:0.12 | L8:7.2 L9:7.2 | Demand:6 | Sig:FLOW+SIG STRONG
+  3. [5.9pts] 159206 Satellite ETF Yongying (Military)
+     Risk:0.22 | L8:8 L9:8.5 | Demand:8 | Sig:FLOW+SIG STRONG
+  4. [5.8pts] 159781 STAR-CY ETF E Fund (AI/Tech)
+     Risk:0.22 | L8:5.4 L9:6.1 | Demand:8 | Sig:DEMAND DRIVEN
+  5. [5.8pts] 159326 Grid Equipment ETF Huaxia (Utilities)
+     Risk:0.22 | L8:6.6 L9:6.4 | Demand:6.5 | Sig:WATCH
+
+[5] RISK WARNINGS
+-------------------------------------------------------
+  [!] QVIX data unavailable - cannot assess panic/greed regime
+  [!] 159131 (HK Tech) risk level 0.55 HIGHEST - position control advised
+  [!] 159516 (Semiconductor Equip) score 5.6, supply chain L3=3.0 L4=2.5
+  [!] 159869 (Gaming) demand score only 3.4 - weak downstream
+  [i] High-score ETFs (>6) mostly dividend/utility/broad-based, lack catalysts
+  [i] Low-score high-momentum (military/AI) have elasticity but need events
+
+=======================================================
+Source: Tencent Quote / ETF Platform Scan / l003 framework
+Generated: 2026-07-07 09:15 CST
+Framework: penetration_score = RISK indicator (NOT return predictor)
+  High score (>7) = safe but lacks catalyst -> defensive/DCA
+  Low score (<4) = high elasticity with catalyst potential -> short-term
+=======================================================

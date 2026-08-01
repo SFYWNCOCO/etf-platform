@@ -74,8 +74,6 @@ def analyze(code, profile="balanced", live=True, deep=True):
     exclude = {"L1_ETF", "L2_Holdings"}
     valid = {k: v for k, v in layers.items() if k not in exclude and isinstance(v, (int, float))}
     supply_layers = {"L3_Material","L4_SupplyChain","L5_Tech","L6_Politics","L7_Irreplaceable"}
-    capital_layer = {"L8_CapitalFlow"}
-    signal_layer = {"L9_Signals"}
     demand_layers = {"L10_Demand","L11_SectorRisk"}
     cycle_layers = {"L12_PoliticalRisk","L13_MacroCycle"}
     risk_layers = {"L14_StoicRisk","L18_VaR","L20_OptionVol"}

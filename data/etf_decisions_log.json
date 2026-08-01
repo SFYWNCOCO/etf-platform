@@ -65,5 +65,33 @@
       "mode": "balanced"
     }
   ],
-  "pitfalls": []
+  "pitfalls": [],
+  "scans": [
+    {
+      "date": "2026-07-15",
+      "type": "daily_scan",
+      "total_scanned": 50,
+      "top3": [
+        {
+          "code": "159691",
+          "name": "港股红利ETF工银",
+          "score": 6.22
+        },
+        {
+          "code": "159263",
+          "name": "价值ETF易方达",
+          "score": 6.07
+        },
+        {
+          "code": "159131",
+          "name": "港股通信息技术ETF华宝",
+          "score": 5.95
+        }
+      ],
+      "cache_used": true
+    }
+  ],
+  "last_updated": "2026-07-15T02:27:02.768097",
+  "_provenance": "mixed",
+  "_last_verified": "2026-07-19"
 }

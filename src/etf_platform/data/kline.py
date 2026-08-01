@@ -36,14 +36,64 @@ TENCENT_KLINE_URL = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=%s%
 _trend_cache = {}
 _TREND_CACHE_LOCK = threading.Lock()
 
+# Disk cache: kline trends survive across runs (daily klines don't change intraday)
+# TTL: 6h — market-close data stable; intraday runs reuse yesterday's close trend.
+import os
+import time as _time
+import dataclasses
+from pathlib import Path
 
-def _sina_code(code):
-    return "sh" if code.startswith(("5","6")) else "sz"
+_KLINE_DISK_CACHE_PATH = Path(__file__).resolve().parent.parent.parent.parent / "data" / "kline_trend_cache.json"
+_KLINE_DISK_TTL = 6 * 3600  # 6 hours
+_kline_disk_loaded = False
+
+
+def _load_disk_cache() -> dict:
+    global _kline_disk_loaded
+    if _kline_disk_loaded:
+        return _trend_cache
+    _kline_disk_loaded = True
+    try:
+        if _KLINE_DISK_CACHE_PATH.exists():
+            raw = json.loads(_KLINE_DISK_CACHE_PATH.read_text(encoding="utf-8"))
+            now = _time.time()
+            for code, blob in raw.items():
+                if now - blob.get("_ts", 0) > _KLINE_DISK_TTL:
+                    continue
+                fields = {k: v for k, v in blob.items() if k != "_ts"}
+                try:
+                    _trend_cache[code] = TrendSnapshot(**fields)
+                except TypeError:
+                    continue
+    except (OSError, ValueError, json.JSONDecodeError) as e:
+        logger.debug("kline disk cache load failed: %s", e)
+    return _trend_cache
+
+
+def _save_disk_cache():
+    try:
+        with _TREND_CACHE_LOCK:
+            snapshot = {}
+            now = _time.time()
+            for code, ts in _trend_cache.items():
+                d = dataclasses.asdict(ts)
+                d["_ts"] = now
+                snapshot[code] = d
+        _KLINE_DISK_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _KLINE_DISK_CACHE_PATH.write_text(
+            json.dumps(snapshot, ensure_ascii=False), encoding="utf-8"
+        )
+    except (OSError, ValueError) as e:
+        logger.debug("kline disk cache save failed: %s", e)
 
 
 def clear_trend_cache():
     with _TREND_CACHE_LOCK:
         _trend_cache.clear()
+
+
+def _sina_code(code):
+    return "sh" if code.startswith(("5","6")) else "sz"
 
 
 def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
@@ -87,7 +137,8 @@ def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
 
 
 def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
-    """Fetch kline data and compute trend indicators. (session-cached)"""
+    """Fetch kline data and compute trend indicators. (session + disk cached)"""
+    _load_disk_cache()
     with _TREND_CACHE_LOCK:
         if code in _trend_cache:
             return _trend_cache[code]
@@ -160,6 +211,7 @@ def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
     )
     with _TREND_CACHE_LOCK:
         _trend_cache[code] = ts
+    _save_disk_cache()
     return ts
 
 

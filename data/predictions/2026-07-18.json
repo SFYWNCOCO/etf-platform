@@ -1,0 +1,40 @@
+{
+  "date": "2026-07-18",
+  "profile": "均衡",
+  "timestamp": "2026-07-18T23:14:27.752705",
+  "top3": [
+    {
+      "code": "159732",
+      "name": "消费电子ETF华夏",
+      "sector": "消费",
+      "two_week_score": 78,
+      "pipeline_score": 5.8,
+      "z_composite": 0.855,
+      "trend_signal": "plunging",
+      "change_20d": -19.6,
+      "change_10d": -20.8
+    },
+    {
+      "code": "159326",
+      "name": "电网设备ETF华夏",
+      "sector": "公用事业",
+      "two_week_score": 72,
+      "pipeline_score": 6.1,
+      "z_composite": 0.87,
+      "trend_signal": "plunging",
+      "change_20d": -27.5,
+      "change_10d": -20.3
+    },
+    {
+      "code": "512690",
+      "name": "酒ETF",
+      "sector": "白酒消费",
+      "two_week_score": 61,
+      "pipeline_score": 5.6,
+      "z_composite": 0.188,
+      "trend_signal": "weak",
+      "change_20d": 2.2,
+      "change_10d": 4.3
+    }
+  ]
+}

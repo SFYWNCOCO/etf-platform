@@ -1,0 +1,14 @@
+[
+  {
+    "ts": "2026-06-26 20:24",
+    "task_id": "test",
+    "domain": "code",
+    "difficulty": "hard",
+    "l0_hits": [
+      "too_short",
+      "no_effort"
+    ],
+    "score": 0.02,
+    "context": ""
+  }
+]

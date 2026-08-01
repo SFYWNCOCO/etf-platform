@@ -15,11 +15,15 @@ PROFILES_ALIAS = {
 
 def compute_weighted_composite(scores: dict, profile: str = "均衡",
                                 weights_data: dict = None,
-                                layers_map: dict = None) -> float:
+                                layers_map: dict = None) -> tuple:
     """Compute profile-weighted composite score.
 
     Uses weights.yaml (profile→category→weight) and layers.yaml (layer→category).
-    Falls back to simple average if config unavailable.
+    Returns (score, total_weight, used_layers) when config present; falls back to
+    simple average (float) if config unavailable — callers should handle both.
+
+    NOTE: this function is currently unused by the live pipeline (dead code kept
+    for reference). pipeline._compute_composite_score is the active path.
     """
     import logging
     logger = logging.getLogger("etf_pipeline")
@@ -57,7 +61,6 @@ def compute_weighted_composite(scores: dict, profile: str = "均衡",
 
         if total_wt > 0:
             return round(total_sum / total_wt, 2), total_wt, used_layers
-
     except Exception as e:
         logger.debug(f"weighted composite fallback ({e})")
 

@@ -1,0 +1,124 @@
+{
+  "description": "ETF Platform 各模块分数范围与量纲对照",
+  "scan_date": "2026-07-18",
+  "score_ranges": {
+    "scorer.py_L10_demand": {
+      "range": [4.0, 8.0],
+      "default_range": "4.0-8.0",
+      "modulation": "(0.5 - risk_level) * 2.0",
+      "description": "消费需求评分，消费者行业4-8，B2B行业4-8"
+    },
+    "scorer.py_L11_sector_risk": {
+      "range": [1.0, 10.0],
+      "default_range": "1.0-10.0",
+      "modulation": "(risk_level - 0.5) * 3.0",
+      "description": "行业风险评分，基础分5.0 +/- 库存和人口因素"
+    },
+    "layers_l12_macro_cycle": {
+      "range": [1.0, 10.0],
+      "function": "score_cycle_layer",
+      "description": "宏观周期评分"
+    },
+    "layers_l13_factor_loading": {
+      "range": [1.0, 10.0],
+      "function": "score_factor_adjustment",
+      "description": "因子加载评分"
+    },
+    "layers_l14_stoic_risk": {
+      "range": [1.0, 10.0],
+      "function": "score_stoic_layer",
+      "description": "基本面/ Stoic 风险评分"
+    },
+    "layers_l15_state_similarity": {
+      "range": [1.0, 10.0],
+      "function": "score_state_similarity",
+      "description": "历史状态相似度评分"
+    },
+    "layers_l16_live_signals": {
+      "sub_functions": ["score_premium_signal", "score_liquidity", "score_fund_quality"],
+      "range": [1.0, 10.0],
+      "description": "实时信号评分（溢价/流动性/基金质量）"
+    },
+    "layers_l17_quantitative_factor": {
+      "range": [1.0, 10.0],
+      "function": "calculate_factor_score",
+      "description": "量化因子评分"
+    },
+    "layers_l18_var_risk": {
+      "range": [1.0, 10.0],
+      "function": "calculate_var_score",
+      "description": "VaR 风险评分"
+    },
+    "layers_l19_fx_channel": {
+      "range": [1.0, 10.0],
+      "function": "calculate_fx_score",
+      "description": "外汇通道评分"
+    },
+    "layers_l20_option_volatility": {
+      "range": [1.0, 10.0],
+      "function": "calculate_iv_score",
+      "description": "期权隐含波动率评分"
+    },
+    "layers_l22_market_pendulum": {
+      "range": [1.0, 10.0],
+      "function": "score_pendulum_layer",
+      "description": "市场钟摆行为评分"
+    },
+    "layers_l23_microstructure": {
+      "range": [1.0, 10.0],
+      "function": "score_microstructure",
+      "description": "微观结构评分（恐慌抛售/惜售蓄力/放量出货）"
+    },
+    "decision_two_week_picker": {
+      "field": "two_week_score",
+      "range": [0, 100],
+      "method": "Z-score标准化多因子加权合成",
+      "description": "2周潜在涨幅预测，6因子Z-score加权 × 100"
+    },
+    "decision_ml_predictor": {
+      "fields": ["probability", "expected_return", "confidence"],
+      "range": "probability: [0,1], expected_return: 百分比",
+      "method": "XGBoost+LightGBM+CatBoost 堆叠集成",
+      "description": "ML预测（概率+预期收益）"
+    },
+    "decision_strategy_tournament": {
+      "field": "pipeline_score",
+      "source_range": "[1.0, 10.0]",
+      "method": "多策略锦标赛 + regime加权集成",
+      "description": "策略锦标赛输出，使用pipeline_score(1-10)"
+    },
+    "analysis_event_nlp": {
+      "field": "signal_strength",
+      "typical_range": "~50 (0-100)",
+      "method": "NLP事件信号强度",
+      "description": "华尔街见闻/新浪财经NLP分析"
+    },
+    "analysis_causal": {
+      "range": [0.0, 1.0],
+      "formula": "auth*0.25 + scope*0.30 + duration*0.20 + surprise*0.15 + (1-reversible)*0.10",
+      "description": "因果推断置信度（加权归一化到0-1）"
+    },
+    "analysis_chain": {
+      "range": "无界",
+      "formula": "direct_bottlenecks*0.4 + indirect_chains*0.3 + cascade_scenarios*0.3",
+      "description": "产业链瓶颈强度评分"
+    },
+    "optimize_portfolio": {
+      "range": "无固定范围",
+      "description": "组合优化评分，依赖supply/capital/chain输入"
+    }
+  },
+  "inconsistency_summary": {
+    "primary_scales": {
+      "1_to_10": ["scorer_L10", "scorer_L11", "all_layers_l12_l23", "strategy_tournament_pipeline_score"],
+      "0_to_100": ["two_week_picker", "event_nlp_typical"],
+      "0_to_1": ["causal_confidence"],
+      "mixed": ["ml_predictor", "portfolio_optimizer"]
+    },
+    "normalization_in_meta_predictor": {
+      "method": "_normalize_scores() 将所有分数 clamp 到 0-100",
+      "issue": "1-10 范围的分数被当作 1-10 而非 10-100，导致低权重",
+      "recommendation": "根据 source 类型区分归一化策略"
+    }
+  }
+}

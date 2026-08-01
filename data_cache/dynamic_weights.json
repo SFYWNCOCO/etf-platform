@@ -1,0 +1,12 @@
+{
+  "state": "normal",
+  "signals": {
+    "main_flow": -117.36879047
+  },
+  "weights": {
+    "supply": 0.15,
+    "capital": 0.45,
+    "signal": 0.25,
+    "demand": 0.15
+  }
+}

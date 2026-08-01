@@ -48,8 +48,6 @@ def health_score(code):
     if not liq:
         return None
     
-    scores = []
-    
     # 1. AP活跃度 (25%)
     ap_30 = liq.get("ap_30d", 3)
     ap_180 = liq.get("ap_180d", 5)

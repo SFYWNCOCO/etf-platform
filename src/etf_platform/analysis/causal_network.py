@@ -845,7 +845,13 @@ def transfer_entropy(
 
     def binarize(series: List[float]) -> List[int]:
         sorted_vals = sorted(set(series))
-        median = sorted_vals[len(sorted_vals) // 2] if sorted_vals else 0
+        if not sorted_vals:
+            return [0] * len(series)
+        # FIX 2026-08-01: len//2 on even-length sets (e.g. [0,1]) picks the UPPER
+        # median (1), making `v > 1` always False → every binary series became all
+        # zeros and transfer_entropy was always 0. Use lower median (len-1)//2 so
+        # v > median correctly separates the two halves.
+        median = sorted_vals[(len(sorted_vals) - 1) // 2]
         return [1 if v > median else 0 for v in series]
 
     s_bin = binarize(source)
@@ -856,11 +862,10 @@ def transfer_entropy(
         return 0.0
 
     counts = {
-        "s_prev_t_curr": 0,
-        "s_prev_t_prev": 0,
-        "both": 0,
-        "t_prev": 0,
-        "s_prev": 0,
+        "s_prev_t_curr": 0,   # P(T_curr=1 & S_prev=1)
+        "s_prev": 0,          # P(S_prev=1)
+        "t_prev_t_curr": 0,   # P(T_curr=1 & T_prev=1)
+        "t_prev": 0,          # P(T_prev=1)
     }
 
     for i in range(n):
@@ -868,21 +873,34 @@ def transfer_entropy(
         t_prev = t_bin[i + embedding_dim]
         s_prev = s_bin[i + embedding_dim]
 
-        counts["s_prev_t_curr"] += 1
-        counts["t_prev"] += 1
-        counts["s_prev"] += 1
-        if t_curr == 1 and s_prev == 1:
-            counts["both"] += 1
+        # FIX 2026-08-01: conditional counts were unconditional (all == n),
+        # making p_t_given_s == 1.0 always and corrupting the transfer entropy.
+        if s_prev == 1:
+            counts["s_prev"] += 1
+            if t_curr == 1:
+                counts["s_prev_t_curr"] += 1
+        if t_prev == 1:
+            counts["t_prev"] += 1
+            if t_curr == 1:
+                counts["t_prev_t_curr"] += 1
 
+    # P(T_curr=1 | S_prev=1): how much the past source predicts current target
     p_t_given_s = counts["s_prev_t_curr"] / counts["s_prev"] if counts["s_prev"] > 0 else 0
-    p_t_given_both = counts["both"] / counts["t_prev"] if counts["t_prev"] > 0 else 0
+    # P(T_curr=1 | T_prev=1): baseline self-persistence of the target
+    p_t_given_both = counts["t_prev_t_curr"] / counts["t_prev"] if counts["t_prev"] > 0 else 0
 
-    if p_t_given_s <= 0 or p_t_given_both <= 0:
+    # FIX 2026-08-01: previously returned 0 whenever p_t_given_s or p_t_given_both
+    # was 0, which killed valid TE in alternating sequences. Zero probability is
+    # meaningful information (perfect predictability / anti-persistence); the eps
+    # clamps in the formula below handle division safely. Only degenerate cases
+    # (no data at all) fall back to 0.
+    EPS = 1e-10
+    if counts["s_prev"] == 0 and counts["t_prev"] == 0:
         return 0.0
+    p_s = min(1.0 - EPS, max(EPS, p_t_given_s))
+    p_b = min(1.0 - EPS, max(EPS, p_t_given_both))
 
-    te = (p_t_given_s * math.log2(p_t_given_s / max(p_t_given_both, 1e-10)) +
-          ((1 - p_t_given_s) * math.log2(max((1 - p_t_given_s), 1e-10) / max((1 - p_t_given_both), 1e-10)))
-         if p_t_given_both > 0 else 0)
+    te = p_s * math.log2(p_s / p_b) + (1 - p_s) * math.log2((1 - p_s) / (1 - p_b))
 
     return max(0.0, te)
 

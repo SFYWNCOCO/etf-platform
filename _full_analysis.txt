@@ -1,0 +1,199 @@
+Total ETFs: 30
+
+Layer                     Unique    Min    Max   Mean     Std Status    
+--------------------------------------------------------------------------------
+L10_Demand                    15    3.3    8.0    5.6    1.16 PASS      
+L11_SectorRisk                22    2.5    6.7    4.1    0.97 ALMOST    
+L12_PoliticalRisk             19    3.4    8.2    5.1    1.18 PASS      
+L13_MacroCycle                18    4.4    8.4    6.4    1.03 PASS      
+L14_StoicRisk                 20    2.1    9.0    6.1    1.64 PASS      
+L15_StateSim                  21    4.2    7.4    5.6    0.90 ALMOST    
+L16_LiveSignals               24    4.2    8.4    6.1    1.10 PASS      
+L17_Factor                    21    4.1    7.8    5.7    0.90 ALMOST    
+L18_VaR                       14    3.0    6.6    4.8    1.13 PASS      
+L19_FXChannel                 12    2.5    8.8    5.9    1.86 PASS      
+L1_ControllabilityBonus       11    3.5    7.2    5.5    1.02 PASS      
+L1_ETF                        18    1.0    6.5    2.4    1.36 PASS      
+L20_OptionVol                 14    3.5    7.9    5.5    1.18 PASS      
+L2_Holdings                   17    4.2    8.2    6.4    0.98 ALMOST    
+L3_Material                   27    2.9    9.5    6.4    1.92 PASS      
+L4_SupplyChain                22    2.5    9.1    6.6    1.76 PASS      
+L5_Tech                       24    2.1    7.6    4.9    1.29 PASS      
+L6_Politics                   26    2.0    8.6    5.9    1.79 PASS      
+L7_Irreplaceable              22    4.1    8.5    6.0    1.31 PASS      
+L8_CapitalFlow                26    3.3    8.7    6.0    1.67 PASS      
+L9_Signals                    22    3.6    8.9    5.8    1.63 PASS      
+
+Composite: unique=16/30, range=[4.7,6.4], mean=5.56, std=0.44
+
+=== DEFAULT CLUSTERING (5.0 or 5.5) ===
+  L10_Demand: 5.0=6, 5.5=1, total=7 (23%) ***
+  L11_SectorRisk: 5.0=0, 5.5=1, total=1 (3%)
+  L12_PoliticalRisk: 5.0=6, 5.5=1, total=7 (23%) ***
+  L15_StateSim: 5.0=1, 5.5=1, total=2 (7%)
+  L16_LiveSignals: 5.0=1, 5.5=2, total=3 (10%)
+  L17_Factor: 5.0=1, 5.5=3, total=4 (13%)
+  L18_VaR: 5.0=1, 5.5=0, total=1 (3%)
+  L19_FXChannel: 5.0=4, 5.5=0, total=4 (13%)
+  L1_ControllabilityBonus: 5.0=5, 5.5=0, total=5 (17%)
+  L2_Holdings: 5.0=1, 5.5=4, total=5 (17%)
+  L3_Material: 5.0=1, 5.5=1, total=2 (7%)
+  L5_Tech: 5.0=1, 5.5=1, total=2 (7%)
+  L6_Politics: 5.0=0, 5.5=1, total=1 (3%)
+  L7_Irreplaceable: 5.0=1, 5.5=1, total=2 (7%)
+  L8_CapitalFlow: 5.0=0, 5.5=1, total=1 (3%)
+
+=== L11_SectorRisk detail ===
+  L11_SectorRisk=4.0: 3 (10%)
+  L11_SectorRisk=3.9: 3 (10%)
+  L11_SectorRisk=4.2: 2 (7%)
+  L11_SectorRisk=4.3: 2 (7%)
+  L11_SectorRisk=4.1: 2 (7%)
+  L11_SectorRisk=3.7: 2 (7%)
+  L11_SectorRisk=4.4: 1 (3%)
+  L11_SectorRisk=5.5: 1 (3%)
+  L11_SectorRisk=4.8: 1 (3%)
+  L11_SectorRisk=3.1: 1 (3%)
+  L11_SectorRisk=6.7: 1 (3%)
+  L11_SectorRisk=3.3: 1 (3%)
+  L11_SectorRisk=2.7: 1 (3%)
+  L11_SectorRisk=3.2: 1 (3%)
+  L11_SectorRisk=3.4: 1 (3%)
+  L11_SectorRisk=2.5: 1 (3%)
+  L11_SectorRisk=6.2: 1 (3%)
+  L11_SectorRisk=4.7: 1 (3%)
+  L11_SectorRisk=6.0: 1 (3%)
+  L11_SectorRisk=4.5: 1 (3%)
+  L11_SectorRisk=3.6: 1 (3%)
+  L11_SectorRisk=2.6: 1 (3%)
+
+=== L13_MacroCycle detail ===
+  L13_MacroCycle=6.3: 4 (13%)
+  L13_MacroCycle=7.7: 2 (7%)
+  L13_MacroCycle=7.3: 2 (7%)
+  L13_MacroCycle=8.4: 2 (7%)
+  L13_MacroCycle=6.2: 2 (7%)
+  L13_MacroCycle=5.9: 2 (7%)
+  L13_MacroCycle=6.6: 2 (7%)
+  L13_MacroCycle=5.4: 2 (7%)
+  L13_MacroCycle=6.0: 2 (7%)
+  L13_MacroCycle=4.8: 2 (7%)
+  L13_MacroCycle=7.5: 1 (3%)
+  L13_MacroCycle=6.8: 1 (3%)
+  L13_MacroCycle=4.4: 1 (3%)
+  L13_MacroCycle=7.9: 1 (3%)
+  L13_MacroCycle=6.4: 1 (3%)
+  L13_MacroCycle=5.6: 1 (3%)
+  L13_MacroCycle=4.9: 1 (3%)
+  L13_MacroCycle=5.7: 1 (3%)
+
+=== L15_StateSim detail ===
+  L15_StateSim=5.1: 4 (13%)
+  L15_StateSim=6.4: 2 (7%)
+  L15_StateSim=6.0: 2 (7%)
+  L15_StateSim=5.2: 2 (7%)
+  L15_StateSim=6.1: 2 (7%)
+  L15_StateSim=4.9: 2 (7%)
+  L15_StateSim=4.3: 2 (7%)
+  L15_StateSim=6.9: 1 (3%)
+  L15_StateSim=7.4: 1 (3%)
+  L15_StateSim=7.2: 1 (3%)
+  L15_StateSim=6.3: 1 (3%)
+  L15_StateSim=5.5: 1 (3%)
+  L15_StateSim=5.9: 1 (3%)
+  L15_StateSim=5.7: 1 (3%)
+  L15_StateSim=7.1: 1 (3%)
+  L15_StateSim=6.7: 1 (3%)
+  L15_StateSim=4.8: 1 (3%)
+  L15_StateSim=4.4: 1 (3%)
+  L15_StateSim=4.7: 1 (3%)
+  L15_StateSim=4.2: 1 (3%)
+  L15_StateSim=5.0: 1 (3%)
+
+=== L17_Factor detail ===
+  L17_Factor=5.2: 3 (10%)
+  L17_Factor=5.5: 3 (10%)
+  L17_Factor=4.8: 3 (10%)
+  L17_Factor=5.6: 3 (10%)
+  L17_Factor=6.0: 2 (7%)
+  L17_Factor=7.8: 1 (3%)
+  L17_Factor=7.5: 1 (3%)
+  L17_Factor=5.7: 1 (3%)
+  L17_Factor=6.5: 1 (3%)
+  L17_Factor=7.0: 1 (3%)
+  L17_Factor=7.2: 1 (3%)
+  L17_Factor=7.1: 1 (3%)
+  L17_Factor=5.8: 1 (3%)
+  L17_Factor=6.6: 1 (3%)
+  L17_Factor=5.9: 1 (3%)
+  L17_Factor=4.1: 1 (3%)
+  L17_Factor=6.1: 1 (3%)
+  L17_Factor=4.7: 1 (3%)
+  L17_Factor=5.0: 1 (3%)
+  L17_Factor=4.4: 1 (3%)
+  L17_Factor=5.4: 1 (3%)
+
+=== L10_Demand detail ===
+  L10_Demand=5.0: 6 (20%)
+  L10_Demand=6.0: 4 (13%)
+  L10_Demand=8.0: 3 (10%)
+  L10_Demand=5.4: 3 (10%)
+  L10_Demand=6.5: 3 (10%)
+  L10_Demand=4.5: 2 (7%)
+  L10_Demand=5.5: 1 (3%)
+  L10_Demand=5.8: 1 (3%)
+  L10_Demand=4.8: 1 (3%)
+  L10_Demand=5.2: 1 (3%)
+  L10_Demand=3.7: 1 (3%)
+  L10_Demand=7.4: 1 (3%)
+  L10_Demand=5.9: 1 (3%)
+  L10_Demand=3.3: 1 (3%)
+  L10_Demand=4.0: 1 (3%)
+
+=== L8_CapitalFlow detail ===
+  L8_CapitalFlow=4.9: 2 (7%)
+  L8_CapitalFlow=7.0: 2 (7%)
+  L8_CapitalFlow=3.5: 2 (7%)
+  L8_CapitalFlow=4.6: 2 (7%)
+  L8_CapitalFlow=6.9: 1 (3%)
+  L8_CapitalFlow=7.4: 1 (3%)
+  L8_CapitalFlow=7.6: 1 (3%)
+  L8_CapitalFlow=7.1: 1 (3%)
+  L8_CapitalFlow=7.7: 1 (3%)
+  L8_CapitalFlow=8.2: 1 (3%)
+  L8_CapitalFlow=6.6: 1 (3%)
+  L8_CapitalFlow=3.3: 1 (3%)
+  L8_CapitalFlow=8.0: 1 (3%)
+  L8_CapitalFlow=6.4: 1 (3%)
+  L8_CapitalFlow=8.7: 1 (3%)
+  L8_CapitalFlow=3.7: 1 (3%)
+  L8_CapitalFlow=7.5: 1 (3%)
+  L8_CapitalFlow=7.8: 1 (3%)
+  L8_CapitalFlow=5.6: 1 (3%)
+  L8_CapitalFlow=8.1: 1 (3%)
+  L8_CapitalFlow=5.5: 1 (3%)
+  L8_CapitalFlow=3.6: 1 (3%)
+  L8_CapitalFlow=4.8: 1 (3%)
+  L8_CapitalFlow=4.2: 1 (3%)
+  L8_CapitalFlow=6.7: 1 (3%)
+  L8_CapitalFlow=4.4: 1 (3%)
+
+=== L1_ETF detail ===
+  L1_ETF=1.7: 7 (23%)
+  L1_ETF=1.0: 2 (7%)
+  L1_ETF=2.5: 2 (7%)
+  L1_ETF=1.8: 2 (7%)
+  L1_ETF=1.5: 2 (7%)
+  L1_ETF=2.3: 2 (7%)
+  L1_ETF=3.0: 2 (7%)
+  L1_ETF=1.4: 1 (3%)
+  L1_ETF=3.1: 1 (3%)
+  L1_ETF=2.9: 1 (3%)
+  L1_ETF=6.0: 1 (3%)
+  L1_ETF=2.4: 1 (3%)
+  L1_ETF=3.3: 1 (3%)
+  L1_ETF=1.3: 1 (3%)
+  L1_ETF=6.5: 1 (3%)
+  L1_ETF=5.7: 1 (3%)
+  L1_ETF=2.0: 1 (3%)
+  L1_ETF=1.9: 1 (3%)

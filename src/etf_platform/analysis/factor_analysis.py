@@ -1,3 +1,4 @@
+from __future__ import annotations
 #!/usr/bin/env python3
 """factor_analysis.py — Z-score因子有效性实证分析
 
@@ -9,8 +10,6 @@ Spearman和Pearson相关性，按市场状态(regime)分层分析。
 """
 import logging
 logger = logging.getLogger(__name__)
-
-from __future__ import annotations
 
 import json
 import sys

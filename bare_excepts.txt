@@ -1,0 +1,69 @@
+=== ETF Platform Bare Except 审计报告 ===
+扫描日期: 2026-07-18
+扫描范围: D:/龙虾/.openclaw/etf-platform/**/*.py
+
+--- 真正的裸 except (必须修复) ---
+
+[CRITICAL] etf_daily_patrol_wrapper.py:49
+    except: return str(v)[:4]
+    说明: 数据格式化函数 fmt() 中的裸 except，可能吞掉关键错误
+    建议: except Exception: return str(v)[:4]
+
+[MEDIUM] src/etf_platform/pipeline.py:320
+    except Exception:
+    说明: 裸 except Exception (有绑定但没有as变量名)
+    建议: except Exception as e: logger.error(...)
+
+--- 有绑定的 except Exception (仅供参考，非紧急) ---
+
+news_to_etf_bridge.py:353           except Exception:
+tests/test_optimizations.py:196     except Exception as e:
+scripts/_archived/baseline_scores.py:15   except Exception as e:
+scripts/_archived/compare_scores.py:24  except Exception as e:
+scripts/_archived/diagnostic_scan.py:28 except Exception as e:
+src/etf_platform/scripts/test_scores.py:11  except Exception as e:
+src/etf_platform/scripts/dynamic_weights.py:14    except Exception as e:
+src/etf_platform/scripts/dynamic_weights.py:100   except Exception as e:
+src/etf_platform/scripts/data_consistency_audit.py:39  except Exception as e:
+src/etf_platform/scripts/code_audit.py:91     except Exception as e:
+scripts/_archived/system_audit.py:57        except Exception as e:
+scripts/_archived/sample_l1l2l8.py:28       except Exception as _bare_except_e:
+scripts/_archived/test_akshare_api.py:31    except Exception as e:
+src/etf_platform/optimize/backtest.py:39    except Exception as e:
+src/etf_platform/optimize/backtest.py:90    except Exception as e:
+src/etf_platform/data/valuation.py:88       except Exception as e:
+src/etf_platform/data/price_cache.py:106    except Exception as e:
+src/etf_platform/data/price_cache.py:126    except Exception as e:
+src/etf_platform/layers/l14_stoic_risk.py:20  except Exception as e:
+src/etf_platform/data/news.py:48            except Exception as e:
+src/etf_platform/layers/l18_var_risk.py:27   except Exception as e:
+src/etf_platform/analysis/holdings_fetcher.py:64  except Exception as e:
+src/etf_platform/data/live_price_bridge.py:137  except Exception as e:
+src/etf_platform/data/live_price_bridge.py:196  except Exception as e:
+src/etf_platform/analysis/l9_signals_enhanced.py:27   except Exception as e:
+src/etf_platform/analysis/l9_signals_enhanced.py:224  except Exception as e:
+src/etf_platform/analysis/macro_climate.py:33     except Exception as e:
+src/etf_platform/analysis/macro_climate.py:46     except Exception as e:
+src/etf_platform/analysis/layer_live_adjustments.py:99  except Exception as e:
+src/etf_platform/analysis/layer_live_adjustments.py:115 except Exception as e:
+src/etf_platform/analysis/layer_live_adjustments.py:131 except Exception as e:
+src/etf_platform/analysis/material_live.py:68     except Exception as e:
+src/etf_platform/analysis/material_live.py:96    except Exception as e:
+src/etf_platform/analysis/realtime_data.py:67    except Exception as e:
+src/etf_platform/analysis/realtime_data.py:209   except Exception as e:
+src/etf_platform/data/akshare_source.py:43       except Exception as e:
+src/etf_platform/data/akshare_source.py:72       except Exception as e:
+src/etf_platform/data/akshare_source.py:89       except Exception as e:
+src/etf_platform/analysis/sector_flow_bridge.py:87  except Exception as e:
+src/etf_platform/decision/screener.py:256        except Exception as e:
+src/etf_platform/decision/screener.py:404        except Exception as e:
+src/etf_platform/decision/screener.py:556        except Exception as e:
+
+--- 修复脚本 ---
+已存在修复工具: src/etf_platform/scripts/fix_bare_except.py
+用法: python src/etf_platform/scripts/fix_bare_except.py
+
+--- 统计 ---
+裸 except (必须修复): 2 处
+except Exception as e (有绑定): 约 40 处
+已归档脚本 (_archived/): 约 6 处 (忽略)

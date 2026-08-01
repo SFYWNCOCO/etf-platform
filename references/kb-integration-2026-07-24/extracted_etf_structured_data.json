@@ -1,0 +1,410 @@
+{
+    "metadata": {
+        "report_date": "2026-07-19",
+        "created_from_files": [
+            "k130-etf-kline-analysis-20260719.md",
+            "k131-etf-market-adjustment-analysis-20260719.md"
+        ],
+        "data_sources": {
+            "kline_api": "东方财富实时API",
+            "capital_flow": "Wind数据",
+            "market_scale": "Choice数据",
+            "intraday": "实时行情API"
+        },
+        "analysis_time_range": {
+            "start": "2026-06-19",
+            "end": "2026-07-17",
+            "trading_days": 20
+        }
+    },
+
+    "sample_statistics": {
+        "total_etf_count": 592,
+        "successfully_fetched": 587,
+        "fetch_success_rate_pct": 99.2,
+        "failed_fetch_count": 5
+    },
+
+    "sector_momentum_stats": {
+        "description": "20日涨跌幅统计，全市场普跌，无一只ETF正收益",
+        "units": "percent",
+        "period_days": 20,
+        "as_of_date": "2026-07-17",
+        "sectors": {
+            "红利价值": {
+                "etf_count": 33,
+                "avg_change_pct": -2.11,
+                "median_change_pct": -1.72,
+                "max_change_pct": -1.18,
+                "min_change_pct": -7.09,
+                "rank_by_performance": 1
+            },
+            "消费": {
+                "etf_count": 16,
+                "avg_change_pct": -3.91,
+                "median_change_pct": -3.16,
+                "max_change_pct": -1.46,
+                "min_change_pct": -8.86,
+                "rank_by_performance": 2
+            },
+            "新能源": {
+                "etf_count": 28,
+                "avg_change_pct": -4.52,
+                "median_change_pct": -4.49,
+                "max_change_pct": -3.91,
+                "min_change_pct": -5.19,
+                "rank_by_performance": 3
+            },
+            "其他": {
+                "etf_count": 391,
+                "avg_change_pct": -4.63,
+                "median_change_pct": -4.63,
+                "max_change_pct": 0.0,
+                "min_change_pct": -10.75,
+                "rank_by_performance": 4
+            },
+            "跨境": {
+                "etf_count": 17,
+                "avg_change_pct": -5.37,
+                "median_change_pct": -6.37,
+                "max_change_pct": -1.77,
+                "min_change_pct": -7.86,
+                "rank_by_performance": 5
+            },
+            "医药": {
+                "etf_count": 24,
+                "avg_change_pct": -6.41,
+                "median_change_pct": -6.52,
+                "max_change_pct": -4.67,
+                "min_change_pct": -9.78,
+                "rank_by_performance": 6
+            },
+            "AI科技": {
+                "etf_count": 56,
+                "avg_change_pct": -6.79,
+                "median_change_pct": -6.52,
+                "max_change_pct": -1.80,
+                "min_change_pct": -11.24,
+                "rank_by_performance": 7
+            },
+            "半导体": {
+                "etf_count": 17,
+                "avg_change_pct": -7.88,
+                "median_change_pct": -7.89,
+                "max_change_pct": -7.28,
+                "min_change_pct": -8.52,
+                "rank_by_performance": 8
+            },
+            "通信": {
+                "etf_count": 5,
+                "avg_change_pct": -8.26,
+                "median_change_pct": -8.06,
+                "max_change_pct": -7.79,
+                "min_change_pct": -9.02,
+                "rank_by_performance": 9
+            }
+        },
+        "weak_etf_top15_loss_gt_5pct": [
+            {"code": "159279", "name": "AI创业", "close_price_cny": 1.327, "change_20d_pct": -11.24},
+            {"code": "159381", "name": "创AI", "close_price_cny": 1.106, "change_20d_pct": -10.88},
+            {"code": "159243", "name": "创业智能", "close_price_cny": 1.187, "change_20d_pct": -10.75},
+            {"code": "159242", "name": "创业AIDC", "close_price_cny": 1.970, "change_20d_pct": -10.54},
+            {"code": "159246", "name": "创AI富国", "close_price_cny": 1.100, "change_20d_pct": -10.20},
+            {"code": "159363", "name": "创业板人工智能ETF华宝", "close_price_cny": 1.168, "change_20d_pct": -10.08},
+            {"code": "159382", "name": "AI创业板", "close_price_cny": 2.501, "change_20d_pct": -10.04},
+            {"code": "159388", "name": "创业AI", "close_price_cny": 0.956, "change_20d_pct": -9.90},
+            {"code": "159248", "name": "AI万家", "close_price_cny": 1.770, "change_20d_pct": -9.88},
+            {"code": "159167", "name": "香港医疗", "close_price_cny": 0.812, "change_20d_pct": -9.78},
+            {"code": "159139", "name": "华泰AI", "close_price_cny": 1.251, "change_20d_pct": -9.74},
+            {"code": "159142", "name": "双创AI", "close_price_cny": 1.205, "change_20d_pct": -9.33},
+            {"code": "159546", "name": "集成电路", "close_price_cny": 0.808, "change_20d_pct": -9.32},
+            {"code": "159022", "name": "AI双创", "close_price_cny": 1.018, "change_20d_pct": -9.19},
+            {"code": "159140", "name": "创智能E", "close_price_cny": 1.256, "change_20d_pct": -9.05}
+        ],
+        "total_etf_loss_gt_5pct": 282,
+        "etf_loss_gt_5pct_ratio_pct": 48.04
+    },
+
+    "market_regime_signals": {
+        "style_judgment": "防御优于进攻",
+        "broad_index_performance_this_week": {
+            "period": "2026-07-13 ~ 2026-07-17",
+            "indices": {
+                "上证指数": {
+                    "level_broken": "跌破3800点",
+                    "friday_single_day_drop_pct": -3.0,
+                    "note": "周五单日跌超3%"
+                },
+                "创业板指": {
+                    "weekly_change_pct": -7.15,
+                    "note": "单日重挫"
+                },
+                "科创50": {
+                    "weekly_change_pct": -7.0,
+                    "note": "科技成长领跌"
+                },
+                "中证2000": {
+                    "regime": "面临技术熊市",
+                    "note": "小盘股承压"
+                },
+                "中证1000": {
+                    "regime": "面临技术熊市",
+                    "note": "小盘股承压"
+                }
+            }
+        },
+        "avoid_thresholds": {
+            "ai_tech_growth": {
+                "avg_20d_drop_gt_pct": 6.0,
+                "action": "回避"
+            },
+            "semiconductor_equipment_materials": {
+                "avg_20d_drop_gt_pct": 7.0,
+                "action": "回避"
+            },
+            "communication_optical_module": {
+                "avg_20d_drop_gt_pct": 8.0,
+                "action": "回避"
+            }
+        },
+        "attention_suggestions": {
+            "dividend_value": "相对抗跌，防御属性强",
+            "consumer": "跌幅适中，估值回归合理区间"
+        },
+        "wait_building_positions": {
+            "semiconductor_ai_entry_threshold_pct": -15.0,
+            "condition": "若继续调整至-15%以下可分批建仓"
+        }
+    },
+
+    "capital_flow_data": {
+        "source": "Wind数据",
+        "week_period": "2026-07-13 ~ 2026-07-17",
+        "weekly_net_inflow": {
+            "股票型ETF_跨境型": {
+                "net_inflow_yi_cNY": 2113.21,
+                "proportion_pct": 92.2
+            },
+            "宽基指数ETF": {
+                "net_inflow_yi_cNY": 1561.00,
+                "proportion_pct": 68.0
+            },
+            "行业主题ETF": {
+                "net_inflow_yi_cNY": 444.00,
+                "proportion_pct": 19.4
+            }
+        },
+        "ytd_month_cumulative_july": {
+            "total_net_inflow_yi_cNY": 3300.00,
+            "total_net_inflow_label": "超3300亿元",
+            "total_trading_days_in_july_so_far": 13,
+            "days_with_net_inflow": 12,
+            "net_inflow_days_ratio_pct": 92.3,
+            "friday_single_day_peak": {
+                "date_note": "本周五",
+                "amount_yi_cNY": 763.49
+            }
+        },
+        "top_broad_based_etf_turnover": [
+            {
+                "name": "创业板ETF易方达",
+                "code": "159915",
+                "daily_turnover_yi_cNY_min": 140,
+                "feature": "集体放量"
+            },
+            {
+                "name": "沪深300ETF华泰柏瑞",
+                "code": "510300",
+                "daily_turnover_yi_cNY_min": 140,
+                "feature": "规模重回第一",
+                "fund_size_yi_cNY": 935
+            },
+            {
+                "name": "科创50ETF华夏",
+                "code": "588000",
+                "daily_turnover_yi_cNY_min": 140,
+                "feature": "集体放量"
+            }
+        ]
+    },
+
+    "macro_cycle_events": {
+        "external_shocks": {
+            "韩国股市": {
+                "drop_on_2026_07_10_pct": -5.4,
+                "cumulative_drop_pct": -20.0,
+                "regime": "技术性熊市"
+            },
+            "日经225": {
+                "drop_pct": -4.0,
+                "softbank_group_drop_pct": -9.0
+            },
+            "费城半导体_SOX": {
+                "drop_from_peak_reference_date": "2026-06-22",
+                "drop_pct": -21.0,
+                "regime": "技术性熊市"
+            }
+        },
+        "tech_stock_pullback": {
+            "存储芯片_SK海力士_ADR": {
+                "drop_pct": -13.69
+            },
+            "闪迪": {
+                "drop_pct": -12.63
+            },
+            "A股半导体_德明利": {
+                "consecutive_limit_down_days": 3,
+                "event": "3连跌停"
+            },
+            "A股半导体_兆易创新": {
+                "event": "跌停"
+            },
+            "CPO_光模块_中际旭创": {
+                "drop_pct_gt": -10.0
+            },
+            "CPO_光模块_新易盛": {
+                "drop_pct_gt": -10.0
+            },
+            "CPO_光模块_天孚通信": {
+                "drop_pct_gt": -10.0
+            }
+        },
+        "policy_catalysts": {
+            "国家发改委": {
+                "document": "《人工智能合作发展行动计划》",
+                "issued_date_range": "2026-07"
+            },
+            "WAIC_2026": {
+                "event": "开幕",
+                "humanoid_robots_deployed": 60,
+                "deployment_mode": "规模化部署"
+            },
+            "星枢计划": {
+                "event": "首发星座发布",
+                "compute_satellites": 2,
+                "edge_compute_satellites": 12,
+                "total_satellites": 14
+            }
+        }
+    },
+
+    "institutional_views": {
+        "方正证券": {
+            "summary": "科技股调整已较为充分，超跌反弹是更大概率事件",
+            "historical_reference_start_year": 2010,
+            "typical_drawdown_pct": -20.0,
+            "extreme_drawdown_range_pct": [-30.0, -40.0],
+            "current_domestic_overseas_computing_power_drawdown_pct": -28.0,
+            "conclusion": "超跌反弹概率大"
+        },
+        "海通国际_张忆东": {
+            "summary": "左侧布局中国股市秋季行情的时机呼之欲出",
+            "phase": "夏日寒风已进入余波阶段",
+            "three_focus_areas": ["安全资产", "制造出海", "高科技硬科技"]
+        },
+        "央视财经_外资机构共识": {
+            "consensus": "看好中国AI产业链，投资中国AI产业链已成为全球投资者共识",
+            "china_chip_daily_production_billion_pieces": 15,
+            "china_chip_daily_production_unit": "亿块",
+            "large_model_daily_call_volume": "数百万亿词元",
+            "global_rank": "世界首位"
+        }
+    },
+
+    "sector_alloc_advice": {
+        "defensive_allocation_current_environment": [
+            {
+                "type": "红利价值",
+                "example_etf": "沪深300红利ETF",
+                "logic": "相对抗跌，避险属性",
+                "pipeline_sector": "红利价值"
+            },
+            {
+                "type": "宽基",
+                "example_etf": "沪深300ETF",
+                "example_code": "510300",
+                "logic": "规模第一(935亿)，资金青睐",
+                "pipeline_sector": "宽基"
+            },
+            {
+                "type": "电力",
+                "example_etf": "电力ETF",
+                "logic": "逆势走强",
+                "power_etf_change_pct": 2.0
+            }
+        ],
+        "left_side_layout_wait_for_stabilization": [
+            {
+                "type": "科创50",
+                "example_etf": "科创50ETF",
+                "example_code": "588000",
+                "logic": "成交放量，资金提前布局",
+                "pipeline_sector": "科创50"
+            },
+            {
+                "type": "半导体",
+                "example_etf": "半导体ETF",
+                "example_code": "512480",
+                "logic": "调整28%，超跌反弹概率大",
+                "semiconductor_adjustment_pct": -28.0,
+                "pipeline_sector": "半导体"
+            },
+            {
+                "type": "AI科技",
+                "example_etf": "人工智能ETF",
+                "logic": "WAIC催化+政策支持",
+                "catalysts": ["WAIC_2026", "人工智能合作发展行动计划"],
+                "pipeline_sector": "AI科技"
+            }
+        ],
+        "avoid": [
+            {
+                "sector": "高波动科技成长类",
+                "reason": "短期继续承压",
+                "threshold_avg_20d_drop_pct": -6.0
+            },
+            {
+                "sector": "小盘股ETF",
+                "specific_indices": ["中证2000", "中证1000"],
+                "reason": "面临技术熊市"
+            }
+        ]
+    },
+
+    "key_monitoring_points": {
+        "next_week_first_half": {
+            "significance": "市场止跌修复的关键博弈期"
+        },
+        "broad_etf_volume_spike": {
+            "interpretation_options": ["短期底部信号", "下跌中继"],
+            "signal_type": "ambiguous"
+        },
+        "maotai_price_hike": {
+            "significance": "打破3-5年一调惯例",
+            "frequency_years": [3, 5],
+            "meaning": "市场化定价机制落地"
+        },
+        "changxin_technology_IPO": {
+            "entity": "长鑫科技",
+            "exchange": "科创板",
+            "scale": "史上最大IPO",
+            "valuation_yi_cNY": 5792,
+            "valuation_unit": "亿元"
+        }
+    },
+
+    "data_validation": {
+        "source_k130": {
+            "api": "东方财富实时API",
+            "fetch_success_rate_pct": 99.2,
+            "data_date": "2026-07-17",
+            "method": "20日涨跌幅计算"
+        },
+        "source_k131": {
+            "capital_flow_source": "Wind数据",
+            "market_size_source": "Choice数据",
+            "intraday_source": "实时行情API",
+            "institutional_view_sources": "公开研报/新闻"
+        }
+    }
+}

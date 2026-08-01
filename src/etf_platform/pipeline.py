@@ -1,4 +1,9 @@
 """Unified L1-L13 penetration pipeline — no etf_system dependency."""
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
 from .config_loader import load_etfs
 
 
@@ -66,6 +71,24 @@ def _apply_sector_scores(scores: dict, sector: str, rl: float) -> None:
             pass
 
 
+def _apply_live_material_fusion(scores: dict, code: str, sector: str, live: bool) -> None:
+    """Fuse real-time commodity prices into L3/L4 (only when live=True).
+
+    material_live.py was dead code — never referenced by pipeline. This activates it:
+    static sector table (from _apply_sector_scores) is the baseline; live commodity
+    data then adjusts L3/L4 by a sector weight (upstream sectors benefit from price
+    rises, mid/downstream get cost-pressure penalty). Strictly best-effort: any
+    network failure keeps the static baseline.
+    """
+    if not live:
+        return
+    try:
+        from .analysis.material_live import apply_live_material_scores
+        apply_live_material_scores(code, sector, scores)
+    except Exception:
+        pass
+
+
 def _apply_multi_signal(scores: dict, code: str, sector: str, info: dict) -> None:
     """v2.0: Multi-signal ETF-level diff (replaces v7.5 fee+type micro-adj)."""
     try:
@@ -125,14 +148,14 @@ def _apply_soft_floor(scores: dict) -> None:
             scores[supply_layer] = SOFT_FLOOR
 
 
-def _apply_sector_flow(scores: dict, info: dict, rl: float, code: str, sector: str = "") -> None:
+def _apply_sector_flow(scores: dict, info: dict, rl: float, code: str, sector: str = "", live: bool = True) -> None:
     """Sector flow bridge: real L8/L9 from Eastmoney fund flows."""
     try:
         from .analysis.sector_flow_bridge import get_bridge
         bridge = get_bridge()
         etf_type = info.get("type", "")
         etf_fee = info.get("fee", 0.005)
-        flow_scores = bridge.score(sector, risk_level=rl, etf_type=etf_type, fee=etf_fee, etf_code=code)
+        flow_scores = bridge.score(sector, risk_level=rl, etf_type=etf_type, fee=etf_fee, etf_code=code, live=live)
         scores["L8_CapitalFlow"] = flow_scores["L8"]
         scores["L9_Signals"] = flow_scores["L9"]
     except Exception:
@@ -254,11 +277,27 @@ def _apply_behavioral_psychology(scores: dict, details: dict, sector: str, rl: f
         details["L21_BiasDetail"] = "unknown"
 
 
-def _apply_pendulum(scores: dict, details: dict, sector: str, rl: float) -> None:
+def _apply_pendulum(scores: dict, details: dict, sector: str, rl: float, code: str = "") -> None:
     """L22 Market Pendulum — fear/greed swing (k011)."""
     try:
         from .layers.l22_market_pendulum import score_pendulum_layer
-        pendulum = score_pendulum_layer(sector, risk_level=rl)
+        # Pass ETF code so pendulum uses real 20d/vol/volume signals
+        trend_data = {}
+        if code:
+            try:
+                from .data.kline import get_trend
+                t = get_trend(code)
+                if t:
+                    trend_data = {
+                        "change_20d": t.change_20d,
+                        "volatility_20d": t.volatility_20d,
+                        "volume_ratio_5_20": t.volume_ratio_5_20,
+                        "position_pct": t.position_pct,
+                        "premium_pct": 0.0,
+                    }
+            except Exception:
+                pass
+        pendulum = score_pendulum_layer(sector, risk_level=rl, etf_code=code, trend_data=trend_data)
         scores["L22_Pendulum"] = pendulum.get("score", 5.0)
         if pendulum.get("detail"):
             details["L22_Pendulum"] = pendulum["detail"]
@@ -278,14 +317,24 @@ def _apply_valuation(scores: dict, details: dict, code: str, sector: str, name: 
         scores["L23_Valuation"] = 5.0
 
 
-def _apply_microstructure(scores: dict, details: dict, sector: str, rl: float) -> None:
+def _apply_microstructure(scores: dict, details: dict, sector: str, rl: float, code: str = "") -> None:
     """L23 Microstructure — OBI/turnover anomaly (k012)."""
     try:
         from .layers.l23_microstructure import score_microstructure
-        micro = score_microstructure(sector, risk_level=rl)
+        # Pass ETF code so microstructure uses real volume/volatility signals
+        micro = score_microstructure(sector, risk_level=rl, etf_code=code)
         scores["L23_Microstructure"] = micro.get("score", 5.0)
         if micro.get("detail"):
             details["L23_Microstructure"] = micro["detail"]
+        else:
+            details["L23_Microstructure"] = {
+                "signal": micro.get("signal"),
+                "turnover_anomaly": micro.get("turnover_anomaly"),
+                "vol_distribution": micro.get("vol_distribution"),
+                "noise_level": micro.get("noise_level"),
+                "volume_ratio": micro.get("volume_ratio"),
+                "change_5d": micro.get("change_5d"),
+            }
     except Exception:
         scores["L23_Microstructure"] = 5.0
 
@@ -310,6 +359,56 @@ def _apply_dip_flow(scores: dict, details: dict, code: str, sector: str, rl: flo
     except Exception:
         scores["L24_DipFlow"] = 5.0
 
+
+
+def _apply_system_dynamics(scores: dict, details: dict, sector: str, rl: float, code: str = "") -> None:
+    """L24 System Dynamics — feedback loops, leverage points, damping from complex systems theory (k238/k268).
+    
+    This layer computes SD-based metrics that capture systemic properties invisible to 
+    traditional finance-only analysis: dominance of reinforcing vs balancing feedback,
+    intervention leverage potential in the underlying economic ecosystem, oscillation 
+    damping characteristics, and resonance risk of boom-bust regimes.
+    
+    Inspired by Donella Meadows' "Leverage Points" and Sterman's "Business Dynamics",
+    these metrics help identify ETFs with robust structural resilience versus those 
+    prone to destabilizing dynamics under stress.
+    """
+    try:
+        from .layers.l24_system_dynamics import score_l24_layer
+        result = score_l24_layer(sector, rl, code)
+        scores["L24_SystemDynamics"] = result.get("score", 5.0)
+        if "metrics" in result:
+            details["L24_SD_Metrics"] = result["metrics"]
+        if "insights" in result and result["insights"]:
+            details["L24_SD_Incidents"] = "; ".join(result["insights"][:3])
+    except Exception:
+        scores["L24_SystemDynamics"] = 5.0
+        details["L24_SD_Metrics"] = {"error": "failed"}
+
+
+
+def _apply_l30_layer(scores: dict, details: dict, sector: str, rl: float, code: str = "") -> None:
+    """L30 Multi-Agent Interaction — MAS-based systemic resilience analysis (MAS theory + k275).
+    
+    This layer quantifies multi-agent system properties underlying the ETF's ecosystem:
+    participant heterogeneity diversity, inter-agent coordination density, feedback loop
+    strength between agent groups, and overall systemic resilience through self-organization
+    
+    Draws on multi-agent systems theory, complex adaptive systems principles, and 
+    leverage point analysis from Donella Meadows' framework. Identifies whether the 
+    market structure is robustly distributed or dangerously concentrated/collusive.
+    """
+    try:
+        from .layers.l30_multiagent import score_l30_layer
+        result = score_l30_layer(sector, rl, code)
+        scores["L30_MultiAgent"] = result.get("score", 6.0)
+        if "metrics" in result:
+            details["L30_MA_Metrics"] = result["metrics"]
+        if "insights" in result and result["insights"]:
+            details["L30_MA_Incidents"] = "; ".join(result["insights"][:2])
+    except Exception:
+        scores["L30_MultiAgent"] = 6.0
+        details["L30_MA_Metrics"] = {"error": "failed"}
 
 def _apply_regime_factor(scores: dict, details: dict, sector: str) -> None:
     """L33 Regime Factor — dynamic factor alignment by QVIX regime."""
@@ -347,11 +446,20 @@ def _apply_liquidity_arbitrage(scores: dict, details: dict, etf_type: str, secto
         scores["L25_LiquidityArb"] = 5.0
 
 
-def _apply_volatility_regime(scores: dict, details: dict, sector: str) -> None:
+def _apply_volatility_regime(scores: dict, details: dict, sector: str, code: str = "") -> None:
     """L26 Volatility Regime — 波动率制度+GARCH信号(k063+k091)."""
     try:
         from .layers.l26_volatility_regime import score_l26_layer
-        vol = score_l26_layer(sector=sector)
+        realized_vol = None
+        if code:
+            try:
+                from .data.kline import get_trend
+                t = get_trend(code)
+                if t:
+                    realized_vol = t.volatility_20d / 100  # 70.9% → 0.709
+            except Exception:
+                pass
+        vol = score_l26_layer(sector=sector, realized_vol=realized_vol)
         scores["L26_VolRegime"] = vol.get("score", 5.0)
         if vol.get("detail"):
             details["L26_VolDetail"] = vol["detail"]
@@ -391,6 +499,9 @@ def _build_result(code: str, name: str, sector: str, info: dict, rl: float,
                   layer_details: dict) -> dict:
     """Assemble final result dictionary."""
     composite = _compute_composite_score(scores)
+    # score must use same exclusion logic as composite_score — previously
+    # simple mean over ALL numeric values differed from composite (which
+    # excludes bonus/detail keys), causing inconsistent rankings.
     return {
         "etf_code": code,
         "name": name,
@@ -403,19 +514,70 @@ def _build_result(code: str, name: str, sector: str, info: dict, rl: float,
         "layers": {},
         "cycle_info": cycle_info,
         "pipeline_version": "1.3.0-MAPREDUCE+DEBATE",
-        "score": round(sum(v for v in scores.values() if isinstance(v, (int, float))) / max(len(scores), 1), 1),
+        "score": composite,
         "composite_score": composite,
         "profile": profile,
     }
 
 
-def _enhance_news(scores: dict, code: str) -> None:
-    """L9 News enhancement (always attempt — sector-cached, fast)."""
+def _enhance_news(scores: dict, code: str, details: dict = None, sector: str = "") -> None:
+    """L9 News enhancement with integrated SD metrics using production-grade news handler.
+    
+    This enhanced version now:
+    1. Extracts real-time signals from news headlines/content via NewsHandler
+    2. Integrates SD-derived feedback ratios and leverage point context
+    3. Produces enriched metadata for downstream consumption
+    4. Falls back gracefully if any step fails
+    
+    Reference: etf_platform.analysis.news_handler.NewsHandler
+    Integration point: Skill multi-agent-systems-framework + system-dynamics-feedback-loops
+    """
     try:
-        from .enhance.l9_news import enhance_l9
-        result = enhance_l9({"etf_code": code, "layer_scores": dict(scores), "layers": {}})
-        scores.update(result.get("layer_scores", {}))
-    except Exception:
+        from etf_platform.analysis.news_handler import get_news_handler
+        
+        # Sector from caller or layer metadata
+        if not sector:
+            sector = details.get("sector", "") if details else ""
+        if not sector:
+            sector = scores.get("sector", "")
+        
+        # Create handler with tuned sensitivity for ETF analysis
+        handler = get_news_handler(sensitivity=0.12, decay_hours=24)
+        
+        # Load real news signals from data/news_etf_signals.json (produced by
+        # news_to_etf_bridge.py --auto cron). Falls back to placeholder if missing.
+        cached_signals = None
+        try:
+            from pathlib import Path
+            import json as _json
+            _sig_path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "news_etf_signals.json"
+            if _sig_path.exists():
+                _all = _json.loads(_sig_path.read_text(encoding="utf-8"))
+                _sig = _all.get(code, {})
+                if _sig and isinstance(_sig, dict) and _sig.get("direction"):
+                    cached_signals = [{
+                        "title": _sig.get("summary", ""),
+                        "direction": _sig.get("direction", "中性"),
+                        "score": abs(_sig.get("news_score", 0.5)),
+                        "source": _sig.get("source", ""),
+                        "category": _sig.get("sector", sector),
+                    }]
+        except Exception:
+            cached_signals = None
+        
+        # Use the real news-enhanced scoring path (news_handler.enhance_pipeline_scores)
+        # instead of the old hardcoded 0.3 placeholder.
+        handler.enhance_pipeline_scores(scores, sector, code, cached_signals=cached_signals)
+        # layer_scores must stay numeric-only: move non-numeric L9 metadata to details
+        for _k in ("L9_Keywords", "L9_LastUpdated", "L9_TotalSignals"):
+            if _k in scores and not isinstance(scores[_k], (int, float)):
+                details[_k] = scores.pop(_k)
+        details["L9_LastUpdated"] = scores.get("L9_LastUpdated", time.strftime("%Y-%m-%d %H:%M"))
+        logger.info(f"[_enhance_news] Applied news enhancement for {code}")
+        
+    except Exception as e:
+        logger.warning(f"[_enhance_news] Failed for {code}: {str(e)}")
+        # Don't fail the whole pipeline; just skip news enhancement
         pass
 
 
@@ -460,6 +622,7 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     # Step 2: Bridge layers (material, sector, multi-signal, L2 holdings)
     scores = _apply_material_bridge(scores, code, sector)
     _apply_sector_scores(scores, sector, rl)
+    _apply_live_material_fusion(scores, code, sector, live)
     _apply_multi_signal(scores, code, sector, info)
     _apply_l2_holdings(scores, code, sector, rl, info.get("fee", 0.005))
 
@@ -470,8 +633,10 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     # Step 4: Chain risk penalty
     _apply_chain_penalty(scores, code)
 
-    # Step 5: Material bridge second pass
-    scores = _apply_material_bridge(scores, code, sector)
+    # Step 5: REMOVED — material_bridge second pass was double-applying adjustments.
+    # apply_to_layers() is INCREMENTAL (layer_scores[layer] = old + adj), so calling it
+    # twice (Step 2 + Step 5) doubled L3-L7 adjustments (e.g. L4 7.2→9.9, L6 3.5→2.5).
+    # Single application in Step 2 is correct.
 
     # Step 6: Live data adjustments
     _run_live_adjustments(scores, sector)
@@ -480,7 +645,7 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     _apply_soft_floor(scores)
 
     # Step 8: Sector flow bridge (L8/L9)
-    _apply_sector_flow(scores, info, rl, code, sector)
+    _apply_sector_flow(scores, info, rl, code, sector, live=live)
 
     # Step 9: Layers L12-L15
     _apply_l12_political_risk(scores, sector)
@@ -501,18 +666,20 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
 
     # Step 12: Layers L21-L24 + L33 + L25-L27 (KB-driven)
     _apply_behavioral_psychology(scores, layer_details, sector, rl)
-    _apply_pendulum(scores, layer_details, sector, rl)
+    _apply_pendulum(scores, layer_details, sector, rl, code=code)
     _apply_valuation(scores, layer_details, code, sector, name, rl)
-    _apply_microstructure(scores, layer_details, sector, rl)
+    _apply_microstructure(scores, layer_details, sector, rl, code=code)
     _apply_dip_flow(scores, layer_details, code, sector, rl, live=live)
+    _apply_system_dynamics(scores, layer_details, sector, rl, code)
     _apply_regime_factor(scores, layer_details, sector)
     _apply_kb_catalyst(scores, layer_details, sector)
     _apply_liquidity_arbitrage(scores, layer_details, info.get("type", ""), sector)
-    _apply_volatility_regime(scores, layer_details, sector)
+    _apply_volatility_regime(scores, layer_details, sector, code=code)
     _apply_factor_smart_beta(scores, layer_details, sector, regime=cycle_info.get("regime", "sideways"))
+    _apply_l30_layer(scores, layer_details, sector, rl, code)
 
     # Step 13: Enhancements
-    _enhance_news(scores, code)
+    _enhance_news(scores, code, layer_details, sector)
     if live:
         _enhance_realtime(scores, code)
 

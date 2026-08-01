@@ -140,6 +140,13 @@ def get_news(keyword: str, limit: int = 10) -> List[NewsItem]:
                 logger.debug("news source %s failed: %s", src_name, e)
 
     # Sort by relevance (descending), then take top-N
+    # FIX: source constants (0.4-0.8) are priority, not keyword relevance.
+    # Boost items whose title actually contains the keyword so ranking reflects
+    # topical match, not just source precedence.
+    kw_lower = keyword.lower() if keyword else ""
+    for it in all_items:
+        if kw_lower and kw_lower in (it.title or "").lower():
+            it.relevance += 0.3
     all_items.sort(key=lambda x: x.relevance, reverse=True)
     result = all_items[:limit]
 

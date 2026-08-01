@@ -221,8 +221,6 @@ def _synthesize(report):
     """综合判断"""
     score = report.get("composite_score", 5)
     scores = report.get("layer_scores", {})
-    bull = report.get("bull_case", "")
-    bear = report.get("bear_case", "")
     tail = report.get("tail_risk", {})
     l8 = scores.get("L8_CapitalFlow", 5)
     l9 = scores.get("L9_Signals", 5)

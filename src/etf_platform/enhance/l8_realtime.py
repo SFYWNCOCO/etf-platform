@@ -8,11 +8,21 @@ def enhance_l8(penetration_result: dict) -> dict:
     scores = penetration_result.get("layer_scores", {})
     
     # Find L8 key (v16.20: 修复——原"资金"匹配失败因为key是"L8_CapitalFlow")
+    # FIX 2026-08-01: pipeline._build_result always sets layers={} (empty),
+    # so the old lookup `for k in layers` never found L8 and enhance_l8 was dead
+    # code. Fall back to layer_scores when layers is empty.
     l8_key = None
     for k in layers:
         if "L8" in k:
             l8_key = k
             break
+    if l8_key is None:
+        for k in scores:
+            if "L8" in k:
+                l8_key = k
+                break
+        # Note: only scores-based L8 (e.g. L8_CapitalFlow) can be enhanced;
+        # layer dicts (which used to carry structure) are not produced anymore.
     
     if not l8_key:
         return penetration_result
@@ -30,8 +40,10 @@ def enhance_l8(penetration_result: dict) -> dict:
     if not price_data or price_data.price <= 0:
         return penetration_result
     
-    l8_data = layers[l8_key]
+    l8_data = layers.get(l8_key, {})
     # v16.20: layers值可能是float(score)而非dict, 需要兼容
+    # FIX 2026-08-01: l8_key may come from scores (layers empty in pipeline);
+    # guard against missing key instead of hard index.
     if not isinstance(l8_data, dict):
         l8_data = {}
     

@@ -221,7 +221,7 @@ def compute_unified_score(
         pipe_result.get("layer_scores", {}).get("L33_RegimeFactor", 5.0)
         or compute_l33_factor(sector)
     )
-    l33_detail = pipe_result.get("layer_scores", {}).get("L33_Detail", {})
+    l33_detail = pipe_result.get("layer_details", {}).get("L33_Detail", {})
 
     # L34: KB Catalyst layer — 知识库催化剂信号
     l34_raw = pipe_result.get("layer_scores", {}).get("L34_KBCatalyst", 5.0)
@@ -243,6 +243,13 @@ def compute_unified_score(
         + l26_raw * SCORING_WEIGHTS["l26_vol_regime"]
         + l27_raw * SCORING_WEIGHTS["l27_factor_beta"]
     )
+    # FIX 2026-08-01: weights summed to 1.13 (>1.0) because pen_comp*0.60 and
+    # l34*0.08 were added on top of SCORING_WEIGHTS entries, while 8 table weights
+    # (capital_flow/live_signals/factor_score/political/macro/tech/supply/material)
+    # are absorbed inside pen_comp. Normalize to 1.0 to stop raw_final from being
+    # systematically >10 and compressed by the clip (which distorted rankings).
+    _NORM = 1.13
+    raw_final = raw_final / _NORM
     final = round(max(0.0, min(10.0, raw_final)), 2)
     risk_adjusted = round(final, 2)
     # v2.0: 负收益惩罚 — volatility_adjusted_return<0 降分

@@ -1,0 +1,133 @@
+========================================================================
+PORTFOLIO THREE-FRAMEWORK BACKTEST  |  2026-07-29 00:41
+========================================================================
+
+[1/6] Loading ETF universe...
+[calibration] Universe loaded: 592 raw → 463 eligible → 30 sampled across 11 sectors
+  - 159781 科创创业ETF易方达 (AI/科技)
+  - 159783 科创创业50ETF华夏 (AI/科技)
+  - 515000 科技ETF华宝 (AI/科技)
+  - 562550 绿电ETF华夏 (新能源)
+  - 159046 绿电TH (新能源)
+  - 159566 储能电池ETF易方达 (新能源)
+  - 159996 家电ETF (家电)
+  - 159732 消费电子ETF华夏 (消费)
+  - 159928 消费ETF汇添富 (消费)
+  - 159851 金融科技ETF华宝 (金融)
+  - 167301 保险ETF (保险)
+  - 512000 券商ETF华宝 (金融)
+  - 562390 中药ETF富国 (中药)
+  - 512170 医疗ETF汇添富 (医药)
+  - 159506 港股通创新药医疗ETF富国 (医药)
+  - 159870 化工ETF鹏华 (周期/资源)
+  - 512400 有色金属ETF南方 (周期/资源)
+  - 515220 煤炭ETF国泰 (周期/资源)
+  - 159206 卫星ETF永赢 (军工)
+  - 563230 卫星ETF富国 (军工)
+  - 159218 卫星产业 (军工)
+  - 159262 港股通科技ETF广发 (跨境)
+  - 159605 中概互联ETF广发 (跨境)
+  - 159636 港股通科技30ETF工银 (跨境)
+  - 159263 价值ETF易方达 (红利/价值)
+  - 159691 港股红利ETF工银 (红利/价值)
+  - 512040 价值100ETF富国 (红利/价值)
+  - 159326 电网设备ETF华夏 (公用事业)
+  - 159301 公用事业 (公用事业)
+  - 159320 电网ETF (公用事业)
+
+[2/6] Fetching CSI 300 benchmark: 510300...
+  ✓ 510300: rows=262
+
+[3/6] Fetching selected ETF klines...
+
+--- Fetching 30 ETF klines (akshare Sina) ---
+  [10/30]
+  [20/30]
+  [30/30]
+[calibration] Kline fetch: success=30, failed=0
+
+[4/6] Building aligned returns panel...
+  Panel shape: (32, 30) (trading days × ETFs)
+  Common dates: 2026-06-12 → 2026-07-28
+
+[5/6] Computing allocation snapshots...
+
+[MPT]  sum=1.0000  HHI=0.0345
+  top5:
+    159320   3.448%
+    159326   3.448%
+    159691   3.448%
+    512040   3.448%
+    159263   3.448%
+
+[Risk_Parity]  sum=1.0000  HHI=0.0333
+  top5:
+    159263   7.165%
+    562390   6.211%
+    159301   6.118%
+    159046   5.385%
+    159691   5.311%
+
+[Black_Litterman]  sum=1.0000  HHI=0.0343
+  top5:
+    159301   3.818%
+    159218   3.818%
+    512000   3.818%
+    159851   3.818%
+    512170   3.818%
+
+[6/6] Running rolling rebalance backtest...
+
+========================================================================
+BACKTEST RESULTS
+========================================================================
+Strategy                  Cum Ret   Sharpe  Sortino    MaxDD  Final NAV
+-----------------------------------------------------------------------
+MPT                       -8.18%  -2.440  -3.907   -11.74%     0.9301
+Risk_Parity               -7.13%  -2.536  -3.906    -8.97%     0.9402
+Black_Litterman           -8.24%  -2.441  -3.833   -11.51%     0.9298
+CSI300 510300             15.91%   0.904      N/A    -9.94%     1.1591
+
+[delivery] Report saved: D:\龙虾\.openclaw\etf-platform\reports\portfolio_three_framework_bt.json
+  ⚠️ [Inverse_RP_canary] allocation @t=0: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=1: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=2: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=3: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=4: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=5: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=6: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=7: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=8: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=9: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=10: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=11: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=12: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=13: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=14: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=15: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=16: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=17: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=18: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=19: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=20: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=21: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=22: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=23: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=24: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=25: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=26: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=27: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=28: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=29: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=30: FAIL ValueError: too many values to unpack (expected 2)
+  ⚠️ [Inverse_RP_canary] allocation @t=31: FAIL ValueError: too many values to unpack (expected 2)
+
+--- Negative Canary ---
+  Inverse_RP_canary: cum_ret=nan, max_dd=nan
+Traceback (most recent call last):
+  File "D:\龙虾\.openclaw\etf-platform\scripts\portfolio_comparison_backtest.py", line 554, in <module>
+    main()
+  File "D:\龙虾\.openclaw\etf-platform\scripts\portfolio_comparison_backtest.py", line 542, in main
+    f"Negative canary did NOT lose money? max_dd={bad_result['Inverse_RP_canary']['max_dd']}"
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+KeyError: 'max_dd'

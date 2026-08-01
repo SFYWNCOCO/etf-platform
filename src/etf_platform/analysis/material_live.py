@@ -108,6 +108,11 @@ def _pmi_to_score(pmi):
     return round(max(1.0, min(10.0, base)), 1)
 
 
+# 上游资源型 sector：商品涨价 = 盈利利好 → L3 正向计分（高价格分=高L3）
+# 中下游制造型 sector：商品涨价 = 成本压力 → L3 反向计分（高价格分=低L3）
+UPSTREAM_SECTORS = {"煤炭", "钢铁", "有色金属", "贵金属", "能源化工", "石油", "农产品", "周期/资源"}
+
+
 def get_sector_commodity_score(sector):
     commodities = _fetch_commodities()
     pmi = _fetch_pmi()
@@ -145,7 +150,11 @@ def get_sector_commodity_score(sector):
         scores.append(combined)
 
     l3_raw = statistics.mean(scores)
-    l3_score = round(max(1.0, min(10.0, 10.0 - l3_raw)), 1)
+    # 上游资源 sector：涨价利好 → 正向；中下游制造：涨价成本压力 → 反向
+    if sector in UPSTREAM_SECTORS:
+        l3_score = round(max(1.0, min(10.0, l3_raw)), 1)
+    else:
+        l3_score = round(max(1.0, min(10.0, 10.0 - l3_raw)), 1)
     pmi_score = _pmi_to_score(pmi)
     l4_raw = (statistics.mean(scores) + pmi_score) / 2
     l4_score = round(max(1.0, min(10.0, l4_raw)), 1)

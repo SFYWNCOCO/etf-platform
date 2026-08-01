@@ -98,6 +98,8 @@ CROSS_IMPACT = {
                "hidden_link": "利率债, 无供应链风险"},
     "563300": {"name": "中证红利低波", "direct_bottlenecks": 0, "indirect_chains": 0, "cascade_scenarios": 1,
                "hidden_link": "防御型, 系统性风险低"},
+    "512890": {"name": "红利低波ETF", "direct_bottlenecks": 0, "indirect_chains": 0, "cascade_scenarios": 1,
+               "hidden_link": "防御型, 系统性风险低 (红利低波同类 563300)"},
 }
 
 

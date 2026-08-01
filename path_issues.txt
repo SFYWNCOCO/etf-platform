@@ -1,0 +1,50 @@
+=== ETF Platform 路径问题分析报告 ===
+扫描日期: 2026-07-18
+扫描范围: D:/龙虾/.openclaw/etf-platform/**/*.py
+
+--- 问题1: event_nlp.py 回退缓存路径少一层 .parent ---
+文件: src/etf_platform/analysis/event_nlp.py
+行号: 1001
+当前代码: old_cache = Path(__file__).resolve().parent.parent.parent / "data" / "event_signals.json"
+问题:     3个.parent 指向 src/etf_platform/data/ 而非 etf-platform/data/
+正确代码: old_cache = Path(__file__).resolve().parent.parent.parent.parent / "data" / "event_signals.json"
+严重性: CRITICAL (缓存失效时永远找不到旧缓存)
+
+--- 问题2: ml_predictor.py BASE 路径少一层 .parent ---
+文件: src/etf_platform/decision/ml_predictor.py
+行号: 39
+当前代码: BASE = Path(__file__).resolve().parent.parent.parent  # etf-platform root
+问题:     3个.parent 停在 etf_platform/ 目录，未到达项目根
+正确代码: BASE = Path(__file__).resolve().parent.parent.parent.parent  # etf-platform root
+影响:     MODEL_DIR 和 PRED_DIR 指向 src/etf_platform/data/ml_models/ 而非 etf-platform/data/ml_models/
+严重性: HIGH (模型和预测文件写入错误位置)
+
+--- 问题3: two_week_picker.py BASE 路径少一层 .parent ---
+文件: src/etf_platform/decision/two_week_picker.py
+行号: 34
+当前代码: BASE = Path(__file__).resolve().parent.parent.parent  # etf-platform root
+问题:     同上，3个.parent 而非4个
+正确代码: BASE = Path(__file__).resolve().parent.parent.parent.parent  # etf-platform root
+影响:     sys.path.insert 插入错误路径，可能导致导入混乱
+严重性: MEDIUM
+
+--- 正常路径 (参考) ---
+src/etf_platform/decision/meta_predictor.py:39       -> parent*4  ✓
+src/etf_platform/decision/confidence_calibrator.py:28 -> parent*4  ✓
+src/etf_platform/decision/prediction_backtest.py:23   -> parent*4  ✓
+src/etf_platform/decision/strategy_tournament.py:33   -> parent*4  ✓
+src/etf_platform/decision/risk_manager.py:12          -> parent*4  ✓
+src/etf_platform/decision/prediction_monitor.py:10    -> parent*4  ✓
+src/etf_platform/decision/auto_tune_weights.py:26     -> parent*4  ✓
+src/etf_platform/decision/screener.py:458             -> parent*4  ✓
+src/etf_platform/decision/synthetic_backtest.py:20    -> parent*4  ✓
+src/etf_platform/patrol/daily.py:9                    -> parent*4  ✓
+src/etf_platform/config_loader.py:6                   -> parent*3  ✓ (config/ 在 etf_platform/ 内)
+src/etf_platform/analysis/macro_overlay.py:16         -> parent*3  ✓ (data/ 在 etf_platform/ 内)
+
+--- 有意使用 5 层 .parent 的路径 ---
+src/etf_platform/data/eastmoney.py:18  -> parent*5 / "etf_system" (跨项目引用)
+src/etf_platform/analysis/deep_sub/materials.py:95 -> parent*5 / "config"
+src/etf_platform/analysis/material_watchdog.py:27  -> parent*5 (指向项目外)
+
+=== 总计: 3 个路径 Bug 需要修复 ===

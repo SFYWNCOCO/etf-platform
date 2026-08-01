@@ -1,3 +1,4 @@
+from __future__ import annotations
 #!/usr/bin/env python3
 """event_nlp.py — 基于规则引擎的中文财经新闻实时事件检测系统
 
@@ -21,8 +22,6 @@
 """
 import logging
 logger = logging.getLogger(__name__)
-
-from __future__ import annotations
 
 import json
 import re
@@ -222,6 +221,7 @@ EVENT_DICTIONARIES: dict[str, dict[str, dict[str, Any]]] = {
                 "反垄断", "反垄断调查", "合规", "规范发展",
                 "强监管", "严监管", "去产能", "限产",
                 "双减", "教培", "平台经济",
+                "立案", "立案调查", "违规", "调查", "被查", "警示函",
             ],
             "sentiment": -0.4,
             "urgency": "medium",
@@ -523,10 +523,16 @@ def _score_match(text: str, keywords: list[str], negation_window: int = 5) -> tu
         return 0.0, []
 
     # 短关键词惩罚：1-2字符的关键词权重减半，减少误匹配
+    # FIX 2026-08-01: penalty was ×0.5 per short keyword — with regulation-style
+    # keyword lists full of 2-char terms (监管/立案/违规/调查), 2 hits dropped
+    # confidence below the 0.15 detection threshold. Relax to ×0.8 so legitimate
+    # 2-char events are still detected while 1-char false positives stay damped.
     short_penalty = 1.0
     for kw in matched:
-        if len(kw) <= 2:
+        if len(kw) <= 1:
             short_penalty *= 0.5
+        elif len(kw) == 2:
+            short_penalty *= 0.8
     score *= short_penalty
 
     # 归一化到 [0, 1]

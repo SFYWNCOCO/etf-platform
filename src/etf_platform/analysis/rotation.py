@@ -67,23 +67,18 @@ def fetch_prices():
 
 
 def rotation_check(prices_dict):
-    """Simplified rotation detection based on daily change and volume.
-    
-    In lieu of 5-day vs 20-day data (needs kline), uses:
-    - Daily change as short-term signal
-    - Volume as confirmation
+    """Build sector→price map from fetched prices.
+
+    NOTE: function name is historical; it does NOT detect rotation itself —
+    it groups fetched prices by sector. detect_rotation() does the actual
+    change classification downstream.
     """
     if not prices_dict:
         return {}
     
-    # Find price-to-name mapping 
-    rot = {}
-    changes = []
-    
     # Build sector mapping from fetched prices
     sector_prices = {}
     for sec, cds in SECTORS.items():
-        code_prefix = cds[0][2:]  # Remove "sh"/"sz"
         for name, data in prices_dict.items():
             # Try to match name to sector
             for sec_name, sec_codes in SECTORS.items():

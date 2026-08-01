@@ -148,10 +148,10 @@ REGIME_WEIGHT_PRIORS: dict[str, dict[str, float]] = {
 
 # Default equal-weight fallback
 DEFAULT_WEIGHTS: dict[str, float] = {
-    "mean_reversion": 0.25,
-    "zscore_multi":   0.25,
-    "momentum":       0.25,
-    "capital_flow":   0.25,
+    "mean_reversion": 0.20,
+    "zscore_multi":   0.20,
+    "momentum":       0.20,
+    "capital_flow":   0.20,
     "consensus":      0.20,
 }
 
@@ -800,17 +800,20 @@ class StrategyTournament:
 
             if best_name:
                 # Boost best strategy, reduce others proportionally
+                # FIX: use DEFAULT_WEIGHTS as baseline (was hardcoded 0.25,
+                # out of sync after DEFAULT_WEIGHTS changed to 0.20)
                 boost = 0.15
+                base_default = DEFAULT_WEIGHTS.get(best_name, 0.20)
                 for sname in DEFAULT_WEIGHTS:
                     if sname == best_name:
                         self._weights[sname] = min(
                             0.50,
-                            self._weights.get(sname, 0.25) + boost,
+                            self._weights.get(sname, base_default) + boost,
                         )
                     else:
                         self._weights[sname] = max(
                             0.05,
-                            self._weights.get(sname, 0.25) * (1 - boost / 3),
+                            self._weights.get(sname, DEFAULT_WEIGHTS.get(sname, 0.20)) * (1 - boost / 3),
                         )
 
         # Normalize weights
@@ -845,7 +848,7 @@ class StrategyTournament:
         for sname, ts_w in ts_weights.items():
             if sname in weights:
                 # 60% TS empirical + 40% theoretical prior
-                weights[sname] = 0.6 * ts_w + 0.4 * weights.get(sname, 0.25)
+                weights[sname] = 0.6 * ts_w + 0.4 * weights.get(sname, DEFAULT_WEIGHTS.get(sname, 0.20))
 
         # If we have historical performance data, blend it with priors
         if self._regime_records:
@@ -855,7 +858,7 @@ class StrategyTournament:
                 for sname, rec in regime_records.items():
                     if rec.sample_count >= 3:
                         empirical_weight = rec.win_rate / 100.0
-                        current = weights.get(sname, 0.25)
+                        current = weights.get(sname, DEFAULT_WEIGHTS.get(sname, 0.20))
                         weights[sname] = 0.7 * current + 0.3 * empirical_weight
 
         # Normalize weights
@@ -869,7 +872,7 @@ class StrategyTournament:
         strategy_contributions: dict[str, list[str]] = defaultdict(list)
 
         for sname, res in results.items():
-            w = weights.get(sname, 0.25)
+            w = weights.get(sname, DEFAULT_WEIGHTS.get(sname, 0.20))
             for pick in res.picks[:3]:
                 code = pick["code"]
                 raw_score = pick.get("raw_score", pick.get("score", 0))

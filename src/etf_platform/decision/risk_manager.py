@@ -116,7 +116,11 @@ def check_risk_flags() -> dict:
     
     if total_entry > 0:
         portfolio_value = total_value / total_entry
-        portfolio_dd = portfolio_value / data["portfolio_peak"] - 1
+        # FIX: guard missing/zero portfolio_peak (old positions files may lack it)
+        peak = data.get("portfolio_peak") or 1.0
+        if peak <= 0:
+            peak = 1.0
+        portfolio_dd = portfolio_value / peak - 1
         
         if portfolio_dd <= PORTFOLIO_MAX_DD:
             flags["portfolio_dd_critical"] = True

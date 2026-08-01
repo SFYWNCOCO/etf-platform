@@ -186,7 +186,9 @@ class FundFlowAnalyzer:
                 alert.message = f"{pattern}: 跌幅{price_chg:+.2f}%但主力净流入{main_net/1e8:.2f}亿，关注反弹机会"
             elif signal == "divergence_bearish" and abs(price_chg) > self.DIVERGENCE_PRICE_THRESHOLD:
                 alert.alert_level = "medium"
-                alert.message = f"{pattern}: 涨幅{price_chg:+.2f}%但超大单+大单净流出{super_large+large/1e8:.2f}亿"
+                # FIX 2026-08-01: parenthesize before /1e8 — previously `super_large + large/1e8`
+                # only divided large, leaving super_large in raw yuan (huge number in message).
+                alert.message = f"{pattern}: 涨幅{price_chg:+.2f}%但超大单+大单净流出{(super_large+large)/1e8:.2f}亿"
 
             if super_large < -self.MAIN_FLOW_THRESHOLD and price_chg > 0:
                 alert.alert_level = "high"

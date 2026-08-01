@@ -639,7 +639,7 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
                         sector_a = get_sector_exposure(code)
                         if holdings_a and sector_a:
                             # Compare against top recommended ETFs already in result
-                            for other in result:
+                            for other in top_results:
                                 if other.get("code") == code:
                                     continue
                                 other_code = other.get("code", "")

@@ -38,6 +38,10 @@ def _print_screen_results(results):
     if results and isinstance(results[0], dict) and "_l003_insight" in results[0]:
         l003 = results[0]["_l003_insight"]
         results = results[1:]
+
+    # Screen results may also carry non-ETF entries (_cash_signal/_risk_flags).
+    # Strip them BEFORE iterating so r["code"]/r["name"] below never KeyErrors.
+    results = [r for r in results if isinstance(r, dict) and "code" in r and "name" in r]
     
     if l003:
         print(f"\n  {'='*70}")

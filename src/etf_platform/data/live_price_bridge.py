@@ -69,11 +69,29 @@ def fetch_live_prices(codes: list[str] = None) -> dict:
     从Sina获取实时ETF价格。默认全量。
     返回: {code: {name, price, change_pct, volume, turnover, high, low, open, prev_close}}
     """
-    if codes is None:
-        codes = list(_build_code_map().keys())  # 全量
-
     # Cache code map locally — saves ~500 _build_code_map() calls per run
     _local_code_map = _build_code_map()
+
+    if codes is None:
+        codes = list(_local_code_map.keys())  # 全量（带 sh/sz 前缀）
+    else:
+        # 显式传入裸 6 位代码 → 补市场前缀；已带前缀的原样保留
+        prefixed = []
+        for c in codes:
+            if len(c) == 6 and c.isdigit():
+                if c in _local_code_map.values():
+                    # 裸代码 → 找到对应前缀 key
+                    for k, v in _local_code_map.items():
+                        if v == c:
+                            prefixed.append(k)
+                            break
+                    else:
+                        prefixed.append(("sz" if c.startswith(("15", "16", "18")) else "sh") + c)
+                else:
+                    prefixed.append(("sz" if c.startswith(("15", "16", "18")) else "sh") + c)
+            else:
+                prefixed.append(c)
+        codes = prefixed
 
     results = {}
     batch_size = 50  # Sina一次最多约50个，全量500+需要~12批

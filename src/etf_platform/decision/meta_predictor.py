@@ -124,18 +124,11 @@ def _tournament_predict() -> list[dict]:
 def _event_predict() -> list[dict]:
     """NLP event signal source — converts events to ETF signals."""
     from etf_platform.analysis.event_nlp import get_sector_signals
-    signals = get_sector_signals()
-    predictions: list[dict] = []
-    for sig in signals:
-        for code in sig.get("etf_codes", [])[:2]:
-            predictions.append({
-                "code": code,
-                "name": f"{sig['sector']} ETF",
-                "sector": sig["sector"],
-                "score": sig.get("signal_strength", 50),
-                "source": "event_nlp",
-            })
-    return predictions
+    # FIX 2026-08-01: get_sector_signals already returns MetaPredictor-format
+    # predictions ({code,name,sector,score,source}) via _signals_to_predictions.
+    # Old code read sig["etf_codes"] from the converted output → always empty,
+    # so the events source never contributed predictions.
+    return get_sector_signals()
 
 
 # ── Predictor registry ────────────────────────────────────────────────

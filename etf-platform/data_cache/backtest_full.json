@@ -1,0 +1,342 @@
+{
+  "timestamp": "2026-07-28T14:38:41.292643",
+  "trades": [
+    {
+      "event": "BIS芯片新管制",
+      "date": "2025-12-02",
+      "code": "159995",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "芯片ETF",
+      "delisted": false
+    },
+    {
+      "event": "BIS芯片新管制",
+      "date": "2025-12-02",
+      "code": "512480",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "半导体ETF",
+      "delisted": false
+    },
+    {
+      "event": "BIS芯片新管制",
+      "date": "2025-12-02",
+      "code": "159819",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "AI ETF",
+      "delisted": false
+    },
+    {
+      "event": "日本限光刻胶",
+      "date": "2026-04-10",
+      "code": "159995",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "芯片ETF",
+      "delisted": false
+    },
+    {
+      "event": "日本限光刻胶",
+      "date": "2026-04-10",
+      "code": "512480",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "半导体ETF",
+      "delisted": false
+    },
+    {
+      "event": "日本限光刻胶",
+      "date": "2026-04-10",
+      "code": "159819",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "AI ETF",
+      "delisted": false
+    },
+    {
+      "event": "茅台批价跌破2000",
+      "date": "2026-04-15",
+      "code": "512690",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "酒ETF",
+      "delisted": false
+    },
+    {
+      "event": "两会国防预算",
+      "date": "2026-03-05",
+      "code": "512660",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "军工ETF",
+      "delisted": false
+    },
+    {
+      "event": "两会国防预算",
+      "date": "2026-03-05",
+      "code": "512670",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "国防ETF",
+      "delisted": false
+    },
+    {
+      "event": "碳酸锂触底反弹",
+      "date": "2026-05-10",
+      "code": "516160",
+      "dir": "利好",
+      "pnl_pct": 1.19,
+      "correct": true,
+      "name": "新能源ETF",
+      "delisted": false
+    },
+    {
+      "event": "碳酸锂触底反弹",
+      "date": "2026-05-10",
+      "code": "515030",
+      "dir": "利好",
+      "pnl_pct": 0.18,
+      "correct": true,
+      "name": "新能源车ETF华夏",
+      "delisted": false
+    },
+    {
+      "event": "DeepSeek-V3发布",
+      "date": "2025-12-26",
+      "code": "159819",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "AI ETF",
+      "delisted": false
+    },
+    {
+      "event": "DeepSeek-V3发布",
+      "date": "2025-12-26",
+      "code": "516510",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "云计算ETF",
+      "delisted": false
+    },
+    {
+      "event": "春节后资金回流",
+      "date": "2026-02-05",
+      "code": "510300",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "沪深300ETF",
+      "delisted": false
+    },
+    {
+      "event": "春节后资金回流",
+      "date": "2026-02-05",
+      "code": "159915",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "创业板ETF",
+      "delisted": false
+    },
+    {
+      "event": "降准50bp",
+      "date": "2025-11-15",
+      "code": "510300",
+      "dir": "利好",
+      "pnl_pct": -0.85,
+      "correct": false,
+      "name": "沪深300ETF",
+      "delisted": false
+    },
+    {
+      "event": "降准50bp",
+      "date": "2025-11-15",
+      "code": "512100",
+      "dir": "利好",
+      "pnl_pct": 0.03,
+      "correct": true,
+      "name": "中证1000ETF",
+      "delisted": false
+    },
+    {
+      "event": "纳指创新高",
+      "date": "2026-01-20",
+      "code": "159941",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "纳指100ETF",
+      "delisted": false
+    },
+    {
+      "event": "纳指创新高",
+      "date": "2026-01-20",
+      "code": "513100",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "纳指ETF",
+      "delisted": false
+    },
+    {
+      "event": "金价突破3000",
+      "date": "2026-04-01",
+      "code": "518880",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "黄金ETF华安",
+      "delisted": false
+    },
+    {
+      "event": "券商降佣新规",
+      "date": "2026-03-20",
+      "code": "512880",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "证券ETF国泰",
+      "delisted": false
+    },
+    {
+      "event": "创新药审批加速",
+      "date": "2026-01-05",
+      "code": "512170",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "医疗ETF汇添富",
+      "delisted": false
+    },
+    {
+      "event": "创新药审批加速",
+      "date": "2026-01-05",
+      "code": "159992",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "创新药ETF",
+      "delisted": false
+    },
+    {
+      "event": "暑期消费预期",
+      "date": "2026-05-25",
+      "code": "515170",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "食品饮料ETF",
+      "delisted": false
+    },
+    {
+      "event": "小盘股反弹",
+      "date": "2025-10-15",
+      "code": "512100",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "中证1000ETF",
+      "delisted": false
+    },
+    {
+      "event": "小盘股反弹",
+      "date": "2025-10-15",
+      "code": "510500",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "中证500ETF",
+      "delisted": false
+    },
+    {
+      "event": "欧盟新能源关税",
+      "date": "2026-03-10",
+      "code": "516160",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "新能源ETF",
+      "delisted": false
+    },
+    {
+      "event": "欧盟新能源关税",
+      "date": "2026-03-10",
+      "code": "515030",
+      "dir": "利空",
+      "pnl_pct": -0.2,
+      "correct": true,
+      "name": "新能源车ETF华夏",
+      "delisted": false
+    },
+    {
+      "event": "科技股估值修复",
+      "date": "2026-02-25",
+      "code": "512890",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "红利低波ETF华泰柏瑞",
+      "delisted": false
+    },
+    {
+      "event": "科技股估值修复",
+      "date": "2026-02-25",
+      "code": "512170",
+      "dir": "利好",
+      "pnl_pct": -0.2,
+      "correct": false,
+      "name": "医疗ETF汇添富",
+      "delisted": false
+    }
+  ],
+  "accuracy": 43.3,
+  "total": 30,
+  "correct": 13,
+  "window_days": 100,
+  "cost_bps": 0.2,
+  "delisted_count": 0,
+  "delisted_codes": [],
+  "event_accuracy": {
+    "BIS芯片新管制": 100.0,
+    "日本限光刻胶": 100.0,
+    "茅台批价跌破2000": 100.0,
+    "两会国防预算": 0.0,
+    "碳酸锂触底反弹": 100.0,
+    "DeepSeek-V3发布": 0.0,
+    "春节后资金回流": 0.0,
+    "降准50bp": 50.0,
+    "纳指创新高": 0.0,
+    "金价突破3000": 0.0,
+    "券商降佣新规": 100.0,
+    "创新药审批加速": 0.0,
+    "暑期消费预期": 0.0,
+    "小盘股反弹": 0.0,
+    "欧盟新能源关税": 100.0,
+    "科技股估值修复": 0.0
+  },
+  "etf_accuracy": {
+    "159995": 100.0,
+    "512480": 100.0,
+    "512690": 100.0,
+    "516160": 100.0,
+    "515030": 100.0,
+    "512880": 100.0,
+    "159819": 66.7,
+    "512100": 50.0,
+    "512660": 0.0,
+    "512670": 0.0
+  }
+}

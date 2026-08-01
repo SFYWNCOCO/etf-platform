@@ -531,18 +531,16 @@ def is_consumer_sector(sector):
 
 def score_demand_climate(sector, risk_level: float = 0.5, etf_code: str = ""):
     """L10: 消费需求健康评分 (1-10)
-    
-    v7.4: Added risk_level parameter. Low-risk ETFs get +1.0 bonus (stable demand),
-    high-risk ETFs get -1.0 penalty (volatile demand).
-    v8.9: Added etf_code parameter for code-based micro-jitter on B2B fallback path.
-    """
-    """L10: 消费需求健康评分 (1-10)
-    
+
     对非消费行业直接返回 7.0 (中性偏健康, 工业需求不受消费信心主导)
     对消费行业使用两模型加权:
       Model A: 社零增速(50%) + 消费信心(50%)
       Model B: 储蓄率(50%) + 失业率(50%)
       最终 = A*0.6 + B*0.4
+
+    v7.4: Added risk_level parameter. Low-risk ETFs get +1.0 bonus (stable demand),
+    high-risk ETFs get -1.0 penalty (volatile demand).
+    v8.9: Added etf_code parameter for code-based micro-jitter on B2B fallback path.
     """
     if not is_consumer_sector(sector):
         b2b = B2B_DEMAND_CLIMATE.get(sector, {})

@@ -516,12 +516,24 @@ def run_realtime_resolution(debug: bool = False) -> ResolutionResult:
             print(f"  {c.conflict_type}: {c.etf_code} ({c.sector}) "
                   f"ML P(涨)={c.ml_prob_up:.1%} → {c.resolution}")
 
-    # 执行裁决
+    # 执行裁决 — market_volatility 从 QVIX 状态派生（此前硬编码 0.02）
+    try:
+        from etf_platform.analysis.qvix_regime import get_regime
+        _rd = get_regime()
+        _qvix = _rd.get("qvix_50", 0) or 0
+        # QVIX 25~35 常态 → 波动 0.02；>35 恐慌 → 升到 0.04；<20 平静 → 0.01
+        _mv = 0.02
+        if _qvix > 35:
+            _mv = 0.04
+        elif _qvix < 20:
+            _mv = 0.01
+    except Exception:
+        _mv = 0.02  # fallback to prior constant
     engine = ResolutionEngine()
     result = engine.resolve(
         conflicts,
         qvix_value=qvix_val,
-        market_volatility=0.02,  # TODO: 从行情数据获取
+        market_volatility=_mv,
     )
 
     # 保存裁决记录
