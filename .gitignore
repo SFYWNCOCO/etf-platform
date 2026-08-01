@@ -50,3 +50,10 @@ data/backup_20260721/
 data/scan_*_latest.json
 data/screener_cache/
 src/data/screener_cache/
+nul
+temp_pipeline.txt
+scripts/tmp_test_fetch.py
+scripts/portfolio_comparison_backtest.py.bak*
+references/kb-integration-2026-07-24/_archive_temp_files/
+src/data_migrated_backup/
+src/etf_platform/portfolio/risk_parity.py.bak*
