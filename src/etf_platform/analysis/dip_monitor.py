@@ -16,8 +16,9 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime, date
 from pathlib import Path
 from typing import Optional
+# ponytail: pandas 只在 DIPMonitor 类方法内用，score_dip_layer(pipeline 唯一调用点)纯逻辑不依赖。
+# 顶层不 import，避免 Hermes venv 无 pandas 时整个模块不可导入→L24 静默死层。
 
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +64,14 @@ class DIPMonitor:
         self.alert_history_file = self.cache_dir / "dip_alert_history.jsonl"
 
     def fetch_etf_data(self) -> pd.DataFrame:
-        """
-        获取ETF实时行情数据
+        """获取ETF实时行情数据
 
         Returns:
             DataFrame with columns: 代码, 名称, 最新价, IOPV实时估值, 基金折价率,
             涨跌额, 涨跌幅, 成交量, 成交额, 开盘价, 最高价, 最低价, 昨收,
             换手率, 量比, 委比, 外盘, 内盘, 主力净流入-净额, ...
         """
+        import pandas as pd
         try:
             import akshare as ak
             df = ak.fund_etf_spot_em()
@@ -109,8 +110,7 @@ class DIPMonitor:
         return result
 
     def detect_alerts(self, df: pd.DataFrame) -> list[DipAlert]:
-        """
-        检测折溢价预警
+        """检测折溢价预警
 
         Args:
             df: 包含折价率数据的DataFrame
@@ -118,6 +118,7 @@ class DIPMonitor:
         Returns:
             预警列表
         """
+        import pandas as pd
         alerts = []
 
         if df.empty:

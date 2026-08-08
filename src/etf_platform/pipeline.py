@@ -413,8 +413,10 @@ def _apply_l30_layer(scores: dict, details: dict, sector: str, rl: float, code: 
 def _apply_regime_factor(scores: dict, details: dict, sector: str) -> None:
     """L33 Regime Factor — dynamic factor alignment by QVIX regime."""
     try:
+        from .analysis.qvix_regime import get_regime
         from .layers.l33_regime_factor import score_l33_layer
-        regime = score_l33_layer(sector, qvix_regime="normal")
+        qvix_regime = get_regime().get("regime", "normal")
+        regime = score_l33_layer(sector, qvix_regime=qvix_regime)
         scores["L33_RegimeFactor"] = regime.get("score", 5.0)
         if regime.get("detail"):
             details["L33_Detail"] = regime["detail"]

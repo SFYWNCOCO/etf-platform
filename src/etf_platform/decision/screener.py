@@ -217,7 +217,10 @@ def _premium_penalty(code: str, spot_df=None) -> dict:
     """
     try:
         import akshare as ak
-        
+    except ImportError:
+        return {"premium_pct": 0, "penalty": 0, "signal": "akshare_not_available"}
+
+    try:
         # 方法1: 用IOPV实时计算折溢价(盘中可用)
         try:
             spot = spot_df if spot_df is not None else ak.fund_etf_spot_em()
@@ -266,7 +269,8 @@ def _premium_penalty(code: str, spot_df=None) -> dict:
         
         return {"premium_pct": round(premium, 2), "penalty": penalty, "signal": signal}
     except Exception:
-        return {"premium_pct": 0, "penalty": 0, "signal": "error"}
+        return {"premium_pct": 0, "penalty": 0, "signal": "no_data"}
+
 
 def _generate_reason(result: dict, trend: dict = None) -> str:
     scores = result.get("layer_scores", {})

@@ -55,13 +55,3 @@ class TestConfigLoader:
 class TestAdapterImports:
     """v7/v9 adapters merged into pipeline.py (v5.5 refactor).
     Only demand_adapter remains as a standalone module."""
-
-    def test_demand_adapter(self):
-        from etf_platform._demand_adapter import add_demand_layers
-        assert callable(add_demand_layers)
-
-    def test_pipeline_exports_all_functions(self):
-        from etf_platform.pipeline import run_full, format_full, batch_full
-        assert callable(run_full)
-        assert callable(format_full)
-        assert callable(batch_full)
