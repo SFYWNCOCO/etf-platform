@@ -1,3 +1,5 @@
+from __future__ import annotations
+from ..utils import zscore
 import logging
 logger = logging.getLogger(__name__)
 
@@ -63,17 +65,6 @@ EXCLUDE_KEYWORDS = [
 
 # ── Z-score utilities ──────────────────────────────────────────────
 
-def _zscore(values: list[float]) -> list[float]:
-    """Z-score标准化: (x - μ) / σ. n<3返回全0."""
-    n = len(values)
-    if n < 3:
-        return [0.0] * n
-    mean = sum(values) / n
-    variance = sum((v - mean) ** 2 for v in values) / n
-    std = variance ** 0.5
-    if std < 1e-10:
-        return [0.0] * n
-    return [(v - mean) / std for v in values]
 
 
 def _clamp_z(z_vals: list[float], cap: float = 3.0) -> list[float]:
@@ -331,7 +322,7 @@ def _collect_factors(candidates: list[tuple[str, dict]], pipe_map: dict[str, dic
 
     z_factors: dict[str, list[float]] = {}
     for f in FACTORS:
-        z_raw = _zscore(raw_factors[f["name"]])
+        z_raw = zscore(raw_factors[f["name"]])
         z_factors[f["name"]] = _clamp_z(z_raw)
 
     return z_factors, trend_map, new_scored

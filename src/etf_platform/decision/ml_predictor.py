@@ -16,6 +16,7 @@ Usage:
   python -m etf_platform.decision.ml_predictor --train-only     # retrain model
   python -m etf_platform.decision.ml_predictor --compare        # ML vs Z-score
 """
+from ..utils import sina_code
 from __future__ import annotations
 
 import json
@@ -109,9 +110,6 @@ EXCLUDE_KEYWORDS = [
 #  DATA LAYER — Fetch kline via Tencent (primary) or Sina (fallback)
 # ===================================================================
 
-def _sina_code(code: str) -> str:
-    """Convert ETF code to exchange prefix."""
-    return "sh" if code.startswith(("5", "6")) else "sz"
 
 
 def fetch_kline_rows(code: str, days: int = KLINE_DAYS) -> list[dict] | None:
@@ -119,7 +117,7 @@ def fetch_kline_rows(code: str, days: int = KLINE_DAYS) -> list[dict] | None:
 
     Tries Tencent primary (fastest), then Sina fallback.
     """
-    prefix = _sina_code(code)
+    prefix = sina_code(code)
 
     # ── Try Tencent first ──
     tencent_url = f"http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={prefix}{code},day,,,{min(days, 200)},qfq"

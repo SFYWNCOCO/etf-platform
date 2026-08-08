@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..utils import zscore
 import logging
 logger = logging.getLogger(__name__)
 
@@ -225,17 +226,6 @@ def _update_ts_bandit(
 # Helper: Z-score (reuse from two_week_picker)
 # ---------------------------------------------------------------------------
 
-def _zscore(values: list[float]) -> list[float]:
-    """Z-score标准化: (x - μ) / σ. n<3返回全0."""
-    n = len(values)
-    if n < 3:
-        return [0.0] * n
-    mean = sum(values) / n
-    variance = sum((v - mean) ** 2 for v in values) / n
-    std = variance ** 0.5
-    if std < 1e-10:
-        return [0.0] * n
-    return [(v - mean) / std for v in values]
 
 
 def _clamp_z(z_vals: list[float], cap: float = 3.0) -> list[float]:
@@ -304,7 +294,7 @@ def _zscore_strategy(
 
     z_factors: dict[str, list[float]] = {}
     for k, v in raw_factors.items():
-        z_factors[k] = _clamp_z(_zscore(v))
+        z_factors[k] = _clamp_z(zscore(v))
 
     composite: list[float] = []
     weights = {

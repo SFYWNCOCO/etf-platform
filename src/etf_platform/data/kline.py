@@ -1,4 +1,5 @@
 """kline.py — Multi-source kline data. Tencent primary, Sina fallback."""
+from ..utils import sina_code
 import urllib.request
 import urllib.error
 import json
@@ -92,15 +93,13 @@ def clear_trend_cache():
         _trend_cache.clear()
 
 
-def _sina_code(code):
-    return "sh" if code.startswith(("5","6")) else "sz"
 
 
 def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
     """Fetch kline data, trying Tencent first then Sina fallback."""
     # Try Tencent (primary, works as of 2026-07)
     try:
-        prefix = _sina_code(code)
+        prefix = sina_code(code)
         url = TENCENT_KLINE_URL % (prefix, code, min(days, 200))
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=10) as resp:
@@ -120,7 +119,7 @@ def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
         pass
     # Fallback to Sina
     try:
-        prefix = _sina_code(code)
+        prefix = sina_code(code)
         url = SINA_KLINE_URL % (prefix, code, min(days, 1024))
         req = urllib.request.Request(url, headers={
             "User-Agent": "Mozilla/5.0", "Referer": "http://finance.sina.com.cn/"
