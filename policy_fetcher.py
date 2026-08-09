@@ -51,7 +51,12 @@ NEG_WORDS = ["限制", "禁止", "整治", "查处", "严格", "规范", "收紧
 
 
 def fetch_policy_list() -> list:
-    """用 Playwright 渲染 gov.cn 最新政策页，提取 (title, url)"""
+    """用 Playwright 渲染 gov.cn 最新政策页，提取 (title, url)。
+
+    降级路径（Playwright 不可用时）：requests 直取同源 JSON 接口
+    https://www.gov.cn/zhengce/zuixin/ZUIXINZHENGCE.json —— 数据与页面渲染完全同源
+    （TITLE/URL/DOCRELPUBTIME），只是少浏览器依赖。
+    """
     items = []
     try:
         from playwright.sync_api import sync_playwright
@@ -69,6 +74,27 @@ def fetch_policy_list() -> list:
                     items.append({"title": e["title"], "url": e.get("url", ""), "source": "gov.cn"})
     except Exception as ex:
         print(f"[policy_fetcher] Playwright 失败: {ex}", file=sys.stderr)
+    if items:
+        return items
+    # ── 降级：requests 直取 gov.cn 同源 JSON（无需浏览器）──
+    try:
+        import requests
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
+        r = requests.get(
+            "https://www.gov.cn/zhengce/zuixin/ZUIXINZHENGCE.json",
+            headers=headers, timeout=20,
+        )
+        r.raise_for_status()
+        data = r.json()
+        if isinstance(data, list):
+            for e in data[:40]:  # 与页面首屏量级一致
+                title = e.get("TITLE", "").strip()
+                if title:
+                    items.append({"title": title, "url": e.get("URL", ""), "source": "gov.cn"})
+        if items:
+            print(f"[policy_fetcher] 降级路径: requests 直取 ZUIXINZHENGCE.json ({len(items)}条)", file=sys.stderr)
+    except Exception as ex:
+        print(f"[policy_fetcher] 降级失败: {ex}", file=sys.stderr)
     return items
 
 

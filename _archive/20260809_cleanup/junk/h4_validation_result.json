@@ -1,0 +1,13 @@
+{
+  "verdict": "PASS",
+  "marginal_losses": {
+    "remove_low": 3.3470473608537175,
+    "reduce_low": 1.6735236804268587,
+    "keep_high": 5.653203111035065
+  },
+  "recommended_strategy": "策略2 (降低权重)",
+  "avg_full": 0.7865694050991501,
+  "removed_cats": 4,
+  "reduced_cats": 4,
+  "kept_cats": 17
+}

@@ -1,0 +1,16 @@
+{
+  "etf_count": 1036,
+  "polarity": {
+    "total": 1036,
+    "bullish": 330,
+    "bearish": 0,
+    "neutral": 706,
+    "bullish_pct": 31.85328185328185,
+    "bearish_pct": 0.0,
+    "neutral_pct": 68.14671814671814,
+    "avg_score": 0.2531497104247104,
+    "std_score": 0.21242961434799926
+  },
+  "avg_change": 0.0,
+  "std_change": 0.0
+}

@@ -1,0 +1,147 @@
+{
+  "verdict": "CONDITIONAL_PASS",
+  "confidence": "MEDIUM",
+  "bullish_avg_return": 0.044050000000000006,
+  "neutral_avg_return": 0.02,
+  "bearish_avg_return": 0,
+  "predictions": [
+    {
+      "sector": "AI/科技",
+      "sentiment": 1.0,
+      "composite": 1.0,
+      "expected_return": 0.05500000000000001,
+      "etfs": [
+        "512480",
+        "159819"
+      ],
+      "direction": "看多"
+    },
+    {
+      "sector": "半导体",
+      "sentiment": 1.0,
+      "composite": 1.0,
+      "expected_return": 0.05500000000000001,
+      "etfs": [
+        "512480",
+        "159995"
+      ],
+      "direction": "看多"
+    },
+    {
+      "sector": "消费",
+      "sentiment": 1.0,
+      "composite": 0.5,
+      "expected_return": 0.036750000000000005,
+      "etfs": [
+        "159928",
+        "159979"
+      ],
+      "direction": "看多"
+    },
+    {
+      "sector": "金融",
+      "sentiment": 1.0,
+      "composite": 0.5,
+      "expected_return": 0.036750000000000005,
+      "etfs": [
+        "159928",
+        "512000"
+      ],
+      "direction": "看多"
+    },
+    {
+      "sector": "基建/地产",
+      "sentiment": 1.0,
+      "composite": 0.5,
+      "expected_return": 0.036750000000000005,
+      "etfs": [
+        "516950"
+      ],
+      "direction": "看多"
+    },
+    {
+      "sector": "AI算力",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [],
+      "direction": "中性"
+    },
+    {
+      "sector": "中药",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [],
+      "direction": "中性"
+    },
+    {
+      "sector": "军工",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [
+        "512660",
+        "512880"
+      ],
+      "direction": "中性"
+    },
+    {
+      "sector": "新能源",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [
+        "516160",
+        "159870"
+      ],
+      "direction": "中性"
+    },
+    {
+      "sector": "机器人/智造",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [],
+      "direction": "中性"
+    },
+    {
+      "sector": "煤炭能源",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [
+        "515220",
+        "159870"
+      ],
+      "direction": "中性"
+    },
+    {
+      "sector": "贵金属",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [
+        "518880"
+      ],
+      "direction": "中性"
+    },
+    {
+      "sector": "通信",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [],
+      "direction": "中性"
+    },
+    {
+      "sector": "通信/5G",
+      "sentiment": 0.0,
+      "composite": 0.0,
+      "expected_return": 0.02,
+      "etfs": [],
+      "direction": "中性"
+    }
+  ],
+  "total_sectors": 14
+}

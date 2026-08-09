@@ -1,0 +1,42 @@
+{
+  "510300": {
+    "initial_price": 4.878,
+    "final_price": 4.751,
+    "total_return": -0.01988315702529147,
+    "max_drawdown": 0.09860538204674912,
+    "volatility": 0.23306208770778986,
+    "shock_impact": "Day []"
+  },
+  "159915": {
+    "initial_price": 3.97,
+    "final_price": 3.586,
+    "total_return": -0.07527801370792991,
+    "max_drawdown": 0.2559726962457337,
+    "volatility": 0.46952732500011723,
+    "shock_impact": "Day []"
+  },
+  "512480": {
+    "initial_price": 2.035,
+    "final_price": 1.083,
+    "total_return": -0.3689950700058471,
+    "max_drawdown": 0.6935108153078202,
+    "volatility": 1.2597467714479147,
+    "shock_impact": "Day []"
+  },
+  "512880": {
+    "initial_price": 1.048,
+    "final_price": 1.096,
+    "total_return": 0.055394016264395864,
+    "max_drawdown": 0.14880952380952386,
+    "volatility": 0.3004340371996647,
+    "shock_impact": "Day []"
+  },
+  "512660": {
+    "initial_price": 1.385,
+    "final_price": 1.154,
+    "total_return": -0.1676295084111692,
+    "max_drawdown": 0.2382671480144405,
+    "volatility": 0.3476661124495451,
+    "shock_impact": "Day []"
+  }
+}

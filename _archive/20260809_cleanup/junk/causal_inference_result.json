@@ -1,0 +1,14 @@
+{
+  "method": "causal_inference_military_materials",
+  "n_samples": 330,
+  "results": {
+    "raw_ate": -5.80495624238396,
+    "adjusted_ate": -4.531284349627014,
+    "psm_ate": null,
+    "n_treated": 153,
+    "n_control": 177,
+    "p_value": 9.758505115087246e-10,
+    "z_score": -6.11331080320486
+  },
+  "timestamp": "2026-08-07T23:11:40.597662"
+}

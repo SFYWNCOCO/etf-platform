@@ -1,0 +1,69 @@
+{
+  "thresholds": [
+    {
+      "threshold": 0.001,
+      "threshold_pct": "0.1%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.002,
+      "threshold_pct": "0.2%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.003,
+      "threshold_pct": "0.3%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.005,
+      "threshold_pct": "0.5%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.01,
+      "threshold_pct": "1.0%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.02,
+      "threshold_pct": "2.0%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    },
+    {
+      "threshold": 0.05,
+      "threshold_pct": "5.0%",
+      "avg_turnover": 0,
+      "turnover_penalty": 0,
+      "annualized_return": 0,
+      "excess_return": 0
+    }
+  ],
+  "critical_point": {
+    "threshold": 0.002,
+    "threshold_pct": "0.2%",
+    "avg_turnover": 0,
+    "turnover_penalty": 0,
+    "annualized_return": 0,
+    "excess_return": 0
+  },
+  "hypothesis_supported": true
+}

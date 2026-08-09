@@ -1,0 +1,10 @@
+{
+  "verdict": "PARTIAL",
+  "total_sectors": 21,
+  "bullish_count": 1,
+  "bearish_count": 0,
+  "neutral_count": 20,
+  "bullish_avg_return": -0.0007496431627610883,
+  "bearish_avg_return": null,
+  "etf_data_coverage": "20/353"
+}

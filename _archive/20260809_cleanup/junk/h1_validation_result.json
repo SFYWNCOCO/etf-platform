@@ -1,0 +1,37 @@
+{
+  "status": "completed",
+  "verdict": "PASS",
+  "marginal_contribution_pct": 0,
+  "full_avg": 0.0,
+  "reduced_avg": 0.0,
+  "test_cases": [
+    {
+      "name": "L1-L20",
+      "layers": 20,
+      "avg_score": 0.0,
+      "std_score": 0.0,
+      "etf_count": 353
+    },
+    {
+      "name": "L1-L25",
+      "layers": 25,
+      "avg_score": 0.0,
+      "std_score": 0.0,
+      "etf_count": 353
+    },
+    {
+      "name": "L1-L30",
+      "layers": 30,
+      "avg_score": 0.0,
+      "std_score": 0.0,
+      "etf_count": 353
+    },
+    {
+      "name": "L1-L37",
+      "layers": 37,
+      "avg_score": 0.0,
+      "std_score": 0.0,
+      "etf_count": 353
+    }
+  ]
+}

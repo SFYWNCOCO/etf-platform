@@ -1,0 +1,6 @@
+{
+  "verdict": "PASS",
+  "baseline_return": 7.304911569415867,
+  "shock_max_drawdown": 0.8034487758283051,
+  "shock_final_return": 4.086304172259818
+}

@@ -1,0 +1,7 @@
+{
+  "verdict": "FAIL",
+  "accuracy": 0.2222222222222222,
+  "auc": 0.5,
+  "total_sectors": 9,
+  "correct_predictions": 2
+}
