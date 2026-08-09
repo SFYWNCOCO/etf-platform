@@ -442,7 +442,7 @@ def build_signals(auto_sentiment=None, impact_scores=None) -> dict:
     if auto_sentiment:
         for sector, sent in auto_sentiment.items():
             if sector not in merged:
-                merged[sector] = {"bullish": 5, "bearish": 3, "total_events": 10, "strength": "中"}
+                merged[sector] = {"bullish": 5, "bearish": 3, "total_events": 10, "direction": "中性", "strength": "中"}
             new_dir = sent.get("direction")
             # 只有明确方向（看多/看空）才覆盖；中性保留 KB 原方向
             if new_dir in ("看多", "看空") and new_dir != merged[sector].get("direction"):
@@ -537,9 +537,9 @@ def build_signals(auto_sentiment=None, impact_scores=None) -> dict:
                 "bullish": bullish,
                 "bearish": bearish,
                 "total_events": total,
-                "direction": ss["direction"],
-                "strength": ss["strength"],
-                "summary": ss.get("note", f"{sector}板块 {ss['direction']}"),
+                "direction": ss.get("direction", "中性"),
+                "strength": ss.get("strength", "中"),
+                "summary": ss.get("note", f"{sector}板块 {ss.get('direction', '中性')}"),
                 "source": "sector_signal",
                 "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "last_seen": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
