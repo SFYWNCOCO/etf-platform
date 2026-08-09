@@ -21,7 +21,7 @@ l33_regime_factor.py — Regime-aware因子制度适配层 (v1.0, k191+k196)
 from __future__ import annotations
 
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -261,14 +261,42 @@ class RegimeFactorLayer:
         }
 
 
-def score_l33_layer(sector: str, qvix_regime: str = "normal") -> Dict:
-    """Pipeline友好接口: 返回{score: float, detail: dict}"""
+def apply_hurst_calibration(scores: Dict, detail: Dict, H: Optional[float], regime: str) -> Dict:
+    """按 Hurst 指数校准 L33 制度因子分数（来源: k190）。
+
+    H>0.55 且处于震荡/正常市 → 趋势制度，趋势因子加分 0.3；
+    H<0.45 且处于震荡市 → 均值回归期，对趋势因子降权 0.3。
+    分数 clip 到 [0,10]，返回 {"score", "detail"}。
+    """
+    if H is None or not regime:
+        return {"score": scores.get("score", 0.0), "detail": detail}
+    new_score = float(scores.get("score", 0.0))
+    if H > 0.55 and regime in ("sideways", "normal"):
+        new_score += 0.3
+    elif H < 0.45 and regime == "sideways":
+        new_score -= 0.3
+    new_score = round(max(0.0, min(10.0, new_score)), 1)
+
+    from etf_platform.analysis.hurst_regime import classify_regime
+    detail = dict(detail)
+    detail["hurst"] = H
+    detail["hurst_regime"] = classify_regime(H, 0.0)["label"]
+    detail["score"] = new_score
+    detail["alignment_score"] = new_score
+    return {"score": new_score, "detail": detail}
+
+
+def score_l33_layer(sector: str, qvix_regime: str = "normal", hurst: Optional[float] = None) -> Dict:
+    """Pipeline友好接口: 返回{score: float, detail: dict}。可传 hurst 做制度校准(k190)。"""
     layer = RegimeFactorLayer()
     result = layer.compute_l33_result(sector, qvix_regime)
-    return {
+    scores = {
         "score": result["score"],
         "detail": result,
     }
+    if hurst is not None:
+        scores = apply_hurst_calibration(scores, result, hurst, result.get("regime", "sideways"))
+    return scores
 
 
 if __name__ == "__main__":

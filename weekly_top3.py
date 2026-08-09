@@ -22,6 +22,9 @@ _SRC = _HERE / "src"
 if str(_SRC) not in sys.path:
     sys.path.insert(0, str(_SRC))
 
+# ── k295 风格轮动（信息展示层，失败不影响主流程）──
+from etf_platform.analysis.style_rotation import recommend_style, STYLE_ETFS
+
 # ── 板块映射（47细分行业 → 10大板块） ──────────────────────
 SECTOR_TO_MEGA = {
     "金融": "金融", "银行": "金融", "保险": "金融", "券商": "金融",
@@ -199,6 +202,28 @@ def _get_sector_flows(live=False) -> dict:
         return result
     except Exception:
         return {}
+
+
+def _get_style_rotation(trends: dict) -> list:
+    """k295 风格轮动：四风格20日动量排名。失败返回空列表，不影响主流程。"""
+    try:
+        from etf_platform.data.kline import get_trend
+        code_to_style = {code: style for style, codes in STYLE_ETFS.items() for code in codes}
+        # 风格代表ETF多为宽基，被动量池过滤，单独补拉（命中缓存或网络）
+        momentum_snapshots = {}
+        for code in code_to_style:
+            if code in trends:
+                momentum_snapshots[code] = trends[code]
+            else:
+                t = get_trend(code)
+                if t:
+                    momentum_snapshots[code] = t
+        if not momentum_snapshots:
+            return []
+        return recommend_style(momentum_snapshots, code_to_style, top_n=4)
+    except Exception as e:
+        print(f"  ⚠️ 风格轮动失败: {e}", file=sys.stderr)
+        return []
 
 
 def _get_valuation_signal(mega: str, mega_sectors: dict, trends: dict) -> dict:
@@ -706,7 +731,10 @@ def main():
             if len(selected_mega) >= 3:
                 break
             selected_mega.append(t)
-    
+
+    # ── k295 风格轮动（信息展示，不影响推荐逻辑）──
+    style_rotation_list = _get_style_rotation(trends)
+
     # 选ETF（每个大板块2只）
     picks = []
     for mega, data in selected_mega:
@@ -756,6 +784,7 @@ def main():
             for s, d in selected_mega
         ],
         "recommendations": [],
+        "style_rotation": style_rotation_list,
         "total_etfs_scanned": len(trends),
     }
     
@@ -846,7 +875,13 @@ def main():
             print(f"  {arrow} {s:10s}: {mom_adj:>+6.1f}% (原始{mom_raw:+.1f}%) {news_tag} {maturity_label} ({d['etf_count']}/{d['total']}只)")
         else:
             print(f"  {arrow} {s:10s}: {mom_adj:>+6.1f}% {maturity_label} ({d['etf_count']}/{d['total']}只)")
-    
+
+    if style_rotation_list:
+        print()
+        print("━━ 风格轮动 (k295) " + "━" * 22)
+        for sr in style_rotation_list:
+            print(f"  {sr['style']:6s}: {sr['momentum']:+.2f}% (代表 {sr['representative_etf']})")
+
     print()
     print("━━ 本周推荐 " + "━" * 36)
     

@@ -134,7 +134,61 @@ def check_risk_flags() -> dict:
         names = [s["name"] for s in flags["stop_loss_hit"]]
         flags["message"] = f"止损触发: {', '.join(names)} 跌幅超15%, 建议立即卖出"
 
+    # k189 组合分散化检查（无法获取 returns 时 checked=False）
+    try:
+        holdings = [
+            {"code": code, "weight": pos.get("entry_price", 1.0) * pos.get("shares", 1),
+             "sector": pos.get("name", code)}
+            for code, pos in data["positions"].items()
+        ]
+        returns_by_code = {}
+        if holdings:
+            from etf_platform.data.kline import _fetch_kline
+            for h in holdings:
+                rows = _fetch_kline(h["code"], 120)
+                if rows:
+                    close = [float(r["close"]) for r in rows]
+                    if len(close) >= 30:
+                        returns_by_code[h["code"]] = [close[i] / close[i - 1] - 1 for i in range(1, len(close))]
+        flags["diversification"] = check_diversification(holdings, returns_by_code)
+    except Exception:
+        flags["diversification"] = {"checked": False, "reason": "insufficient_data"}
+
     return flags
+
+
+def check_diversification(holdings: list[dict], returns_by_code: dict[str, list[float]] | None = None) -> dict:
+    """组合级分散化检查（来源: k189 跨资产相关/危机制度）。
+
+    holdings: [{code, weight, sector}]；returns_by_code: {code: [日收益率]}。
+    returns 为空或不足时返回 {"checked": False, "reason": "insufficient_data"}。
+    高相关(>0.7)对数占比 >0.5 判定分散化失效，返回 warning。
+    """
+    from etf_platform.analysis.cross_asset_correlation import (
+        correlation_matrix,
+        detect_diversification_failure,
+    )
+
+    if not returns_by_code:
+        return {"checked": False, "reason": "insufficient_data"}
+    codes = [h["code"] for h in holdings if h.get("code") in returns_by_code]
+    if len(codes) < 2:
+        return {"checked": False, "reason": "insufficient_data"}
+
+    corr_dict, _meta = correlation_matrix({c: returns_by_code[c] for c in codes})
+    if not corr_dict:
+        return {"checked": False, "reason": "insufficient_data"}
+
+    info = detect_diversification_failure(corr_dict)
+    result = {
+        "checked": True,
+        "diversification_failure": info["failure"],
+        "high_ratio": info["high_ratio"],
+        "avg_corr": info["avg_corr"],
+    }
+    if info["failure"]:
+        result["warning"] = f"分散化失效警报：高相关(>0.7)占比 {info['high_ratio']:.0%}，同涨同跌风险高"
+    return result
 
 
 def get_position_summary() -> str:

@@ -28,6 +28,10 @@ class TrendSnapshot:
     volume_ratio_5_20: float = 1.0
     trend_signal: str = "neutral"
     data_days: int = 0
+    rsi14: Optional[float] = None
+    macd_hist: Optional[float] = None
+    ma20: Optional[float] = None
+    ma60: Optional[float] = None
 
 
 SINA_KLINE_URL = "http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=%s%s&scale=240&ma=no&datalen=%d"
@@ -199,6 +203,18 @@ def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
     elif c5 > 5 and signal in ("strong", "overbought"):
         signal = "surging"
 
+    # k168 技术指标增强（可选字段，收盘价>=30点计算，失败保持 None）
+    rsi14 = macd_hist = ma20_v = ma60_v = None
+    if total >= 30:
+        try:
+            from etf_platform.analysis.technical_indicators import rsi, macd, sma
+            rsi14 = rsi(close_list, 14)[-1]
+            macd_hist = macd(close_list)["hist"][-1]
+            ma20_v = sma(close_list, 20)[-1]
+            ma60_v = sma(close_list, 60)[-1]
+        except Exception:
+            pass
+
     ts = TrendSnapshot(
         code=code, price=latest,
         change_5d=round(c5, 2), change_10d=round(c10, 2),
@@ -207,6 +223,7 @@ def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
         position_pct=round(pos, 1), max_drawdown=round(dd, 1),
         volatility_20d=round(vol_20d, 1), volume_ratio_5_20=round(vr, 2),
         trend_signal=signal, data_days=total,
+        rsi14=rsi14, macd_hist=macd_hist, ma20=ma20_v, ma60=ma60_v,
     )
     with _TREND_CACHE_LOCK:
         _trend_cache[code] = ts
