@@ -457,7 +457,7 @@ def build_signals(auto_sentiment=None, impact_scores=None) -> dict:
             elif new_dir in ("看多", "看空"):
                 merged[sector]["strength"] = sent.get("strength", merged[sector].get("strength", "中"))
             if sent.get("note"):
-                merged[sector]["note"] = f"[AUTO] {sent['note']}"
+                merged[sector]["note"] = f"[AUTO] {sent.get('note', '')}"
 
     etf_sectors = load_etf_sectors()
     signals = {}
