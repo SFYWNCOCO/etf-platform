@@ -2,6 +2,7 @@
 """
 position_allocator.py — ETF预测持仓分配引擎 v1.0
 
+来源: k170 (资产配置/组合构建)
 ================================================================================
 问题：系统产出 Top3 后，没有分配逻辑——只是告诉用户"买这3个"，但没说各买多少。
 ================================================================================
@@ -10,7 +11,7 @@ position_allocator.py — ETF预测持仓分配引擎 v1.0
 ------------
 1. 只使用系统中已有的数据（不引入外部依赖）
 2. 适配 regime-aware 框架（fearful/cautious/normal/complacent）
-3. 可对比多种分配方法（等权 / 分数加权 / 置信度加权 / 风险平价近似）
+3. 可对比多种分配方法（等权 / 分数加权 / 置信度加权 / 风险平价近似 / 风险平价 / Black-Litterman）
 4. 硬约束：单ETF上限、行业集中度、恐慌降仓
 
 可用数据源（来自 fused_top3 + 全局状态）
@@ -132,6 +133,7 @@ def allocate(
     transition_probs: Optional[dict] = None,
     profile: str = "均衡",
     risk_flags: Optional[dict] = None,
+    method: Optional[str] = None,
 ) -> AllocationResult:
     """主入口：基于多方法对比后选择最优分配方案。
 
@@ -142,6 +144,8 @@ def allocate(
         transition_probs: {"prob_stay": x, "prob_improve": y, "prob_worsen": z}
         profile: 风险偏好（均衡/激进/保守/进取）
         risk_flags: 风控信号（来自 risk_manager.check_risk_flags()）
+        method: 强制指定分配方法（risk_parity/black_litterman/equal_weight/...）；
+            None 时自动选择（默认 hybrid，波动率差异大时可选 risk_parity）
 
     Returns:
         AllocationResult 包含所有方法的对比结果
@@ -202,6 +206,8 @@ def allocate(
         "hybrid_score_conf_vol": _hybrid_allocation(
             fused_top3, source_confidences or {}, result.regime_multiplier
         ),
+        "risk_parity": _risk_parity_weighted(fused_top3, result.regime_multiplier),
+        "black_litterman": _black_litterman_weighted(fused_top3, result.regime_multiplier),
     }
 
     result.comparison = {
@@ -214,8 +220,14 @@ def allocate(
         for name, m in methods.items()
     }
 
-    # 6. 选择最优方法（默认 hybrid，可配置）
-    selected = _select_best_method(methods, fused_top3, resolved_regime)
+    # 6. 选择最优方法（默认 hybrid，可配置；method 指定时强制使用）
+    if method is not None:
+        selected = methods.get(method)
+        if selected is None:
+            result.notes.append(f"未知分配方法: {method}, 回退自动选择")
+            selected = _select_best_method(methods, fused_top3, resolved_regime)
+    else:
+        selected = _select_best_method(methods, fused_top3, resolved_regime)
     result.allocation_method = selected.allocation_method
     result.total_exposure = selected.total_exposure
     result.cash_reserve = selected.cash_reserve
@@ -565,6 +577,104 @@ def _vol_weighted(fused_top3: list[dict], max_exposure: float) -> AllocationResu
     return result
 
 
+# ── 方法4b: 风险平价（k170） ────────────────────────────────────────
+def _risk_parity_weighted(fused_top3: list[dict], max_exposure: float) -> AllocationResult:
+    """风险平价加权：权重与波动率倒数成正比（风险贡献均衡近似）。
+
+    来源: k170 (资产配置)
+    原理：每只 ETF 的权重 ∝ 1/volatility，使各 ETF 对组合风险的贡献接近相等。
+    与 _vol_weighted 同为波动率倒数族，但 risk_parity 额外强调波动率差异判别
+    （差异 >3 倍时，风险平价显著优于等权/分数加权）。
+
+    优点：天然分散风险，避免高波动品种过度集中
+    缺点：忽略预测质量，可能在低波动但低分品种上浪费仓位
+    """
+    if not fused_top3:
+        return AllocationResult(allocation_method="risk_parity")
+
+    vols = []
+    for etf in fused_top3:
+        vol = etf.get("volatility", 2.0)  # 默认2%，防止除零
+        vol = max(vol, 0.5)  # 最低0.5%
+        vols.append(vol)
+
+    # 风险贡献均衡近似：inverse volatility → 归一化
+    inv_vols = [1.0 / v for v in vols]
+    total_inv = sum(inv_vols)
+    raw_weights = [iv / total_inv for iv in inv_vols]
+
+    holdings, constraints = _build_holdings(
+        fused_top3, raw_weights, "risk_parity", max_exposure
+    )
+
+    max_vol = max(vols)
+    min_vol = min(vols)
+    note = f"风险平价: 波动范围 {min_vol:.1f}%~{max_vol:.1f}%"
+    if max_vol / min_vol > 3:
+        note += " [波动率差异大, 风险平价优于等权/分数加权]"
+
+    result = AllocationResult(
+        allocation_method="risk_parity",
+        total_exposure=sum(h.weight for h in holdings),
+        cash_reserve=max(0, 1.0 - sum(h.weight for h in holdings)),
+        holdings=holdings,
+        constraints_applied=constraints,
+        notes=[note],
+    )
+    return result
+
+
+# ── 方法4c: Black-Litterman 简化版（k170） ───────────────────────────
+def _black_litterman_weighted(fused_top3: list[dict], max_exposure: float) -> AllocationResult:
+    """Black-Litterman 简化版：市场均衡权重 + 观点调整。
+
+    来源: k170 (资产配置)
+    公式：
+      市场均衡权重 w_mkt = 1/n（等权先验）
+      观点向量 Q_i = score_i - mean_score（分数偏离均值作为观点强度）
+      后验权重 w_i ∝ w_mkt * (1 + κ * Q_i)，κ = 0.3
+    负后验权重钳制到 0（无做空），再归一化。
+
+    优点：在市场均衡基础上融入预测观点，κ 控制观点信任度
+    缺点：κ 需调优；分数未校准时观点方向可能失真
+    """
+    if not fused_top3:
+        return AllocationResult(allocation_method="black_litterman")
+
+    n = len(fused_top3)
+    scores = [
+        etf.get("composite_score", etf.get("weighted_score", 50)) for etf in fused_top3
+    ]
+    mean_score = sum(scores) / n
+
+    kappa = 0.3
+    mkt = 1.0 / n
+    posterior = [mkt * (1 + kappa * (s - mean_score)) for s in scores]
+    posterior = [max(w, 0.0) for w in posterior]  # 无做空
+    total = sum(posterior) or 1.0
+    raw_weights = [w / total for w in posterior]
+
+    holdings, constraints = _build_holdings(
+        fused_top3, raw_weights, "black_litterman", max_exposure
+    )
+
+    score_range = max(scores) - min(scores)
+    note = (
+        f"Black-Litterman: κ={kappa}, 分数偏离幅度{score_range:.1f}, "
+        f"均值{mean_score:.1f}"
+    )
+
+    result = AllocationResult(
+        allocation_method="black_litterman",
+        total_exposure=sum(h.weight for h in holdings),
+        cash_reserve=max(0, 1.0 - sum(h.weight for h in holdings)),
+        holdings=holdings,
+        constraints_applied=constraints,
+        notes=[note],
+    )
+    return result
+
+
 # ── 方法5: 混合分配（推荐） ─────────────────────────────────────────
 def _hybrid_allocation(
     fused_top3: list[dict],
@@ -662,6 +772,8 @@ def _select_best_method(
     - 默认使用 hybrid（综合最佳）
     - 如果校准数据不足，回退到 score_weighted
     - 如果regime=fearful，增加 vol_weighted 的权重
+    - k170 新增候选：risk_parity / black_litterman 进入候选池；
+      波动率差异 >3 倍时 risk_parity 优于 vol_weighted
     """
     # 检查校准数据质量
     has_good_calibration = False
@@ -672,9 +784,16 @@ def _select_best_method(
     # 恐慌regime下，降低高风险分配
     resolved = _resolve_regime(regime)
 
-    # 优先级排序
+    # 优先级排序（默认 hybrid 优先；risk_parity/black_litterman 为 k170 新增候选）
     priority = ["hybrid_score_conf_vol", "score_weighted", "vol_weighted",
-                 "confidence_weighted", "equal_weight"]
+                 "confidence_weighted", "equal_weight",
+                 "risk_parity", "black_litterman"]
+
+    # 波动率差异 >3 倍时，风险平价优先于分数加权/波动率加权
+    if _vol_spread_high(fused_top3):
+        priority = ["hybrid_score_conf_vol", "risk_parity", "score_weighted",
+                    "vol_weighted", "confidence_weighted", "equal_weight",
+                    "black_litterman"]
 
     for method_name in priority:
         if method_name in methods:
@@ -687,13 +806,21 @@ def _select_best_method(
     return methods.get("equal_weight", AllocationResult())
 
 
+def _vol_spread_high(fused_top3: list[dict]) -> bool:
+    """判断 Top3 波动率差异是否 >3 倍（风险平价优于等权/分数加权的信号）。"""
+    vols = [max(etf.get("volatility", 2.0), 0.5) for etf in fused_top3]
+    if len(vols) < 2:
+        return False
+    return max(vols) / min(vols) > 3.0
+
+
 def _analyze_three_layer_distribution(holdings: list, fused_top3: list) -> str:
     """分析三层架构分布（防御/均衡/进取）. k105 regression fix."""
     if not holdings:
         return "no holdings"
     layers = {"defensive": 0, "balanced": 0, "aggressive": 0}
     for h in holdings:
-        profile = getattr(h, "profile", None) or h.get("profile", "balanced")
+        profile = getattr(h, "profile", None) or "balanced"
         layers[profile] = layers.get(profile, 0) + 1
     return f"def={layers['defensive']} bal={layers['balanced']} agg={layers['aggressive']}"
 

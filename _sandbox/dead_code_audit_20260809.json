@@ -1,0 +1,250 @@
+{
+  "kb_sector_momentum": {
+    "count": 2,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/kb_sector_momentum.py:2:kb_sector_momentum.py — KB驱动的行业动量/资金流先验层 (v1.0)",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/kb_sector_momentum.py:27:CACHE_FILE = KB_ROOT / \"meta\" / \"_kb_sector_momentum_cache.json\""
+    ]
+  },
+  "pherosome_decay": {
+    "count": 3,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/pherosome_decay.py:1:\"\"\"pherosome_decay.py — K181 Stigmergy 信息素蒸发映射（v1.0）",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/pherosome_decay.py:155:        sig[\"pherosome_decay\"] = result",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/pherosome_decay.py:186:    print(f\"✅ pherosome_decay applied to {stats['total']} signals:\")"
+    ]
+  },
+  "meta_predictor": {
+    "count": 8,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/meta_predictor.py:3:meta_predictor.py — 多源预测集成器 v2.0 (并行化)",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/meta_predictor.py:19:  python -m etf_platform.decision.meta_predictor",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/meta_predictor.py:20:  python -m etf_platform.decision.meta_predictor --json"
+    ]
+  },
+  "position_allocator": {
+    "count": 3,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/position_allocator.py:3:position_allocator.py — ETF预测持仓分配引擎 v1.0",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/__init__.py:9:from .position_allocator import (",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/layers/l33_regime_factor.py:17:  2. 返回regime权重向量 → 供投资推荐引擎/position_allocator消费"
+    ]
+  },
+  "regime_transition": {
+    "count": 17,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/position_allocator.py:71:# 备选名称映射（qvix_regime.py 和 regime_transition.py 用词略有不同）",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/regime_transition.py:3:regime_transition.py — 市场状态转换预测器 v1.0",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/regime_transition.py:19:  python -m etf_platform.decision.regime_transition"
+    ]
+  },
+  "prediction_explainer": {
+    "count": 3,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/prediction_explainer.py:3:prediction_explainer.py — 预测解释器 v1.0",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/prediction_explainer.py:9:  python -m etf_platform.decision.prediction_explainer",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/decision/prediction_explainer.py:10:  python -m etf_platform.decision.prediction_explainer --json"
+    ]
+  },
+  "realtime_data": {
+    "count": 3,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/layers/l16_live_signals.py:15:from ..data.realtime_data import (",
+      "D:\\龙虾\\.openclaw\\etf-platform\\docs/transformation_plan.md:73:3. 更新 `data/realtime_data.py` 增加IOPV和资金流字段",
+      "D:\\龙虾\\.openclaw\\etf-platform\\knowledge/audit_etf_platform.md:74:  - l9_news.py(1), realtime_data.py(1), analyst.py(1)"
+    ]
+  },
+  "deep_sub._common": {
+    "count": 1,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/analysis/deep.py:21:    deep_sub/_common.py          — 共享 imports"
+    ]
+  },
+  "adversarial_self_check": {
+    "count": 0,
+    "locs": []
+  },
+  "analyze_gaps": {
+    "count": 0,
+    "locs": []
+  },
+  "analyze_materials_structure": {
+    "count": 0,
+    "locs": []
+  },
+  "analyze_unknown": {
+    "count": 0,
+    "locs": []
+  },
+  "audit_materials": {
+    "count": 0,
+    "locs": []
+  },
+  "backtest_verification": {
+    "count": 0,
+    "locs": []
+  },
+  "blind_etf_analysis": {
+    "count": 0,
+    "locs": []
+  },
+  "calculate_penetration_scores": {
+    "count": 0,
+    "locs": []
+  },
+  "check_coverage": {
+    "count": 0,
+    "locs": []
+  },
+  "check_derived_materials": {
+    "count": 0,
+    "locs": []
+  },
+  "check_fallback": {
+    "count": 0,
+    "locs": []
+  },
+  "check_material_structure": {
+    "count": 0,
+    "locs": []
+  },
+  "check_remaining_blind": {
+    "count": 0,
+    "locs": []
+  },
+  "cleanup": {
+    "count": 0,
+    "locs": []
+  },
+  "code_audit": {
+    "count": 4,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/code_audit.py:107:with open(BASE / 'code_audit_report.json', 'w', encoding='utf-8') as f:",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/code_audit.py:130:print(\"\\n完整报告已保存到 data/code_audit_report.json\")",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/code_audit_detail.py:9:report = json.load(open(BASE / 'code_audit_report.json', 'r', encoding='utf-8'))"
+    ]
+  },
+  "code_audit_detail": {
+    "count": 0,
+    "locs": []
+  },
+  "data_consistency_audit": {
+    "count": 0,
+    "locs": []
+  },
+  "derived_materials_report": {
+    "count": 0,
+    "locs": []
+  },
+  "diag_deep": {
+    "count": 0,
+    "locs": []
+  },
+  "diag_full": {
+    "count": 0,
+    "locs": []
+  },
+  "diag_quick": {
+    "count": 0,
+    "locs": []
+  },
+  "extract_categories": {
+    "count": 0,
+    "locs": []
+  },
+  "final_coverage_report": {
+    "count": 0,
+    "locs": []
+  },
+  "final_report_all": {
+    "count": 0,
+    "locs": []
+  },
+  "final_report_optimization": {
+    "count": 0,
+    "locs": []
+  },
+  "final_report_penetration": {
+    "count": 0,
+    "locs": []
+  },
+  "final_report_round2": {
+    "count": 0,
+    "locs": []
+  },
+  "fix_bare_except": {
+    "count": 0,
+    "locs": []
+  },
+  "fix_categories": {
+    "count": 0,
+    "locs": []
+  },
+  "list_all_materials": {
+    "count": 0,
+    "locs": []
+  },
+  "list_all_materials_classified": {
+    "count": 0,
+    "locs": []
+  },
+  "list_others": {
+    "count": 0,
+    "locs": []
+  },
+  "next_round_strategy": {
+    "count": 0,
+    "locs": []
+  },
+  "penetration_screen": {
+    "count": 0,
+    "locs": []
+  },
+  "price_monitor": {
+    "count": 0,
+    "locs": []
+  },
+  "regime_weights": {
+    "count": 7,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/data_consistency_audit.py:17:    'regime_weights.json',",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/regime_weights.py:11:regime_weights = {",
+      "D:\\龙虾\\.openclaw\\etf-platform\\src/etf_platform/scripts/regime_weights.py:75:with open(BASE / 'regime_weights.json', 'w', encoding='utf-8') as f:"
+    ]
+  },
+  "round2_learning": {
+    "count": 0,
+    "locs": []
+  },
+  "round3_learning": {
+    "count": 0,
+    "locs": []
+  },
+  "round4_final": {
+    "count": 0,
+    "locs": []
+  },
+  "step1_screen": {
+    "count": 0,
+    "locs": []
+  },
+  "step4_alert": {
+    "count": 0,
+    "locs": []
+  },
+  "step4_alert_fixed": {
+    "count": 0,
+    "locs": []
+  },
+  "test_scores": {
+    "count": 2,
+    "locs": [
+      "D:\\龙虾\\.openclaw\\etf-platform\\tests/test_demand.py:18:    def test_scores_in_range(self):",
+      "D:\\龙虾\\.openclaw\\etf-platform\\tests/test_pipeline.py:53:    def test_scores_are_numeric(self, chip_result):"
+    ]
+  },
+  "verify_round2": {
+    "count": 0,
+    "locs": []
+  }
+}
