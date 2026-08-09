@@ -2,7 +2,7 @@
 
 目标：终结"假集成"——代码中引用的每个 k\\d{3} 都必须有登记记录
 （来源 KB 文件、消费模块、集成模式、验证状态）。数据落盘到
-data/kb_registry.json，首次访问时自动以内置 58 个 k-code 初始化。
+data/kb_registry.json，首次访问时自动以内置 64 个 k-code 初始化。
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ _SKIP_PARTS = {
     "__pycache__",
 }
 
-# 内置初始数据：现有代码已消费的 58 个 k-code
+# 内置初始数据：现有代码已消费的 64 个 k-code
 _BUILTIN_CODES = (
     "k001", "k002", "k003", "k004", "k005", "k006", "k007", "k008", "k009", "k010",
     "k011", "k012", "k019", "k021", "k033", "k042", "k044", "k046", "k053", "k063",
@@ -37,14 +37,31 @@ _BUILTIN_CODES = (
     "k098", "k099", "k100", "k104", "k105", "k117", "k118", "k122", "k123", "k124",
     "k125", "k126", "k127", "k129", "k130", "k131", "k180", "k186", "k187", "k191",
     "k192", "k196", "k229", "k238", "k260", "k261", "k268", "k275",
+    "k168", "k169", "k170", "k189", "k190", "k295",
 )
+
+# 6 个新模块的元信息：内置种子即含 consumer，保证干净环境可复现（data/*.json 被 gitignore）
+_BUILTIN_META = {
+    "k168": {"title": "技术分析基础", "source_file": "knowledge/theory/k168-technical-analysis-fundamentals.md",
+             "consumer": "analysis/technical_indicators.py", "mode": "data_source"},
+    "k169": {"title": "量化投资绩效评估", "source_file": "knowledge/theory/k169-quant-performance-evaluation.md",
+             "consumer": "analysis/performance_metrics.py", "mode": "research"},
+    "k170": {"title": "资产配置模型", "source_file": "knowledge/theory/k170-asset-allocation-models.md",
+             "consumer": "decision/position_allocator.py", "mode": "weight"},
+    "k189": {"title": "跨资产相关性结构与危机制度", "source_file": "knowledge/theory/k189-cross-asset-correlation-and-crisis-regime.md",
+             "consumer": "analysis/cross_asset_correlation.py", "mode": "layer"},
+    "k190": {"title": "Hurst指数与分形市场假说", "source_file": "knowledge/theory/k190-hurst-exponent-and-fractal-market.md",
+             "consumer": "analysis/hurst_regime.py", "mode": "layer"},
+    "k295": {"title": "A股风格四周期框架与ETF轮动策略", "source_file": "knowledge/k295-A股风格四周期框架与ETF轮动策略.md",
+             "consumer": "analysis/style_rotation.py", "mode": "signal"},
+}
 
 
 class KBRegistry:
     """k-code 注册表：登记每个 k-code 的来源、消费方、集成模式与状态。"""
 
     def __init__(self, registry_path=None):
-        """加载已有注册表；文件不存在时以内置 58 个 k-code 初始化并生成数据文件。
+        """加载已有注册表；文件不存在时以内置 64 个 k-code 初始化并生成数据文件。
 
         registry_path 为 None 时使用项目内 data/kb_registry.json。
         """
@@ -62,12 +79,13 @@ class KBRegistry:
             self._registry = {k: v for k, v in data.items() if isinstance(v, dict)}
             return
         for code in _BUILTIN_CODES:
+            meta = _BUILTIN_META.get(code, {})
             self._registry[code] = {
                 "code": code,
-                "title": "<unknown>",
-                "source_file": "<unknown>",
-                "consumer": "<unknown>",
-                "mode": "research",
+                "title": meta.get("title", "<unknown>"),
+                "source_file": meta.get("source_file", "<unknown>"),
+                "consumer": meta.get("consumer", "<unknown>"),
+                "mode": meta.get("mode", "research"),
                 "status": "active",
             }
         self._save()

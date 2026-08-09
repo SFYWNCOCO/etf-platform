@@ -1,6 +1,7 @@
 """Unified L1-L13 penetration pipeline — no etf_system dependency."""
 import logging
 import time
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -410,13 +411,40 @@ def _apply_l30_layer(scores: dict, details: dict, sector: str, rl: float, code: 
         scores["L30_MultiAgent"] = 6.0
         details["L30_MA_Metrics"] = {"error": "failed"}
 
-def _apply_regime_factor(scores: dict, details: dict, sector: str) -> None:
-    """L33 Regime Factor — dynamic factor alignment by QVIX regime."""
+def _estimate_hurst(code: str) -> Optional[float]:
+    """估算 ETF 的 Hurst 指数（k190）。真实K线优先，失败退化到趋势近似；全程异常安全返回 None。"""
+    try:
+        from .data.kline import _fetch_kline, get_trend
+        from .analysis.hurst_regime import hurst_dfa, _MIN_POINTS
+        rows = _fetch_kline(code, 300)
+        if rows and len(rows) >= 150:
+            prices = [float(r["close"]) for r in rows]
+            # hurst_dfa 输入应为日收益率增量序列（价格本身是积分序列，会得到 H≈1.5 失真）
+            returns = [prices[i] / prices[i - 1] - 1 for i in range(1, len(prices))]
+            H, r2 = hurst_dfa(returns)
+            if r2 > 0.0 and H == H:  # 排除 nan
+                return H
+        t = get_trend(code)
+        if t is not None:
+            chg = getattr(t, "change_20d", 0.0) or 0.0
+            vol = getattr(t, "volatility_20d", 0.0) or 0.0  # 年化百分比（如 30.5 = 30.5%）
+            if chg > 8 and vol > 3.0:
+                return 0.60
+            if vol < 2.0:
+                return 0.45
+        return None
+    except Exception:
+        return None
+
+
+def _apply_regime_factor(scores: dict, details: dict, sector: str, code: str = "") -> None:
+    """L33 Regime Factor — dynamic factor alignment by QVIX regime + Hurst calibration (k190)。"""
     try:
         from .analysis.qvix_regime import get_regime
         from .layers.l33_regime_factor import score_l33_layer
         qvix_regime = get_regime().get("regime", "normal")
-        regime = score_l33_layer(sector, qvix_regime=qvix_regime)
+        hurst = _estimate_hurst(code) if code else None
+        regime = score_l33_layer(sector, qvix_regime=qvix_regime, hurst=hurst)
         scores["L33_RegimeFactor"] = regime.get("score", 5.0)
         if regime.get("detail"):
             details["L33_Detail"] = regime["detail"]
@@ -673,7 +701,7 @@ def run_full(code: str, live: bool = True, profile: str = "均衡") -> dict:
     _apply_microstructure(scores, layer_details, sector, rl, code=code)
     _apply_dip_flow(scores, layer_details, code, sector, rl, live=live)
     _apply_system_dynamics(scores, layer_details, sector, rl, code)
-    _apply_regime_factor(scores, layer_details, sector)
+    _apply_regime_factor(scores, layer_details, sector, code)
     _apply_kb_catalyst(scores, layer_details, sector)
     _apply_liquidity_arbitrage(scores, layer_details, info.get("type", ""), sector)
     _apply_volatility_regime(scores, layer_details, sector, code=code)

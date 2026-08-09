@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 H_TREND_THRESHOLD = 0.55
 H_REVERSION_THRESHOLD = 0.45
 DEFAULT_WINDOWS = [30, 50, 70, 100, 150, 200, 300]
-_MIN_POINTS = 200
+_MIN_POINTS = 150
 
 
 def hurst_dfa(prices: list[float], windows: list[int] | None = None) -> tuple[float, float]:
@@ -46,8 +46,13 @@ def hurst_dfa(prices: list[float], windows: list[int] | None = None) -> tuple[fl
             resid += float(np.sum((seg - np.polyval(coeffs, t)) ** 2))
         fluct.append(np.sqrt(resid / (nseg * w)))
 
+    # 常数/零波动序列: fluct 全为 0 → log(0)=-inf → polyfit 出 nan，直接退化返回
+    fluct_arr = np.asarray(fluct, dtype=float)
+    if np.any(fluct_arr == 0.0) or not np.all(np.isfinite(fluct_arr)):
+        return (0.5, 0.0)
+
     log_n = np.log(np.asarray(valid, dtype=float))
-    log_f = np.log(np.asarray(fluct, dtype=float))
+    log_f = np.log(fluct_arr)
     H, logc = np.polyfit(log_n, log_f, 1)
     pred = np.polyval([H, logc], log_n)
     ss_res = float(np.sum((log_f - pred) ** 2))

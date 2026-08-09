@@ -199,7 +199,7 @@ class RegimeFactorLayer:
         for factor in ["Value", "Growth", "Quality", "LowVol", "Momentum", "Size(SMB)"]:
             perf = regime_perf[factor][regime]
             exp_key = "Size" if factor == "Size(SMB)" else factor
-            exp = exposure.get(factor, 0.0)
+            exp = exposure.get(exp_key, 0.0)
             raw_score += exp * perf
             total_exposure += abs(exp)
         
@@ -296,6 +296,8 @@ def score_l33_layer(sector: str, qvix_regime: str = "normal", hurst: Optional[fl
     }
     if hurst is not None:
         scores = apply_hurst_calibration(scores, result, hurst, result.get("regime", "sideways"))
+    else:
+        result["hurst"] = None
     return scores
 
 

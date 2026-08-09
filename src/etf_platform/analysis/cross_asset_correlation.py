@@ -42,6 +42,17 @@ def correlation_matrix(returns_by_code: dict[str, list[float]]) -> tuple[dict, d
     return (corr_dict, meta)
 
 
+def _serialize_keys(corr_dict: dict) -> dict:
+    """tuple key → 'A|B' 字符串 key（小的在前，确定性排序）。"""
+    return {f"{a}|{b}" if a <= b else f"{b}|{a}": c for (a, b), c in corr_dict.items()}
+
+
+def correlation_matrix_serializable(returns_by_code: dict[str, list[float]]) -> dict:
+    """相关矩阵的可 JSON 序列化版本：内部调 correlation_matrix，tuple key 转 'A|B'。"""
+    corr_dict, _ = correlation_matrix(returns_by_code)
+    return _serialize_keys(corr_dict)
+
+
 def detect_diversification_failure(corr_dict: dict, threshold: float = 0.7) -> dict:
     """统计相关性 >threshold 的对数/总对数，判断分散化是否失效。
 
@@ -117,7 +128,7 @@ def get_cross_asset_risk(codes: list[str], days: int = 120) -> dict:
             warnings.append(f"左尾依赖危险：{a}-{b} 同跌系数 {t:.2f}")
 
     return {
-        "corr_matrix": corr_dict,
+        "corr_matrix": _serialize_keys(corr_dict),
         "failure": info["failure"],
         "avg_corr": info["avg_corr"],
         "warnings": warnings,
