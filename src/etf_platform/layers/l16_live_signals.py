@@ -18,10 +18,9 @@ from ..data.realtime_data import (
     enrich_with_premium,
     enrich_with_flow_totals,
     get_market_flow_summary,
-    normalize_dataframe,
 )
-from ..analysis.dip_monitor import DIPMonitor, DipAlert
-from ..analysis.fund_flow import FundFlowAnalyzer, FundFlowAlert
+from ..analysis.dip_monitor import DIPMonitor
+from ..analysis.fund_flow import FundFlowAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -470,14 +469,8 @@ def get_live_signals(sector: str, daily_amount_yi: float = 1.0,
     else:
         fee_adj = -0.4
     
-    code_jitter = 0.0
-    if daily_amount_yi == 1.0 and etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        # v8.5: Amplified jitter for robust intra-sector differentiation.
-        # Fee differentiation only covers ~36% of ETFs (others share fee=0.005).
-        # Larger jitter ensures even fee-identical ETFs spread out.
-        code_jitter = ((code_hash % 13) - 6) * 0.14  # range [-0.84, +0.84]
+    from ..utils.hash_jitter import pair_sum_jitter
+    code_jitter = pair_sum_jitter(etf_code, 13, 0.14) if daily_amount_yi == 1.0 else 0.0  # range [-0.84, +0.84]
     
     composite = liq["score"] * 0.45 + prem["score"] * 0.25 + quality["score"] * 0.30 + prem_adjusted + fee_adj + code_jitter
     composite = round(max(1.0, min(10.0, composite)), 1)

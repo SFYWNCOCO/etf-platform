@@ -7,7 +7,6 @@ DFA(去趋势波动分析)计算 Hurst 指数，按 Fractal Cycles 四制度分�
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import numpy as np
 

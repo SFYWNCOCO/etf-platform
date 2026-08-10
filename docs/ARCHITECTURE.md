@@ -65,7 +65,7 @@
 ## 3. 数据流
 
 ```
-etfs.yaml(1071) ──► Sina hq.sinajs.cn 实时行情 (586只, ~3s)
+etfs.yaml(1071) ──► Sina hq.sinajs.cn 实时行情 (586只, ~3s) ──► price_cache.json (15:10 cron 刷新)
       │                    │
       ▼                    ▼
  config_loader      live_price_bridge (FINE_TO_BROAD 60→17)
@@ -86,7 +86,12 @@ etfs.yaml(1071) ──► Sina hq.sinajs.cn 实时行情 (586只, ~3s)
  飞书日报
 ```
 
-**数据源优先级**：Sina(主力实时) → 东方财富 push2(资金流/板块) → akshare(离线批量, 必须 timeout 包裹) → KB先验(降级fallback)。
+**数据源优先级（08-10 精简）**：价格源 = Sina(主力实时) → akshare(兜底, 必须 timeout 包裹) → KB先验(降级fallback)。东方财富 push2 仅用于资金流/板块/估值等非价格数据（sector_flow_bridge / valuation），不再作为价格源——原 EastMoneySource 是死源（包装已清除的 etf_system/ETFDataFetcher），已删除。
+
+**08-10 数据层修复**：
+- 深市代码识别：`live_price_bridge._SZ_PREFIXES` 补 "167"（167301 实测走深圳市场接口），修复深市 K 线/行情断供
+- kline 磁盘缓存 TTL 失效：`_save_disk_cache` 原把所有 `_ts` 重置为 now → 磁盘缓存永不过期。改为 `_trend_ts` 字典记录原始 fetch 时间，TTL 语义恢复（6h）
+- kline 除零防护：`change`/`max_drawdown`/`r_list` 增加 close>0 前置检查，历史数据含 0 收盘价不再崩溃
 
 **金律**：所有外部数据必须 try-except + timeout + fallback；任何数据桥优先级读取必须检查"数据有意义"（total>0）否则降级。
 
@@ -166,16 +171,27 @@ class KBRegistry:
 ### weekly_top3 v17.0（生产入口）
 - 回测验证：507 ETF × 400天 × 81周，夏普 1.75（原1.31），回撤 -13.8%（原-30.4%）
 - 流程：K线20日动量 → 大板块去重 → 沪深300趋势过滤动态仓位 → 新闻情绪自动刷新对冲 → 动量成熟度检测
+- **强看空永否决修复（08-10）**：强看空新闻原本无条件把板块整段排除（news_adj=-5.0*decay 已衰减仍被永久锁死）。现仅排除新鲜强看空（news_adjustment<=-2.5），旧闻按衰减减分即可；另修复 `news_signals` 参数被无条件覆盖为磁盘加载的 bug（注入失效）
 - 输出：买卖指令格式，用户偏好"只要3只、不要报价表格、过滤宽基"
 
 ### two_week_picker（2周预测）
 - 6因子 Z-score + 锦标赛融合（5策略）+ regime 条件动态权重 + macro_overlay 叠加
-- 预测写入 `data/two_week_predictions.jsonl`，每周回测验证命中率
+- **动态权重接入（08-10 修复）**：`_get_factor_weights(qvix_regime)` 此前是死代码（定义后从未被调用），composite 一直用静态 FACTORS weight → QVIX 切换恐惧市时红利/防御因子不增权。已接入 `_compute_scores_and_rank`，缺失 key 回退静态权重
+- **候选池行业均衡（08-10 修复）**：`_build_candidate_pool` 原按 etfs.yaml 键序截断到 80 只（924 只 buyable 里截掉 91%），排在 yaml 尾部的行业整段饿死、池内 Z-score 失去对比基准。改为按行业轮询截断，保证各行业有代表
+- 预测写入 `data/two_week_predictions.jsonl`，每周一由 `etf_prediction_cron.py` 回测 + 生成新预测（cron 0170f59b3e44）
+- **回测方法论（08-10 修复）**：`evaluate_prediction` 用 K 线锚点法（预测日起 10 交易日后价格），不用当前动量
+- **深市 K 线断供（08-10 修复）**：腾讯 K 线对深市 ETF 返回 `day` 字段、沪市返回 `qfqday`，只读 qfqday 导致深市样本被静默丢弃 → 回测系统性偏向沪市
+- **log_prediction 幂等**：同一天同 profile 只保留一条，防 cron/手动重复触发污染回测样本
+- **样本现状（08-10）**：独立预测日仅 5-6 个（n≈15-87），命中率 ~55% 接近随机、rank1 倒挂（胜率 7-20% vs rank3 86-100%）。**样本不足以调权**（auto_tune_weights 已归档 dead module），继续积累后再验证
 
 ### position_allocator（k170 增强）
 - 7种方法：等权/分数加权/置信度加权/波动率倒数/混合/风险平价(risk_parity)/Black-Litterman(black_litterman)
 - risk_parity: 权重∝1/volatility，风险贡献均衡；波动率差异>3倍时优于等权
 - black_litterman: 市场均衡权重(等权) + 观点调整(score偏离均值, κ=0.3)
+- **现金缓冲修复（08-10）**：持仓权重和被挤出缓冲时按比例收缩到 `CASH_BUFFER_MIN`，不再盲目超配/忽略现金
+- **CVaR 符号修复（08-10）**：`cvar_portfolio` 梯度原为 `-μ - k·dσ`（风险偏好型，收敛到高波动资产）；已改为 `-μ + k·dσ`（风险厌恶，最小化尾部损失 CVaR(L)=-μ+σ·k）
+- **screener break 修复（08-10）**：`screener.py` 内层循环错误缩进的一个无条件 `break` 在第 1 只 ETF 后就退出候选扫描，已删除
+- **超限截断（08-10）**：`optimize/portfolio.allocate` 增加 `i >= max_positions` 边界，防止 amount=0 的溢出标的撑破持仓数
 
 ---
 
@@ -192,6 +208,11 @@ fetch_news_sources.py (6源: sina/eastmoney/tonghuashun/360news/search_pipeline)
 
 动态词表 v2：三层动态词源（平台12 + 持仓ETF行业60 + 历史热点），共63词。
 
+**08-10 新闻/政策修复**：
+- 中文情绪恒 0：`extract_sentiment` 原 `split()` 切不开中文（无空格），整句成单 token 导致词表词永远匹配不上 → 改为子串匹配（专项测试 4 过）
+- 政策误判：`policy_fetcher` 弱看多触发词中移除 "批复"/"通知"（监管类公文被自动当利好），仅保留 规划/方案/意见/行动方案/纲要
+- auto=中性 矛盾：`news_to_etf_bridge` auto 中性不再覆盖 KB 方向，保留 KB note 追加 `[AUTO中性]` 标记（专项测试 11 过）
+
 ---
 
 ## 8. Cron 自动化（ETF 相关核心）
@@ -200,7 +221,11 @@ fetch_news_sources.py (6源: sina/eastmoney/tonghuashun/360news/search_pipeline)
 |-----|------|------|------|
 | d1febc893708 | ETF每日穿透巡检+Top3 | 工作日 8:00 | ✅ no_agent wrapper |
 | da3a5c97555c | ETF新闻信号每日刷新 | 工作日 8:05 | ✅ no_agent wrapper |
+| a60a666331d9 | ETF价格缓存每日刷新 | 工作日 15:10 | ✅ no_agent wrapper |
+| 0170f59b3e44 | ETF 2周预测+回测闭环 | 周一 8:45 | ✅ no_agent wrapper |
 | 6e878757cfc7 | 生产级健康巡检 | 每日 10:00 | ✅ |
+
+**price_cache 刷新坑**：`price_cache.refresh_all()` 逐只 get_price → EastMoney/Sina 挂了就回退 akshare（587 只 × ~25s ≈ 4h）不可行。真源用 `price_cache_refresh.py`（Sina 批量全量 ~13s）+ prev_close 兜底 + 有效条目 <50 保留旧缓存不覆盖。
 
 **历史坑**：cron 引用不存在脚本（静默失败）→ 统一 wrapper + workdir 模式；归档文件前必须 grep 活引用（wrapper/cron 也算）。
 
@@ -238,7 +263,7 @@ python -c "from etf_platform.analysis.technical_indicators import rsi; print(rsi
 
 ## 10. 已知限制 / 待办
 
-- **policy_fetcher playwright 版本不匹配**（08-06）：chromium_headless_shell-1200 vs -1234，cron 08:05 失败未修
+- ~~**policy_fetcher playwright 版本不匹配**（08-06）~~ 已解决：chromium 内置浏览器版本不匹配时回退 msedge channel；Playwright 整体不可用时回退 requests 直取 gov.cn 同源 `ZUIXINZHENGCE.json`（08-10 实测 20 条政策→8 行业，降级路径生效）
 - **KB 集成率 15.5%**：还有 349 个 k-code 未消费，其中 ~48 个 ETF/投资相关（k062全天候/k132量化因子/k172定投/k178行业估值等）
 - **data_integrity.py 未自动集成 pipeline**：手动门禁，非自动
 - **skill 文档与代码漂移**：skill 说 592 只 ETF，实际 1071；层数 29→30→36 漂移

@@ -58,6 +58,10 @@ def _fetch_commodities():
             change_pct = float(row.get("\u4e3b\u529b\u5408\u7ea6\u53d8\u52a8\u767e\u5206\u6bd4", 0) or 0)
             basis = spot - future if spot > 0 and future > 0 else 0
             basis_pct = (basis / future * 100) if future > 0 else 0
+            # 异常值过滤: 期货单日涨跌停一般 <=10-12%, 超 15% 为合约切换/除权等数据异常,
+            # 不算入信号(否则 -19.6% 焦炭这类异常值会与真实行情对冲掩盖)
+            if abs(change_pct) > 15 or abs(basis_pct) > 15:
+                continue
             if spot > 0:
                 commodities.append({"name": name, "spot": spot, "future": future,
                     "change_pct": change_pct, "basis": round(basis, 2), "basis_pct": round(basis_pct, 2)})

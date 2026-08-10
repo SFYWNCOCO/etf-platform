@@ -37,7 +37,7 @@ def _get_material_signals():
     try:
         _cap_path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "material_capacity.json"
         if _cap_path.exists():
-            with open(_cap_path, "r") as f:
+            with open(_cap_path, "r", encoding="utf-8") as f:
                 cap_data = json.load(f)
         
         SR_MAP = {"极高": 0.95, "高": 0.7, "中": 0.5, "低": 0.3}
@@ -130,9 +130,13 @@ def material_layer_adjustments(etf_code: str) -> dict:
         mat_signals.append((mat_name, signal, mat.get("warning", ""), bottleneck))
     
     if mat_signals:
-        # Aggregate: sum of all material signals, capped at +/- 2.0
+        # Aggregate: sum of all material signals, compressed non-linearly.
+        # 修复: 原 cap ±2.0 在 253 材料库下被轻松打满(20+ 命中即恒 1.4),
+        # 材料层对所有 ETF 失去区分度。改用 tanh 压缩: 保留单调性与方向,
+        # 大信号饱和但不会抹平差异, 且不受命中数量线性放大影响。
         total_signal = sum(s for _, s, _, _ in mat_signals)
-        total_signal = max(-2.0, min(2.0, total_signal))
+        import math
+        total_signal = 3.0 * math.tanh(total_signal / 5.0)
         
         # Materials affect L3 (material safety) and L4 (supply chain)
         # v8.31: L3 gets the full material signal. L4 gets minimal material signal

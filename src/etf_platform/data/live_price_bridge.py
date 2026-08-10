@@ -17,6 +17,14 @@ SINA_URL = "https://hq.sinajs.cn/list="
 # ETF代码→Sina symbol映射
 CODE_TO_SINA = {}  # lazy load from config
 
+# 深市 ETF/LOF 代码前缀: 159/160/161/166/167/184 (159 为主流, 167301 实测深市)
+_SZ_PREFIXES = ("159", "160", "161", "166", "167", "184")
+
+
+def _market_for(code: str) -> str:
+    """按代码前缀判断交易所. 深市前缀→sz, 其余→sh."""
+    return "sz" if code.startswith(_SZ_PREFIXES) else "sh"
+
 
 def _build_code_map():
     """从etfs.yaml加载全量ETF代码→Sina symbol映射"""
@@ -34,14 +42,10 @@ def _build_code_map():
                 code = str(etf.get("code", code_key))
                 if not (code and len(code) == 6 and code.isdigit()):
                     continue
-                if code.startswith("159"):
-                    market = "sz"
-                else:
-                    market = "sh"
-                CODE_TO_SINA[f"{market}{code}"] = code
+                CODE_TO_SINA[f"{_market_for(code)}{code}"] = code
                 yaml_loaded += 1
-    except ImportError:
-            logger.warning("silent catch in live_price_bridge.py:43 - needs review")
+    except ImportError as e:
+        logger.warning("load_etfs failed in live_price_bridge: %s", e)
     
     if yaml_loaded == 0:
         # 降级：从 data/price_cache.json 读取代码列表
@@ -55,10 +59,7 @@ def _build_code_map():
             for code in prices_dict:
                 if len(code) == 6:
                     # 根据代码前缀判断市场——避免同时创建sh+sz的无效条目
-                    if code.startswith("159"):
-                        CODE_TO_SINA[f"sz{code}"] = code
-                    else:
-                        CODE_TO_SINA[f"sh{code}"] = code
+                    CODE_TO_SINA[f"{_market_for(code)}{code}"] = code
             yaml_loaded = len(prices_dict)
     
     return CODE_TO_SINA
@@ -86,9 +87,9 @@ def fetch_live_prices(codes: list[str] = None) -> dict:
                             prefixed.append(k)
                             break
                     else:
-                        prefixed.append(("sz" if c.startswith(("15", "16", "18")) else "sh") + c)
+                        prefixed.append(_market_for(c) + c)
                 else:
-                    prefixed.append(("sz" if c.startswith(("15", "16", "18")) else "sh") + c)
+                    prefixed.append(_market_for(c) + c)
             else:
                 prefixed.append(c)
         codes = prefixed

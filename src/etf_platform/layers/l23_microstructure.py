@@ -130,10 +130,8 @@ def score_microstructure(sector: str, risk_level: float = 0.5,
         score = 9.5 + (score - 9.5) * 0.3
 
     # Intra-score jitter by ETF code hash
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        score += ((code_hash % 7) - 3) * 0.15
+    from ..utils.hash_jitter import pair_sum_jitter
+    score += pair_sum_jitter(etf_code, 7, 0.15)  # range [-0.45, +0.45]
 
     score = round(max(1.0, min(10.0, score)), 1)
 

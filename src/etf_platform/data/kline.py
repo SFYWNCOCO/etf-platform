@@ -39,11 +39,12 @@ TENCENT_KLINE_URL = "http://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=%s%
 
 # Session cache: get_trend results (persists across calls in the same run)
 _trend_cache = {}
+# code -> last fetch/load time (disk TTL 锚点；保存时不得重置，否则 TTL 永不过期)
+_trend_ts: dict = {}
 _TREND_CACHE_LOCK = threading.Lock()
 
 # Disk cache: kline trends survive across runs (daily klines don't change intraday)
 # TTL: 6h — market-close data stable; intraday runs reuse yesterday's close trend.
-import os
 import time as _time
 import dataclasses
 from pathlib import Path
@@ -68,6 +69,7 @@ def _load_disk_cache() -> dict:
                 fields = {k: v for k, v in blob.items() if k != "_ts"}
                 try:
                     _trend_cache[code] = TrendSnapshot(**fields)
+                    _trend_ts[code] = blob.get("_ts", now)
                 except TypeError:
                     continue
     except (OSError, ValueError, json.JSONDecodeError) as e:
@@ -82,7 +84,8 @@ def _save_disk_cache():
             now = _time.time()
             for code, ts in _trend_cache.items():
                 d = dataclasses.asdict(ts)
-                d["_ts"] = now
+                # 保留原始 fetch 时间：全部重置为 now 会让 TTL 无限顺延、缓存永不失效
+                d["_ts"] = _trend_ts.get(code, now)
                 snapshot[code] = d
         _KLINE_DISK_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
         _KLINE_DISK_CACHE_PATH.write_text(
@@ -95,6 +98,7 @@ def _save_disk_cache():
 def clear_trend_cache():
     with _TREND_CACHE_LOCK:
         _trend_cache.clear()
+        _trend_ts.clear()
 
 
 
@@ -109,7 +113,10 @@ def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read().decode("utf-8")
         data = json.loads(raw)
-        rows = data.get("data", {}).get(f"{prefix}{code}", {}).get("qfqday", [])
+        # 腾讯对深市 ETF 返回 day 字段、沪市返回 qfqday（实测 159xxx→day, 512xxx→qfqday）。
+        # 只读 qfqday 会把深市 81 条数据静默丢弃，导致回测样本系统性偏向沪市。
+        _sec = data.get("data", {}).get(f"{prefix}{code}", {})
+        rows = _sec.get("qfqday") or _sec.get("day") or []
         if rows and len(rows) >= 5:
             result = []
             for r in rows:
@@ -142,22 +149,26 @@ def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
 def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
     """Fetch kline data and compute trend indicators. (session + disk cached)"""
     _load_disk_cache()
+    now = _time.time()
     with _TREND_CACHE_LOCK:
         if code in _trend_cache:
-            return _trend_cache[code]
+            # session 缓存也有 TTL：过期则视为 miss，重新获取
+            if now - _trend_ts.get(code, 0) <= _KLINE_DISK_TTL:
+                return _trend_cache[code]
     rows = _fetch_kline(code, days)
     if not rows:
         return None
 
     close_list = [float(r["close"]) for r in rows]
-    high_list = [float(r["high"]) for r in rows]
-    low_list = [float(r["low"]) for r in rows]
     vol_list = [float(r["volume"]) for r in rows]
     total = len(close_list)
     latest = round(close_list[-1], 3)
 
     def chg(n):
-        return ((close_list[-1] / close_list[-n-1]) - 1) * 100 if total > n else 0.0
+        # close=0（停牌/数据缺口）时避免除零
+        if total > n and close_list[-n-1] > 0:
+            return ((close_list[-1] / close_list[-n-1]) - 1) * 100
+        return 0.0
 
     c5 = chg(5) if total >= 6 else 0.0
     c10 = chg(10) if total >= 11 else 0.0
@@ -174,9 +185,11 @@ def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
     for p in close_list:
         if p > peak:
             peak = p
-        dd = min(dd, (p - peak) / peak * 100)
+        if peak > 0:
+            dd = min(dd, (p - peak) / peak * 100)
 
-    r_list = [(close_list[i]/close_list[i-1]-1) for i in range(1, total)]
+    # 跳过 close=0 的相邻 bar，避免除零
+    r_list = [(close_list[i]/close_list[i-1]-1) for i in range(1, total) if close_list[i-1] > 0]
     r20 = r_list[-20:] if len(r_list) >= 20 else r_list
     vol_20d = statistics.stdev(r20) * (252**0.5) * 100 if len(r20) > 1 else 0.0
 
@@ -227,6 +240,7 @@ def get_trend(code: str, days: int = 63) -> Optional[TrendSnapshot]:
     )
     with _TREND_CACHE_LOCK:
         _trend_cache[code] = ts
+        _trend_ts[code] = now
     _save_disk_cache()
     return ts
 

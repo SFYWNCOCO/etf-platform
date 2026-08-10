@@ -182,7 +182,6 @@ def _compute_composite(scores: dict, weights: dict, trend: dict = None) -> float
     if trend:
         sig = trend.get("signal", "")
         dd = trend.get("max_drawdown", 0)
-        penalty = 0.0
         # v5.4: 乘法惩罚 — 趋势信号对评分直接打折
         trend_mult = 1.0
         # v5.5: Optimized via grid search (729 combos, Sharpe 0.027->0.031)
@@ -274,7 +273,6 @@ def _premium_penalty(code: str, spot_df=None) -> dict:
 
 def _generate_reason(result: dict, trend: dict = None) -> str:
     scores = result.get("layer_scores", {})
-    name = result.get("name", "")
     sector = result.get("sector", "") or "未知行业"
     parts = [f"行业:{sector}"]
     if trend:
@@ -668,7 +666,6 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
                         logger.debug(f"overlap integration failed for {code}: {e}")
                 except Exception as e:
                     print(f"    ⚠ enhance failed for {code}: {e}")
-                break
         item["reason"] = _generate_reason(item, item.get("trend"))
 
     # v5.4: 用趋势调整后的评分重新排序

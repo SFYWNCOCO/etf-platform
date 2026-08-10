@@ -97,9 +97,6 @@ class FundFlowAnalyzer:
         """
         price_chg = float(row.get('涨跌幅', 0))
         main_net = float(row.get('主力净流入-净额', 0))
-        main_ratio = float(row.get('主力净流入-净占比', 0))
-        super_large = float(row.get('超大单净流入-净额', 0))
-        large = float(row.get('大单净流入-净额', 0))
         medium = float(row.get('中单净流入-净额', 0))
         small = float(row.get('小单净流入-净额', 0))
 
@@ -112,7 +109,6 @@ class FundFlowAnalyzer:
         money_out = main_net < -self.MAIN_FLOW_THRESHOLD
 
         # 大单 vs 小单
-        big_money_in = super_large + large > 0
         retail_money_in = medium + small > 0
 
         if price_up and money_in:

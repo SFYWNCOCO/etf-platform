@@ -203,7 +203,9 @@ def get_position_summary() -> str:
     for code, pos in data["positions"].items():
         pnl = pos.get("pnl_pct", 0)
         entry = pos.get("entry_price", 1.0)
-        weight = entry * pos.get("shares", 1)  # v5.6: entry-price-weighted
+        # 权重=当前市值(price×shares); 无市价时回退入场市值
+        price = pos.get("current_price") or entry
+        weight = price * pos.get("shares", 1)
         weighted_pnl += pnl * weight
         total_weight += weight
         icon = "🔴" if pnl < -10 else ("🟡" if pnl < 0 else "🟢")

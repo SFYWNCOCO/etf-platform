@@ -457,7 +457,13 @@ def build_signals(auto_sentiment=None, impact_scores=None) -> dict:
             elif new_dir in ("看多", "看空"):
                 merged[sector]["strength"] = sent.get("strength", merged[sector].get("strength", "中"))
             if sent.get("note"):
-                merged[sector]["note"] = f"[AUTO] {sent.get('note', '')}"
+                if new_dir == "中性":
+                    # F2 修复：auto 中性时 direction 沿用 KB（P2-1），note 不能
+                    # 覆盖成"中性"——否则 direction=看多 但 summary=中性 矛盾。
+                    # 保留 KB note 并附加 auto 中性标记。
+                    merged[sector]["note"] = f"{merged[sector].get('note', '')} [AUTO中性]"
+                else:
+                    merged[sector]["note"] = f"[AUTO] {sent.get('note', '')}"
 
     etf_sectors = load_etf_sectors()
     signals = {}

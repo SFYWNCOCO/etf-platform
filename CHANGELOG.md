@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0] - 2026-08-10
+
+### Fixed（08-10 全流程审计修复，227 tests pass）
+- **H1 回测前视偏差**：`prediction_backtest._get_etf_returns` 忽略 start_date 用当前动量 → 改 K 线锚点法（复用 `_return_since`），win 100%→44.4%
+- **CVaR 符号**：`cvar_portfolio` 梯度 `-μ-k·dσ`（risk-seeking）→ `-μ+k·dσ`（risk-averse）
+- **screener break**：错误缩进的 `break` 在第 1 只 ETF 后退出扫描，已删除
+- **现金缓冲**：`position_allocator` 持仓挤出缓冲时按比例收缩到 `CASH_BUFFER_MIN`
+- **超限截断**：`portfolio.allocate` 增加 `max_positions` 边界
+- **中文情绪恒 0**：`news_signal_extractor` split() 切不开中文 → 子串匹配
+- **政策误判**：`policy_fetcher` 弱看多触发词移除 批复/通知
+- **auto=中性 矛盾**：`news_to_etf_bridge` 中性不覆盖 KB 方向
+- **数据层**：移除 EastMoney 死源；`live_price_bridge` 补 167 深市前缀；kline 磁盘 TTL 失效（`_ts` 全重置）与除零防护
+- **推荐引擎**：`two_week_picker` 动态因子权重接入（原死代码）；候选池行业均衡轮询截断；`weekly_top3` 强看空旧闻不再永否决 + `news_signals` 参数被覆盖 bug
+
+### Infrastructure
+- 专项测试 41 个新增（prediction_backtest 5 / kline 4 / cvar 2 / portfolio 1 / news_policy 11 / recommendation_engine 8 / 其余）
+
 ## [0.2.0] - 2026-06-26
 
 ### Added

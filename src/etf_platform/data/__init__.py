@@ -4,7 +4,6 @@ Provides unified interface for price, volume, and news data
 with automatic fallback between providers.
 """
 from .base import PriceSource, NewsSource, DataHealth
-from .eastmoney import EastMoneySource
 from .sina import SinaSource
 from .akshare_source import AKShareSource
 from .news import WallStreetCNSource, WeiboSource, Kr36Source, TencentSource, V2EXSource, SinaNewsSource

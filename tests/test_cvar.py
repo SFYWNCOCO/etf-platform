@@ -68,6 +68,24 @@ class TestOptimizeGaussian:
         assert "ret" in info
         assert info["method"] == "gaussian"
 
+    def test_risk_averse_prefers_low_vol(self):
+        """回归：梯度符号错误曾使优化追逐高波动资产（risk-seeking）。
+
+        目标是最小化尾部损失 CVaR(L) = -mu + sigma*k：高波动高收益 A
+        vs 低波动低收益 B，风险规避应把权重集中在 B。
+        """
+        means = [0.05, 0.01]
+        cov = [[0.16, 0.0], [0.0, 0.01]]  # A vol=40%, B vol=10%, 无相关
+        w, _ = optimize_gaussian(means, cov, alpha=0.95, max_iter=2000, lr=0.1)
+        assert w[1] > w[0], f"应偏好低波动资产, 实际 w={w}"
+
+    def test_risk_averse_two_equal_vol(self):
+        """方差相同但收益不同时，风险规避应偏好更高收益者。"""
+        means = [0.04, 0.02]
+        cov = [[0.04, 0.0], [0.0, 0.04]]  # 同为 20% 波动
+        w, _ = optimize_gaussian(means, cov, alpha=0.95, max_iter=2000, lr=0.1)
+        assert w[0] > w[1]
+
 
 @pytest.mark.unit
 class TestOptimizeHistorical:

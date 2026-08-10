@@ -732,7 +732,6 @@ def apply_economics_adjustment(sector, base_score):
             adjustments.append(f"需求弹性{demand_el:.1f}(高)->-0.3(量价风险)")
     
     # 3. Correlation regime: stagflation bonus for defensive assets
-    regime = CORRELATION_REGIMES.get(CURRENT_REGIME, {})
     if "黄金" in sector:
         adjusted += 0.5  # Gold strong in stagflation
         adjustments.append("滞胀期黄金+0.5")

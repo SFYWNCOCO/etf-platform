@@ -415,7 +415,7 @@ def _estimate_hurst(code: str) -> Optional[float]:
     """估算 ETF 的 Hurst 指数（k190）。真实K线优先，失败退化到趋势近似；全程异常安全返回 None。"""
     try:
         from .data.kline import _fetch_kline, get_trend
-        from .analysis.hurst_regime import hurst_dfa, _MIN_POINTS
+        from .analysis.hurst_regime import hurst_dfa
         rows = _fetch_kline(code, 300)
         if rows and len(rows) >= 150:
             prices = [float(r["close"]) for r in rows]
@@ -460,7 +460,8 @@ def _apply_kb_catalyst(scores: dict, details: dict, sector: str) -> None:
         scores["L34_KBCatalyst"] = catalyst.get("score", 5.0)
         if catalyst.get("detail"):
             details["L34_CatalystDetail"] = catalyst["detail"]
-    except Exception:
+    except Exception as e:
+        logger.debug("[L34] kb catalyst failed: %s", e)
         scores["L34_KBCatalyst"] = 5.0
 
 
@@ -472,7 +473,8 @@ def _apply_liquidity_arbitrage(scores: dict, details: dict, etf_type: str, secto
         scores["L25_LiquidityArb"] = liq.get("score", 5.0)
         if liq.get("detail"):
             details["L25_LiquidityDetail"] = liq["detail"]
-    except Exception:
+    except Exception as e:
+        logger.debug("[L25] liquidity arb failed: %s", e)
         scores["L25_LiquidityArb"] = 5.0
 
 
@@ -493,7 +495,8 @@ def _apply_volatility_regime(scores: dict, details: dict, sector: str, code: str
         scores["L26_VolRegime"] = vol.get("score", 5.0)
         if vol.get("detail"):
             details["L26_VolDetail"] = vol["detail"]
-    except Exception:
+    except Exception as e:
+        logger.debug("[L26] vol regime failed: %s", e)
         scores["L26_VolRegime"] = 5.0
 
 
@@ -505,7 +508,8 @@ def _apply_factor_smart_beta(scores: dict, details: dict, sector: str, regime: s
         scores["L27_FactorBeta"] = factor.get("score", 5.0)
         if factor.get("detail"):
             details["L27_FactorDetail"] = factor["detail"]
-    except Exception:
+    except Exception as e:
+        logger.debug("[L27] factor smart beta failed: %s", e)
         scores["L27_FactorBeta"] = 5.0
 
 
@@ -580,18 +584,25 @@ def _enhance_news(scores: dict, code: str, details: dict = None, sector: str = "
         try:
             from pathlib import Path
             import json as _json
-            _sig_path = Path(__file__).resolve().parent.parent.parent.parent / "data" / "news_etf_signals.json"
+            from etf_platform.analysis.news_handler import NewsSignalResult
+            _sig_path = Path(__file__).resolve().parent.parent.parent / "data" / "news_etf_signals.json"
             if _sig_path.exists():
                 _all = _json.loads(_sig_path.read_text(encoding="utf-8"))
                 _sig = _all.get(code, {})
                 if _sig and isinstance(_sig, dict) and _sig.get("direction"):
-                    cached_signals = [{
-                        "title": _sig.get("summary", ""),
-                        "direction": _sig.get("direction", "中性"),
-                        "score": abs(_sig.get("news_score", 0.5)),
-                        "source": _sig.get("source", ""),
-                        "category": _sig.get("sector", sector),
-                    }]
+                    # 必须构造 NewsSignalResult 对象：generate_pipeline_enhancement 用
+                    # 属性访问（s.signal_strength），传 dict 会 AttributeError 被外层
+                    # except 吞掉 → L9 新闻增强永久静默失效（审计 F1, 2026-08-10）。
+                    _dir = _sig.get("direction", "中性")
+                    cached_signals = [NewsSignalResult(
+                        etf_code=code,
+                        sector=_sig.get("sector", sector),
+                        signal_strength=float(min(max(abs(_sig.get("news_score", 0.5)), 0.0), 1.0)),
+                        sentiment_score=1.0 if _dir == "看多" else (-1.0 if _dir == "看空" else 0.0),
+                        keywords_matched=[],
+                        timestamp=_sig.get("updated", ""),
+                        source=str(_sig.get("source", "")),
+                    )]
         except Exception:
             cached_signals = None
         

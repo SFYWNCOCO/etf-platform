@@ -121,7 +121,10 @@ def _get_sector_momentum(sector: str) -> float:
     """Get sector index 20-day momentum. Returns -1 to +1."""
     try:
         import akshare as ak
-        df = ak.stock_board_industry_index_ths()
+        from datetime import datetime
+        # symbol=sector 取该行业日线; 默认 end_date 停在 20240108, 必须动态传当前日期
+        df = ak.stock_board_industry_index_ths(
+            symbol=sector, end_date=datetime.now().strftime("%Y%m%d"))
         if df is None or len(df) < 21:
             return 0.0
         closes = df["收盘价"].tail(21).astype(float)

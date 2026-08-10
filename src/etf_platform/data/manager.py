@@ -4,7 +4,6 @@ import threading
 import logging
 from typing import Optional, List, Dict, Tuple
 from .base import PriceSource, NewsSource, PriceSnapshot, NewsItem, DataHealth, SourceStatus
-from .eastmoney import EastMoneySource
 from .sina import SinaSource
 from .akshare_source import AKShareSource
 from .news import WallStreetCNSource, Kr36Source, TencentSource, SinaNewsSource, BackupNewsSource
@@ -12,9 +11,10 @@ from .news import WallStreetCNSource, Kr36Source, TencentSource, SinaNewsSource,
 logger = logging.getLogger(__name__)
 
 # Priority order for price sources
+# 08-10: 移除 EastMoneySource（包装已清除的 etf_system/ETFDataFetcher，死源，
+# 永远失败且占 Primary 槽位污染健康报告）。Sina 是主力、AKShare 兜底。
 _PRICE_SOURCES: List[PriceSource] = [
-    EastMoneySource(),   # Primary: fast, free
-    SinaSource(),        # Fallback 1: very stable
+    SinaSource(),        # Primary: very stable
     AKShareSource(),     # Fallback 2: auto-maintained
 ]
 
@@ -79,7 +79,6 @@ def get_price(code: str, prefer: str = "") -> Tuple[Optional[PriceSnapshot], str
     
     for source in ordered:
         try:
-            t0 = time.time()
             result = source.get_price(code)
             if result is not None and result.price > 0:
                 with _LAST_PRICE_SOURCE_LOCK:

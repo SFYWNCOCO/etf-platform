@@ -61,7 +61,11 @@ def fetch_policy_list() -> list:
     try:
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
+            try:
+                browser = p.chromium.launch(headless=True)
+            except Exception:
+                # playwright 自带浏览器版本不匹配（实测 -1200 vs -1234）时回退系统 Edge，零下载
+                browser = p.chromium.launch(headless=True, channel="msedge")
             page = browser.new_page()
             page.goto("https://www.gov.cn/zhengce/zuixin/", wait_until="domcontentloaded", timeout=30000)
             page.wait_for_timeout(2500)
@@ -118,8 +122,10 @@ def judge_policy_direction(title: str) -> tuple:
         return "看多", pos - neg
     elif neg > pos:
         return "看空", neg - pos
-    # 中性词库无方向词时：规划/方案/意见 = 弱利好（产业被国家提上议程）
-    if any(w in title for w in ["规划", "方案", "意见", "行动方案", "纲要", "批复", "通知"]):
+    # 中性词库无方向词时：规划/方案/意见/纲要 = 弱利好（产业被国家提上议程）。
+    # 修复："批复/通知"只是公文形式，方向由措辞决定——监管类批复/通知
+    # 误判为利好会污染行业方向（如"加强安全管理的通知"）。
+    if any(w in title for w in ["规划", "方案", "意见", "行动方案", "纲要"]):
         return "看多", 0.5
     return "中性", 0
 

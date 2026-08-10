@@ -380,11 +380,8 @@ def score_cycle_layer(sector: str, risk_level: float, etf_code: str = "") -> Dic
     # When multiple ETFs share the same sector+risk_level, they get identical scores
     # even after expanding ca values and widening risk_mod.
     # Solution: add deterministic jitter based on code hash.
-    code_jitter = 0.0
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        code_jitter = ((code_hash % 11) - 5) * 0.06  # range [-0.30, +0.30] (reduced from ±0.60 to avoid dominating signal)
+    from ..utils.hash_jitter import pair_sum_jitter
+    code_jitter = pair_sum_jitter(etf_code, 11, 0.06)  # range [-0.30, +0.30]
     score = round(score + code_jitter, 1)
 
     # 高风险行业(risk_level>0.5)在逆周期时额外惩罚

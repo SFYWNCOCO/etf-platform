@@ -117,17 +117,12 @@ def _event_accuracy(event, hist, etfs, window_days=5, delisted_codes=None):
         if recs[0]["date"] > event["d"]:
             continue  # 事件前无数据,跳过
 
-        # Pre-event price (N days before)
-        pre = None
-        for r in recs:
-            if r["date"] <= event["d"]:
-                pre = r["close"]
-        # Post-event price (N days after)
-        post = None
-        for r in recs:
-            if r["date"] >= event["d"]:
-                post = r["close"]
-                break
+        # 滚动窗口: pre = 事件前 window_days 个交易日, post = 事件后 window_days 个交易日
+        pre_idx = next((i for i, r in enumerate(recs) if r["date"] >= event["d"]), None)
+        if pre_idx is None or pre_idx < window_days or pre_idx + window_days >= len(recs):
+            continue
+        pre = recs[pre_idx - window_days]["close"]
+        post = recs[pre_idx + window_days]["close"]
         # 修复: 移除 post = recs[-1]["close"] fallback(事件后无数据则跳过)
         if pre is None or post is None or pre == 0:
             continue

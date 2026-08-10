@@ -388,12 +388,13 @@ def _build_holdings(
                 h.weight = MAX_SINGLE_ETf_WEIGHT
                 constraints.append(f"归一化后仍超限: {h.code}")
 
-    # 确保现金缓冲
+    # 确保最小现金缓冲：真实现金 = 1 - actual_total，低于下限则缩仓。
+    # 修复：旧逻辑 cash=max(1-actual_total, CASH_BUFFER_MIN) 恒 >= 下限，
+    # 使 if cash > CASH_BUFFER_MIN 永假——缩仓成为死代码。
     actual_total = sum(h.weight for h in holdings)
-    cash = round(max(1.0 - actual_total, CASH_BUFFER_MIN), 4)
-    if cash > CASH_BUFFER_MIN and actual_total > 0:
-        # 按比例缩减持仓以保留最小现金
-        shrink = (1.0 - cash) / actual_total
+    cash = 1.0 - actual_total
+    if cash < CASH_BUFFER_MIN and actual_total > 0:
+        shrink = (1.0 - CASH_BUFFER_MIN) / actual_total
         for h in holdings:
             h.weight = round(h.weight * shrink, 4)
 
@@ -770,20 +771,9 @@ def _select_best_method(
 
     策略：
     - 默认使用 hybrid（综合最佳）
-    - 如果校准数据不足，回退到 score_weighted
-    - 如果regime=fearful，增加 vol_weighted 的权重
     - k170 新增候选：risk_parity / black_litterman 进入候选池；
       波动率差异 >3 倍时 risk_parity 优于 vol_weighted
     """
-    # 检查校准数据质量
-    has_good_calibration = False
-    for name, m in methods.items():
-        if "calibration" in str(m.notes).lower() or "无校准" not in str(m.notes):
-            has_good_calibration = True
-
-    # 恐慌regime下，降低高风险分配
-    resolved = _resolve_regime(regime)
-
     # 优先级排序（默认 hybrid 优先；risk_parity/black_litterman 为 k170 新增候选）
     priority = ["hybrid_score_conf_vol", "score_weighted", "vol_weighted",
                  "confidence_weighted", "equal_weight",

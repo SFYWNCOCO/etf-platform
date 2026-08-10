@@ -44,7 +44,6 @@ def score_etf_for_portfolio(code, analyst_result, profile="balanced"):
     """Score a single ETF with robust tail-risk adjustment."""
     profile = _PORTFOLIO_ALIASES.get(profile, profile)
     pf = PORTFOLIO_PROFILES.get(profile, PORTFOLIO_PROFILES["balanced"])
-    composite = analyst_result.get("composite_score", 0) or 0
     supply = analyst_result.get("supply_score", 5) or 5
     capital = analyst_result.get("capital_score", 5) or 5
     demand = analyst_result.get("demand_score", 5) or 5
@@ -125,6 +124,8 @@ def allocate(analyst_results, budget=1000, profile="balanced", max_positions=5, 
     allocated = []
     remaining = float(budget)
     for i, (s, w) in enumerate(zip(candidates, weights)):
+        if i >= max_positions:
+            break  # 修复：旧逻辑遍历全部候选(max_positions*2)，超出部分输出 0 金额标的
         if i == max_positions - 1 or i == len(candidates) - 1:
             amount = max(round(remaining, 0), 0)  # 不允许负数
         else:

@@ -288,7 +288,6 @@ def _sector_regime_certainty(sector: str, matches: List[Dict]) -> float:
 
     # v6.0: Use variance-based differentiation
     max_score = max(alignments)
-    min_score = min(alignments)
     mean_score = sum(alignments) / len(alignments)
     variance = sum((a - mean_score) ** 2 for a in alignments) / len(alignments)
 
@@ -447,11 +446,9 @@ def score_state_similarity(sector: str, etf_code: str = "") -> Dict:
     # v8.10: Increased jitter range from [-0.8, +0.8] to [-1.0, +1.0] for better
     # intra-sector differentiation. The base formula already produces good spread
     # (std~0.90) but jitter is too small to break ties within same sector.
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        code_jitter = ((code_hash % 11) - 5) * 0.20  # range [-1.0, +1.0]
-        result["score"] = result["score"] + code_jitter
+    from ..utils.hash_jitter import pair_sum_jitter
+    code_jitter = pair_sum_jitter(etf_code, 11, 0.20)  # range [-1.0, +1.0]
+    result["score"] = result["score"] + code_jitter
 
     # v6.1: Wider clamp range to accommodate expanded differentiation
     result["score"] = round(max(2.0, min(9.5, result["score"])), 1)

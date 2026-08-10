@@ -13,11 +13,7 @@ Key changes from v3.1:
 The root cause of L17 flatness was that SECTOR_TO_FACTOR_KEY mapped ~60% of sectors
 to "宽基" (all-zero exposure, sharpe=1.0). Every such sector got exactly score=5.0.
 """
-import os
-for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
-    if key in os.environ: del os.environ[key]
-os.environ['NO_PROXY'] = '*'
-
+# 无网络请求, 不再模块级删除代理(曾污染同进程其他模块)
 from typing import Dict
 
 # ═══════════════════════════════════════════
@@ -592,11 +588,8 @@ def apply_factor_layer(sector: str, scores: Dict, etf_code: str = "") -> Dict:
     # v8.10: Increased jitter range from [-0.6, +0.6] to [-0.8, +0.8] to further
     # break intra-sector ties. With the wider base score spread from v8.10 formula,
     # jitter provides additional per-ETF differentiation.
-    code_jitter = 0.0
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        code_jitter = ((code_hash % 11) - 5) * 0.16  # range [-0.8, +0.8]
+    from ..utils.hash_jitter import pair_sum_jitter
+    code_jitter = pair_sum_jitter(etf_code, 11, 0.16)  # range [-0.8, +0.8]
     
     # v8.35: Ceiling-aware — prevent L17 from hitting 10.0 hard ceiling.
     # Base scores for defensive sectors (红利/价值=9.5, 自由现金流=9.6) 

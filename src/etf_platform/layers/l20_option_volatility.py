@@ -8,11 +8,7 @@ Key changes from v4.0:
 
 Expected: 10+ unique values, spread 5.0+, <15% clustering at any single value
 """
-import os
-for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
-    if key in os.environ: del os.environ[key]
-os.environ['NO_PROXY'] = '*'
-
+# 无网络请求, 不再模块级删除代理(曾污染同进程其他模块)
 from typing import Dict
 import math
 import hashlib
@@ -326,8 +322,6 @@ def apply_option_layer(sector: str, scores: Dict, etf_code: str = "") -> Dict:
     raw = iv_result["score"]
     inverted = round(max(1.0, min(10.0, 11.0 - raw)), 1)
     scores["L20_OptionVol"] = inverted
-
-    strategy_result = analyze_option_strategy(sector)
 
     return scores
 

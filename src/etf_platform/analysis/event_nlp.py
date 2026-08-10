@@ -581,7 +581,6 @@ def detect_events(
         return []
 
     results: list[EventSignal] = []
-    ts = timestamp or time.time()
 
     for event_type, sub_types in EVENT_DICTIONARIES.items():
         for sub_type, config in sub_types.items():

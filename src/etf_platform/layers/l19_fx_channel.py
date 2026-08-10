@@ -9,11 +9,7 @@ Key changes from v2.0:
 
 Expected: 10+ unique values, spread 5.0+, <20% clustering at any single value
 """
-import os
-for key in ['HTTP_PROXY','HTTPS_PROXY','http_proxy','https_proxy','ALL_PROXY']:
-    if key in os.environ: del os.environ[key]
-os.environ['NO_PROXY'] = '*'
-
+# 无网络请求, 不再模块级删除代理(曾污染同进程其他模块)
 from typing import Dict
 
 # ═══════════════════════════════════════════
@@ -389,11 +385,8 @@ def calculate_fx_score(sector: str, etf_type: str = "", etf_code: str = "") -> D
     # v8.13: Code-based deterministic jitter for intra-sector differentiation
     # Without jitter, sectors in the same FX category (e.g. 外资偏好_大盘)
     # all get identical scores, causing 13% clusters at 8.8, 5.0, 2.5.
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        jitter = ((code_hash % 11) - 5) * 0.20  # range [-1.0, +1.0]
-        score = score + jitter
+    from ..utils.hash_jitter import pair_sum_jitter
+    score = score + pair_sum_jitter(etf_code, 11, 0.20)  # range [-1.0, +1.0]
 
     score = round(max(1.0, min(10.0, score)), 1)
 

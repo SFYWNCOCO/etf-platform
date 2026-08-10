@@ -255,8 +255,9 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
     按20日动量排序大板块（去重），返回Top3。
     集成新闻信号：强看空 → 降权，强看多 → 加分
     """
-    # 加载新闻信号
-    news_signals = _load_news_signals()
+    # 加载新闻信号（参数已注入则不重载——否则测试/调用方注入被覆盖）
+    if news_signals is None:
+        news_signals = _load_news_signals()
     
     # 计算每个大板块的动量中位数
     mega_momentum = {}
@@ -365,10 +366,14 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
             }
     
     # 按调整后动量排序
-    ranked = sorted(mega_momentum.items(), key=lambda x: x[1]["adjusted_momentum"] if x[1]["news_label"] != "🔴强看空" else -999, reverse=True)
-    
-    # 排除强看空的板块
-    ranked = [(s, d) for s, d in ranked if d.get("news_label") != "🔴强看空"]
+    ranked = sorted(mega_momentum.items(), key=lambda x: x[1]["adjusted_momentum"], reverse=True)
+
+    # 排除强看空板块：仅限新鲜强看空（news_adjustment 已衰减的除外）。
+    # 修复：291 行 news_adj=-5.0*decay 已对旧闻衰减，这里无条件排除会让
+    # 过期新闻永久锁死板块（fresh_days>7 时 decay=0.1 → 只该减 -0.5）。
+    ranked = [(s, d) for s, d in ranked
+              if not (d.get("news_label") == "🔴强看空"
+                      and d.get("news_adjustment", 0) <= -2.5)]
     
     # 动量成熟度惩罚：peaking板块降权，early板块加分
     final_ranked = []
@@ -830,11 +835,26 @@ def main():
     output["per_etf_position"] = f"{per_etf_pct}% (总仓位{int(position_mult*100)}% / 3只)"
     
     # ── P1-2: 持久化推荐日志（JSONL，供回测归因）──
+    # 幂等去重：同一天同一 ETF 只写一次。cron 可能多次触发，否则日志膨胀污染回测统计。
     try:
         log_path = _HERE / "data" / "recommendations_log.jsonl"
         log_path.parent.mkdir(parents=True, exist_ok=True)
+        today = now.strftime("%Y-%m-%d")
+        seen_codes = set()
+        if log_path.exists():
+            with open(log_path, encoding="utf-8") as _f:
+                for _line in _f:
+                    try:
+                        _row = json.loads(_line)
+                        if _row.get("date") == today:
+                            seen_codes.add(_row.get("code"))
+                    except Exception:
+                        continue
         with open(log_path, "a", encoding="utf-8") as f:
             for rec in output["recommendations"]:
+                if rec["code"] in seen_codes:
+                    continue
+                seen_codes.add(rec["code"])
                 f.write(json.dumps({
                     "recommendation_id": rec["recommendation_id"],
                     "date": now.strftime("%Y-%m-%d"),

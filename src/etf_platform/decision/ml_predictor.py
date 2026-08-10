@@ -16,8 +16,9 @@ Usage:
   python -m etf_platform.decision.ml_predictor --train-only     # retrain model
   python -m etf_platform.decision.ml_predictor --compare        # ML vs Z-score
 """
-from ..utils import sina_code
 from __future__ import annotations
+
+from ..utils import sina_code
 
 import json
 import logging

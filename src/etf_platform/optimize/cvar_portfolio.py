@@ -27,7 +27,10 @@ def gaussian_cvar_gradient(w, means, cov, alpha=0.95):
     grad = []
     for i in range(n):
         ds = sum(w[j]*cov[i][j] for j in range(n)) / sigma_p if sigma_p > 0 else 0
-        grad.append(-means[i] - k * ds)
+        # 目标 = 最小化尾部损失 CVaR(L)=-mu+sigma*k（风险规避）。
+        # 修复：旧实现 -mu-k*ds 使梯度下降追逐高波动资产（risk-seeking）。
+        # ∂CVaR(L)/∂w_i = -mu_i + k*ds_i
+        grad.append(-means[i] + k * ds)
     return grad
 
 
@@ -89,7 +92,22 @@ def optimize_historical(scenarios, alpha=0.95, lr=0.01, max_iter=500, tol=1e-6):
 
 
 def student_t_cvar(mu, sigma, nu=5, alpha=0.95):
-    z = PHI.inv_cdf(alpha)
-    k = PHI_PDF(z) / (1 - alpha)
-    if nu <= 30: k *= (1 + 4.0/max(nu-2, 1))
-    return mu - sigma * k
+    """Student-t CVaR (重尾风险).
+
+    修复: 原实现用正态分位数×经验因子冒充 Student-t。
+    正确公式 (scipy.stats.t):
+      CVaR = mu - sigma * k
+      k = pdf(t_ppf(alpha)) * (nu + t_ppf^2) / ((1-alpha)(nu-1))
+    """
+    try:
+        from scipy.stats import t as t_dist
+        t_ppf = t_dist.ppf(alpha, df=nu)
+        t_pdf = t_dist.pdf(t_ppf, df=nu)
+        k = t_pdf * (nu + t_ppf ** 2) / ((1 - alpha) * (nu - 1))
+        return mu - sigma * k
+    except ImportError:
+        # 无 scipy 时回退正态近似
+        z = PHI.inv_cdf(alpha)
+        k = PHI_PDF(z) / (1 - alpha)
+        if nu <= 30: k *= (1 + 4.0/max(nu-2, 1))
+        return mu - sigma * k

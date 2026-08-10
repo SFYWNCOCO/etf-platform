@@ -112,7 +112,12 @@ class TestPriceFallback:
         mock_src_c.get_price.return_value = None
         with patch.object(manager, "_PRICE_SOURCES",
                           [mock_src_a, mock_src_b, mock_src_c]):
-            result, src_name = manager.get_price("159995")
+            # 隔离磁盘缓存：本测试意在验证 source fallback，若命中真实
+            # price_cache.json（价格随每日刷新变化），断言会脆断。
+            # manager.get_price 内是函数级 `from .price_cache import get_cached_price`，
+            # 局部导入每次重新绑定，因此 patch 源模块即可拦截。
+            with patch("etf_platform.data.price_cache.get_cached_price", return_value=None):
+                result, src_name = manager.get_price("159995")
         assert result is not None
         assert result.price == 1.23
         assert src_name == "source_b"
@@ -156,7 +161,8 @@ class TestPriceFallback:
             code="159995", price=1.5, source="source_b"
         )
         with patch.object(manager, "_PRICE_SOURCES", [mock_src_a, mock_src_b]):
-            result, src_name = manager.get_price("159995")
+            with patch("etf_platform.data.price_cache.get_cached_price", return_value=None):
+                result, src_name = manager.get_price("159995")
         assert result is not None
         assert result.price == 1.5
         assert src_name == "source_b"

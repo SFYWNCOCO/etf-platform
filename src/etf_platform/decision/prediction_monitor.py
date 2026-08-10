@@ -42,83 +42,133 @@ def log_prediction(predictions: list, profile: str = "均衡"):
             for p in predictions[:3]
         ],
     }
-    
+
     # Daily file
     daily_file = DATE_DIR / f"{today}.json"
     with open(daily_file, "w", encoding="utf-8") as f:
         json.dump(record, f, ensure_ascii=False, indent=2)
-    
-    # Append to full log
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
-    
+
+    # Append to full log (幂等：同一天同 profile 去重，覆盖旧记录，防止 cron/手动
+    # 重复触发导致回测样本被同一预测重复加权)
+    lines = []
+    if LOG_FILE.exists():
+        with open(LOG_FILE, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    row = json.loads(line)
+                except Exception:
+                    continue
+                if row.get("date") == today and row.get("profile") == profile:
+                    continue  # 丢弃同日同 profile 旧记录
+                lines.append(line)
+    lines.append(json.dumps(record, ensure_ascii=False))
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOG_FILE, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
     return daily_file
 
 
+def _return_since(pred_date_str: str, code: str, horizon: int = 10):
+    """从预测日起 horizon 个交易日后的收益率（K线锚点法）。
+
+    - 取预测日当天（或之后首个交易日）收盘价为 P0
+    - 取 P0 之后第 horizon 个交易日收盘价为 P1
+    - 返回 (P1-P0)/P0*100；数据不足或失败返回 None
+
+    修复：旧逻辑用 get_trend 的"当前动量"（与预测日无关），导致命中率虚高。
+    """
+    from etf_platform.data.kline import _fetch_kline
+
+    rows = _fetch_kline(code, days=80)  # 80 个日线 bar 足够覆盖预测日 + 2 周余量
+    if not rows:
+        return None
+    start_idx = None
+    for i, r in enumerate(rows):
+        d = r.get("date") or r.get("day")
+        if not d:
+            continue
+        if d >= pred_date_str:
+            start_idx = i
+            break
+    if start_idx is None:
+        return None
+    p0 = float(rows[start_idx]["close"])
+    if p0 <= 0:
+        return None
+    end_idx = min(start_idx + horizon, len(rows) - 1)
+    p1 = float(rows[end_idx]["close"])
+    if p1 <= 0:
+        return None
+    return (p1 - p0) / p0 * 100
+
+
 def evaluate_prediction(days_back: int = 10):
-    """回测历史预测: 检查预测后N天的涨跌幅
-    
+    """回测历史预测: 检查预测日起 N 个交易日的涨跌幅（K线锚点法）
+
     Returns:
         dict with accuracy metrics
     """
-    from etf_platform.data.kline import get_trend
-    
     if not LOG_FILE.exists():
         return {"error": "No prediction history"}
-    
+
     # Load all predictions
     predictions = []
     with open(LOG_FILE, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:
-                predictions.append(json.loads(line))
-    
+                try:
+                    predictions.append(json.loads(line))
+                except Exception:
+                    continue
+
     if not predictions:
         return {"error": "Empty prediction history"}
-    
+
     results = []
     hits = 0
     total = 0
     return_avg = []
-    
+
     for pred in predictions:
         pred_date = pred["date"]
         days_since = (date.today() - date.fromisoformat(pred_date)).days
-        
+
         if days_since < 5:
             continue  # 还没足够时间验证
-        
+
         total += 1
         for i, etf in enumerate(pred["top3"]):
             code = etf["code"]
-            t = get_trend(code)
-            if t and t.data_days > 5:
-                ret_10d = t.change_10d
-                ret_20d = t.change_20d
-                return_avg.append(ret_10d)
-                
-                # Hit: 预测后10日涨幅 > 0
-                hit = ret_10d > 0 if days_since >= 10 else ret_20d > 0
-                if hit: hits += 1
-                
-                results.append({
-                    "date": pred_date,
-                    "code": code,
-                    "name": etf["name"],
-                    "rank": i + 1,
-                    "pred_score": etf["two_week_score"],
-                    "return_10d": ret_10d,
-                    "return_20d": ret_20d,
-                    "hit": hit,
-                })
-    
+            ret = _return_since(pred_date, code, days_back)
+            if ret is None:
+                continue
+            return_avg.append(ret)
+
+            hit = ret > 0
+            if hit:
+                hits += 1
+
+            results.append({
+                "date": pred_date,
+                "code": code,
+                "name": etf["name"],
+                "rank": i + 1,
+                "pred_score": etf["two_week_score"],
+                "return_horizon": ret,
+                "hit": hit,
+            })
+
     if not results:
         return {"error": f"等待足够回测数据 (需>5天, 当前最早预测: {predictions[0]['date'] if predictions else 'N/A'})"}
-    
+
     avg_return = sum(return_avg) / max(len(return_avg), 1)
     hit_rate = hits / max(len(results), 1) * 100
-    
+
     return {
         "total_predictions": len(results),
         "hits": hits,

@@ -46,6 +46,22 @@ class TestAllocateBasic:
         for a in alloc:
             assert a["weight_pct"] <= 30.5  # 允许浮点误差
 
+    def test_respects_max_positions(self):
+        """分配标的数不超过 max_positions。
+
+        修复：旧循环遍历全部候选(max_positions*2)，超出部分以 0 金额追加。
+        """
+        results = {}
+        for i in range(10):
+            code = f"1599{i:02d}"
+            results[code] = {"name": f"ETF{i}", "composite_score": 8.0,
+                             "supply_score": 7, "capital_score": 8,
+                             "demand_score": 7, "signal_score": 7, "sector": "半导体"}
+        alloc = allocate(results, budget=1000, profile="balanced", max_positions=5)
+        assert len(alloc) <= 5
+        # 无 0 金额死条目
+        assert all(a["amount"] > 0 for a in alloc)
+
     def test_softmax_vs_cvar_method(self):
         results = {
             "159995": {"name": "芯片ETF", "composite_score": 8.0, "supply_score": 7,

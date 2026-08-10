@@ -43,20 +43,31 @@ def _load_predictions() -> list[dict]:
     return predictions
 
 
+_return_cache: dict[tuple, float] = {}
+
+
 def _get_etf_returns(code: str, start_date: str, days: int = 10) -> list[float]:
-    """Get daily returns for an ETF from start_date for N days.
-    
-    Uses get_trend for 10-day returns as proxy for backtest.
-    For full accuracy would need daily kline, but 10d return is sufficient
-    for 2-week prediction backtesting.
+    """Return percentage return from start_date over next `days` trading days.
+
+    复用 prediction_monitor._return_since 的 K 线锚点法：以预测日当天（或之后
+    首个交易日）收盘价为 P0，P0 之后第 days 个交易日收盘价为 P1，返回
+    (P1-P0)/P0*100。
+
+    修复：旧逻辑忽略 start_date/days，直接返回 get_trend 的"当前 10 日动量"
+    （预测日之后的涨跌），导致回测/校准曲线前视偏差——win 100%、Sharpe 62
+    全是假象。
     """
+    key = (code, start_date, days)
+    if key in _return_cache:
+        return [_return_cache[key]]
     try:
-        from etf_platform.data.kline import get_trend
-        t = get_trend(code)
-        if t and t.data_days >= days:
-            return [t.change_10d]  # Simplified: use 10d return as single point
+        from etf_platform.decision.prediction_monitor import _return_since
+        ret = _return_since(start_date, code, days)
+        if ret is not None:
+            _return_cache[key] = ret
+            return [ret]
     except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError) as e:
-            logger.debug(f"[backtest] trend fetch failed: {e}")
+        logger.debug(f"[backtest] return lookup failed: {e}")
     return []
 
 
@@ -206,7 +217,7 @@ def _suggest_weights(rank_stats: dict, win_rate: float, sharpe: float) -> dict:
     return {
         "current_win_rate": round(win_rate, 1),
         "current_sharpe": round(sharpe, 2),
-        "sample_size_note": f"基于{len(rank_stats.get('rank_1',[]))}个有效样本",
+        "sample_size_note": f"基于{rank_stats.get('rank_1', {}).get('count', 0)}个有效样本",
         "suggestions": suggestions,
     }
 

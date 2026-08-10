@@ -2,13 +2,13 @@
 from ..config_loader import load_etfs
 
 MODE_CONFIG = {
-    "defensive": {"label": "防御型", "score_direction": "high", "min_score": 50, "max_risk": 0.30,
+    "defensive": {"label": "防御型", "score_direction": "high", "min_score": 5.0, "max_risk": 0.30,
         "sector_preference": ["红利/价值", "宽基", "消费", "金融", "医药"]},
-    "balanced": {"label": "平衡型", "score_direction": "balanced", "min_score": 40, "max_risk": 0.50,
+    "balanced": {"label": "平衡型", "score_direction": "balanced", "min_score": 4.0, "max_risk": 0.50,
         "sector_preference": ["宽基", "红利/价值", "消费", "医药", "AI/科技"]},
-    "aggressive": {"label": "进攻型", "score_direction": "low", "min_score": 20, "max_risk": 0.80,
+    "aggressive": {"label": "进攻型", "score_direction": "low", "min_score": 2.0, "max_risk": 0.80,
         "sector_preference": ["半导体", "AI/科技", "新能源", "军工"]},
-    "value": {"label": "价值型", "score_direction": "high", "min_score": 45, "max_risk": 0.40,
+    "value": {"label": "价值型", "score_direction": "high", "min_score": 4.5, "max_risk": 0.40,
         "sector_preference": ["红利/价值", "红利+低波", "高股息", "央企改革", "宽基"]},
 }
 
@@ -28,7 +28,8 @@ def select(mode="balanced", top_n=10):
         risk_level = info.get("risk_level", 0.5)
         if risk_level > cfg["max_risk"]: continue
         base_score = score_map.get(code, 5.0)
-        if cfg["score_direction"] == "high" and base_score < cfg["min_score"]: continue
+        # min_score 对所有模式生效（原只对 high 方向生效, aggressive 模式失效）
+        if base_score < cfg["min_score"]: continue
         sector_bonus = 0.5 if sector in cfg.get("sector_preference", []) else 0
         final_score = base_score + sector_bonus
         results.append({"code": code, "name": info.get("name", code), "sector": sector,

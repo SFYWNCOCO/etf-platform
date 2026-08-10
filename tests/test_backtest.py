@@ -11,37 +11,41 @@ from etf_platform.optimize.backtest import (
 class TestEventAccuracyBasic:
     def test_basic_correct_prediction(self):
         # 利好事件,价格从 10 涨到 11,应判 correct=True(扣除成本后仍正)
-        # window_days=2 需要 len(recs) >= 4,提供 4 条数据
-        # 事件日 2026-01-15 无数据点,pre 取 01-13(10.2),post 取 01-20(11.0)
+        # window_days=2 需事件前后各 2 个交易日,提供 6 条数据
+        # 事件日 2026-01-15 无数据点,anchor=01-17,pre=01-10(10.0),post=01-22(11.2)
         event = {"d": "2026-01-15", "dir": "利好", "c": ["159995"], "n": "test_event", "h": 30}
         hist = {"159995": [
+            {"date": "2026-01-08", "close": 9.8},
             {"date": "2026-01-10", "close": 10.0},
             {"date": "2026-01-13", "close": 10.2},
             {"date": "2026-01-17", "close": 10.5},
             {"date": "2026-01-20", "close": 11.0},
+            {"date": "2026-01-22", "close": 11.2},
         ]}
         etfs = {"159995": {"name": "芯片ETF"}}
         results = _event_accuracy(event, hist, etfs, window_days=2)
         assert len(results) == 1
-        # pre=10.2 (01-13, <= 01-15), post=10.5 (01-17, >= 01-15)
-        # pnl = (10.5-10.2)/10.2*100 - 0.2 = 2.94 - 0.2 = 2.74 > 0 → correct=True
+        # pre=10.0 (01-10), post=11.2 (01-22)
+        # pnl = (11.2-10.0)/10.0*100 - 0.2 = 11.8 > 0 → correct=True
         assert results[0]["correct"] is True
         assert results[0]["pnl_pct"] > 0
 
     def test_cost_deduction(self):
         # 价格仅微涨,扣除交易成本后应判 correct=False
-        # window_days=2 需要 len(recs) >= 4
+        # window_days=2 需事件前后各 2 个交易日
         event = {"d": "2026-01-15", "dir": "利好", "c": ["159995"], "n": "test_event", "h": 30}
         hist = {"159995": [
+            {"date": "2026-01-08", "close": 10.0},
             {"date": "2026-01-10", "close": 10.0},
-            {"date": "2026-01-13", "close": 10.003},
-            {"date": "2026-01-15", "close": 10.005},
-            {"date": "2026-01-20", "close": 10.01},
+            {"date": "2026-01-13", "close": 10.0},
+            {"date": "2026-01-17", "close": 10.005},
+            {"date": "2026-01-20", "close": 10.006},
+            {"date": "2026-01-22", "close": 10.008},
         ]}
         etfs = {"159995": {"name": "芯片ETF"}}
         results = _event_accuracy(event, hist, etfs, window_days=2)
         assert len(results) == 1
-        # pnl = (10.01 - 10.0)/10.0 * 100 - COST_BPS = 0.1 - 0.2 = -0.1 → correct=False
+        # pnl = (10.008 - 10.0)/10.0 * 100 - COST_BPS = 0.08 - 0.2 = -0.12 → correct=False
         assert results[0]["correct"] is False
 
 
@@ -50,10 +54,12 @@ class TestEventAccuracyDelisted:
     def test_delisted_flag_false_by_default(self):
         event = {"d": "2026-01-15", "dir": "利好", "c": ["159995"], "n": "test_event", "h": 30}
         hist = {"159995": [
+            {"date": "2026-01-08", "close": 9.8},
             {"date": "2026-01-10", "close": 10.0},
             {"date": "2026-01-13", "close": 10.2},
-            {"date": "2026-01-15", "close": 10.5},
+            {"date": "2026-01-17", "close": 10.5},
             {"date": "2026-01-20", "close": 11.0},
+            {"date": "2026-01-22", "close": 11.2},
         ]}
         etfs = {"159995": {"name": "芯片ETF"}}
         results = _event_accuracy(event, hist, etfs, window_days=2, delisted_codes=[])
@@ -62,10 +68,12 @@ class TestEventAccuracyDelisted:
     def test_delisted_flag_true(self):
         event = {"d": "2026-01-15", "dir": "利好", "c": ["159995"], "n": "test_event", "h": 30}
         hist = {"159995": [
+            {"date": "2026-01-08", "close": 9.8},
             {"date": "2026-01-10", "close": 10.0},
             {"date": "2026-01-13", "close": 10.2},
-            {"date": "2026-01-15", "close": 10.5},
+            {"date": "2026-01-17", "close": 10.5},
             {"date": "2026-01-20", "close": 11.0},
+            {"date": "2026-01-22", "close": 11.2},
         ]}
         etfs = {"159995": {"name": "芯片ETF"}}
         results = _event_accuracy(event, hist, etfs, window_days=2, delisted_codes=["159995"])

@@ -122,13 +122,13 @@ class NewsSignalExtractor:
         if not text or len(text.strip()) == 0:
             return 0.0
         
-        # 标准化文本：中英文转换、去除无关符号
-        cleaned = re.sub(r'[^一-龥a-zA-Z0-9]', ' ', text.lower())
-        words = cleaned.split()
-        
-        # 统计正负词出现次数
-        pos_count = sum(1 for w in words if w in self.positive_words)
-        neg_count = sum(1 for w in words if w in self.negative_words)
+        # 标准化文本：小写化（中文无空格，不能 split()——否则整句成单 token，
+        # 词表词永远匹配不上 → 中文情绪恒 0）。改为对词表词做子串匹配。
+        text_lower = text.lower()
+
+        # 统计正负词出现次数（子串匹配）
+        pos_count = sum(1 for w in self.positive_words if w in text_lower)
+        neg_count = sum(1 for w in self.negative_words if w in text_lower)
         
         total = pos_count + neg_count
         if total == 0:
@@ -144,7 +144,6 @@ class NewsSignalExtractor:
                        source: str) -> List[NewsSignal]:
         """从一篇新闻中提取所有相关ETF信号"""
         combined_text = f"{news_headline} {news_content}"
-        sector_lower = sector.lower()
         
         # 获取该行业的关键词
         keywords = self.sector_keywords.get(sector, [])

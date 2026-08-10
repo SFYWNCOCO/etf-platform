@@ -280,9 +280,27 @@ def _build_candidate_pool(etfs: dict, qvix_regime: str, max_candidates: int, deb
         candidates.append((code, info))
 
     if len(candidates) > max_candidates:
-        candidates = candidates[:max_candidates]
+        # 修复：yaml 顺序截断会让排在末尾的行业整段饿死（924只里只留80只）。
+        # Z-score 是在候选池内标准化——池内行业单一会让超跌/动量失去对比基准。
+        # 改为按行业轮询取前 max_candidates，保证各行业都有代表且分布均衡。
+        from collections import defaultdict
+        by_sector: dict[str, list] = defaultdict(list)
+        for cand in candidates:
+            by_sector[cand[1].get("sector", "")].append(cand)
+        sectors = list(by_sector.keys())
+        pool: list[tuple[str, dict]] = []
+        while len(pool) < max_candidates:
+            before = len(pool)
+            for s in sectors:
+                if len(pool) >= max_candidates:  # 循环中途到顶，避免整轮超发
+                    break
+                if by_sector[s]:
+                    pool.append(by_sector[s].pop(0))
+            if len(pool) == before:  # 全部取完
+                break
+        candidates = pool
     if debug:
-        print(f"  候选池: {len(candidates)}只 (已排除宽基/债券/QVIX过滤)")
+        print(f"  候选池: {len(candidates)}只 (已排除宽基/债券/QVIX过滤/行业均衡)")
     return candidates
 
 
@@ -335,12 +353,17 @@ def _compute_scores_and_rank(
     trend_map: dict[str, object],
     scored_indices: list[int],
     profile: str = "均衡",
+    qvix_regime: str = "normal",
     debug: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     """Steps 5-8: 加权合成 → 宏观叠加 → 锦标赛boost → 排名 → 记录."""
     n_valid = len(scored_indices)
+    # 接入动态权重：_get_factor_weights 此前是死代码（line 239 定义了
+    # 但从未被调用），FACTORS 静态 weight 无法响应 QVIX 市场状态切换
+    # （恐惧市该加红利权重、减半导体权重）。缺失 key 回退静态 weight。
+    dyn_weights = _get_factor_weights(qvix_regime)
     composite_scores = [
-        sum(z_factors[f["name"]][i] * f["weight"] for f in FACTORS)
+        sum(z_factors[f["name"]][i] * dyn_weights.get(f["name"], f["weight"]) for f in FACTORS)
         for i in range(n_valid)
     ]
 
@@ -464,7 +487,7 @@ def pick_top3(
             print(f"  ⚠️ 有效数据不足 ({n_valid}<3)")
         return [], []
 
-    top3, all_scored = _compute_scores_and_rank(z_factors, candidates, pipe_map, trend_map, scored_indices, profile, debug)
+    top3, all_scored = _compute_scores_and_rank(z_factors, candidates, pipe_map, trend_map, scored_indices, profile, qvix_regime, debug)
 
     if debug:
         print(f"  总耗时: {time.time() - t0:.0f}s")
@@ -538,7 +561,9 @@ if __name__ == "__main__":
         else:
             print(format_report([r]))
     elif args.top3:
-        top3, _ = pick_top3(args.profile, max_candidates=args.max, debug=True)
+        # skip_tournament=True：batch_full 锦标赛是 80 只耗时主源（>10min）。
+        # tournament boost 仅 ±0.03，跳过几乎不影响排名，速度可接受（预测 cron 用）。
+        top3, _ = pick_top3(args.profile, max_candidates=args.max, debug=True, skip_tournament=True)
         if args.json:
             print(json.dumps(top3, ensure_ascii=False, indent=2))
         else:

@@ -201,11 +201,8 @@ def score_pendulum_layer(sector: str, risk_level: float = 0.5,
     
     # v8.14: Intra-angle jitter for same-angle ETFs (e.g., same 20d trend across sectors)
     # Uses code-based deterministic hash so same ETF always gets same jitter
-    if etf_code and etf_code.isdigit():
-        digits = etf_code
-        code_hash = sum(int(digits[i:i+2]) for i in range(0, len(digits)-1, 2))
-        code_jitter = ((code_hash % 7) - 3) * 0.15  # range [-0.45, +0.45]
-        score += code_jitter
+    from ..utils.hash_jitter import pair_sum_jitter
+    score += pair_sum_jitter(etf_code, 7, 0.15)  # range [-0.45, +0.45]
     
     score = round(max(1.0, min(10.0, score)), 1)
     

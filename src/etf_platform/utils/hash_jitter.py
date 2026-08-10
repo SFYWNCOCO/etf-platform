@@ -31,4 +31,27 @@ def code_jitter(etf_code: str, amplitude: float = 0.5) -> float:
     return (h / 10000.0 * 2 - 1) * amplitude
 
 
-__all__ = ["code_jitter"]
+def pair_sum_jitter(etf_code: str, modulus: int = 11, amplitude: float = 0.5) -> float:
+    """基于ETF代码两位分组求和的确定性jitter（与原各层内联实现兼容）.
+
+    原实现散落在 L12/L15/L16/L17/L19/L22/L23 七处且参数各异,
+    本函数统一提取, 保持 hash 公式与取值范围逐位一致:
+      code_hash = sum(int(code[i:i+2]) for i in range(0, len-1, 2))
+      jitter = ((code_hash % modulus) - center) * amplitude, center=(modulus-1)//2
+
+    Args:
+        etf_code: ETF代码字符串 (期望6位数字, 如 '510300')
+        modulus: 取模基数 (原实现 7/11/13)
+        amplitude: 单档幅度 (原实现 0.06~0.20)
+
+    Returns:
+        float: 确定性jitter. 非数字代码或空字符串返回 0.0.
+    """
+    if not etf_code or not etf_code.isdigit():
+        return 0.0
+    code_hash = sum(int(etf_code[i:i + 2]) for i in range(0, len(etf_code) - 1, 2))
+    center = (modulus - 1) // 2
+    return ((code_hash % modulus) - center) * amplitude
+
+
+__all__ = ["code_jitter", "pair_sum_jitter"]

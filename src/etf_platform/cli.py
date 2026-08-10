@@ -784,8 +784,6 @@ def app():
         if not code:
             print("Usage: etf estimate <CODE> [--amount=10000]")
             return
-        from etf_platform.utils.return_calculator import ReturnCalculator
-        calc = ReturnCalculator()
 
         # 优先从ETF实时行情获取名称和收益率
         name = code
