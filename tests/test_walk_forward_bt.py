@@ -135,3 +135,72 @@ class TestPoolReproduction:
         assert "oversold_depth" in z_factors
         # BBB 跌最多 → oversold_depth(=-change_20d) 的 z 值应为三者最高
         assert z_factors["oversold_depth"][1] == max(z_factors["oversold_depth"])
+
+
+class TestFwdReturn:
+    def test_anchors_at_first_bar_ge_date(self):
+        rows = _trend_rows(40, base=100, step=1.0)  # close: 100..139
+        # 锚点取 ≥ 06-10 首根(close=109), +10 根 → 119 → +9.17%
+        assert wf._fwd_return(rows, date(2026, 6, 10)) == pytest.approx(9.17, abs=0.01)
+
+    def test_no_bar_after_date_returns_none(self):
+        rows = _trend_rows(10)
+        assert wf._fwd_return(rows, date(2026, 7, 1)) is None
+
+
+class TestWeeklyDates:
+    def test_aligns_to_monday(self):
+        from datetime import date as D
+        # 2026-02-12 是周四 → 对齐到 02-16(周一)
+        dates = wf._weekly_dates("2026-02-12", "2026-03-02")
+        assert dates[0] == D(2026, 2, 16)
+        assert all(d.weekday() == 0 for d in dates)
+        assert dates[-1] <= D(2026, 3, 2)
+
+
+class TestWeeklyBacktest:
+    def _mini_etfs(self):
+        return {
+            "111111": {"name": "消费ETF", "sector": "消费", "access": "buyable", "type": "行业A"},
+            "222222": {"name": "医药ETF", "sector": "医药", "access": "buyable", "type": "行业A"},
+            "333333": {"name": "公用ETF", "sector": "公用事业", "access": "buyable", "type": "行业A"},
+            "444444": {"name": "黄金ETF", "sector": "贵金属", "access": "buyable", "type": "商品"},
+            "555555": {"name": "白酒ETF", "sector": "白酒消费", "access": "buyable", "type": "行业A"},
+            "666666": {"name": "食品ETF", "sector": "食品饮料", "access": "buyable", "type": "行业A"},
+        }
+
+    def _kline_for(self, code):
+        # 每只 code 给 ~70 根日线，从 2026-04-01 起，收盘价按 code 数字随机化确定
+        import hashlib
+        seed = int(hashlib.md5(code.encode()).hexdigest()[:8], 16) % 1000
+        base = 50 + seed % 100
+        step = 0.5 if seed % 2 else -0.4
+        rows = []
+        for i in range(70):
+            rows.append({
+                "date": f"2026-{4 + (i // 30):02d}-{(i % 30) + 1:02d}",
+                "open": base + i * step, "close": base + i * step,
+                "high": base + i * step + 0.5, "low": base + i * step - 0.5,
+                "volume": 1000,
+            })
+        return rows
+
+    def test_run_weekly_end_to_end(self, tmp_path, monkeypatch):
+        """monkeypatch 合成数据跑通长窗口回测：结构完整、样本>0、QVIX 用临时缓存。"""
+        import json as _json
+        qvix = {"cached_at": "2026-07-01T00:00:00",
+                "50": [{"date": f"2026-06-{i:02d}", "close": 20.0} for i in range(1, 31)],
+                "500": [{"date": f"2026-06-{i:02d}", "close": 20.0} for i in range(1, 31)]}
+        qvix_path = tmp_path / "qvix.json"
+        qvix_path.write_text(_json.dumps(qvix), encoding="utf-8")
+
+        monkeypatch.setattr(wf, "QVIX_CACHE", qvix_path)
+        monkeypatch.setattr(wf, "load_etfs", self._mini_etfs)
+        monkeypatch.setattr(wf, "_fetch_kline", lambda code, days: self._kline_for(code))
+
+        report = wf.run_weekly_backtest("2026-06-01", "2026-06-29", max_candidates=10)
+        assert report["sample"] > 0
+        assert 0 <= report["engine"]["hit_rate"] <= 100
+        assert report["weeks"] and all(len(w["new_codes"]) == 3 for w in report["weeks"])
+        assert "vs_pool_avg_spread" in report["engine"]
+        assert "pool_avg" in report

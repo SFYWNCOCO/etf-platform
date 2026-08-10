@@ -153,6 +153,127 @@ def _trend_at(code: str, rows: list, d: date, window: int = 64) -> TrendSnapshot
     )
 
 
+def _fwd_return(rows: list, d: date, horizon: int = 10) -> float | None:
+    """本地前向收益（K线锚点）：取 ≥D 首根为 P0，其后 horizon 根为 P1。
+
+    与 prediction_monitor._return_since 同逻辑，但用调用方已抓取的 rows，
+    避免长窗口回测对每只候选额外打网络。金丝雀：同一 code+D 应与生产一致。
+    """
+    start_idx = next((i for i, r in enumerate(rows) if r["date"] >= d.isoformat()), None)
+    if start_idx is None:
+        return None
+    p0 = float(rows[start_idx]["close"])
+    if p0 <= 0:
+        return None
+    end_idx = min(start_idx + horizon, len(rows) - 1)
+    p1 = float(rows[end_idx]["close"])
+    if p1 <= 0:
+        return None
+    return (p1 - p0) / p0 * 100
+
+
+def _weekly_dates(start_iso: str, end_iso: str) -> list[date]:
+    """每个周一（含 start 当周起）作为预测日；非交易日由锚点自动对齐。"""
+    from datetime import timedelta
+    d = date.fromisoformat(start_iso)
+    end = date.fromisoformat(end_iso)
+    d = d + timedelta(days=(0 - d.weekday()) % 7)  # 对齐到周一
+    out = []
+    while d <= end:
+        out.append(d)
+        d += timedelta(days=7)
+    return out
+
+
+def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
+                        max_candidates: int = 80, kline_days: int = 200) -> dict:
+    """长窗口滚动回测：每周一 PIT 重跑新引擎，对比候选池均值基准。
+
+    样本量远大于日志 A/B（~26周×3 只 vs 5周×3 只），统计上更有意义。
+    引擎前向收益与池均值都用本地锚点计算（同一批 kline 缓存），A/B 内部一致。
+    """
+    etfs = load_etfs()
+    if QVIX_CACHE.exists():
+        qvix_cache = json.loads(QVIX_CACHE.read_text(encoding="utf-8"))
+    else:
+        qvix_cache = {}
+
+    _orig_macro, _orig_sector = twp._get_macro_boost, twp._get_sector_flow_raw
+    twp._get_macro_boost = lambda sector: 0.0
+    twp._get_sector_flow_raw = lambda sector, code="": 0.0
+    _orig_log = pm.log_prediction
+    pm.log_prediction = lambda *a, **k: None
+
+    _kline_cache: dict[str, list] = {}
+
+    def _kline(code):
+        if code not in _kline_cache:
+            _kline_cache[code] = _fetch_kline(code, days=kline_days) or []
+        return _kline_cache[code]
+
+    weeks = []
+    try:
+        for d in _weekly_dates(start, end):
+            if (date.today() - d).days < 5:
+                continue  # 与 evaluate_prediction 一致，验证期内跳过
+            regime = _regime_at(qvix_cache, d)
+            candidates = twp._build_candidate_pool(etfs, regime, max_candidates)
+            trend_map = {}
+            for code, _info in candidates:
+                t = _trend_at(code, _kline(code), d)
+                if t is not None:
+                    trend_map[code] = t
+            z_factors, scored_indices = _collect_factors_pit(candidates, trend_map)
+            if len(scored_indices) < 3:
+                continue
+            pipe_map = {code: {"score": 5.0} for code, _ in candidates}
+            new_top3, _all = twp._compute_scores_and_rank(
+                z_factors, candidates, pipe_map, trend_map, scored_indices,
+                profile, regime, False)
+
+            new_returns = {r["code"]: _fwd_return(_kline(r["code"]), d) for r in new_top3}
+            pool_rets = [_fwd_return(_kline(c), d) for c, _ in candidates
+                         if _fwd_return(_kline(c), d) is not None]
+            pool_avg = sum(pool_rets) / len(pool_rets) if pool_rets else 0.0
+
+            weeks.append({
+                "date": d.isoformat(), "regime": regime,
+                "new_codes": [r["code"] for r in new_top3],
+                "new_returns": new_returns,
+                "pool_avg": round(pool_avg, 2),
+            })
+    finally:
+        twp._get_macro_boost = _orig_macro
+        twp._get_sector_flow_raw = _orig_sector
+        pm.log_prediction = _orig_log
+
+    valid = [w for w in weeks if any(v is not None for v in w["new_returns"].values())]
+    n_vals, n_hits, spreads = [], 0, []
+    for w in valid:
+        for c, v in w["new_returns"].items():
+            if v is None:
+                continue
+            n_vals.append(v)
+            n_hits += v > 0
+            spreads.append(v - w["pool_avg"])
+    hit_rate = round(n_hits / max(len(n_vals), 1) * 100, 1) if n_vals else 0.0
+    pool_hit = round(sum(1 for w in valid if w["pool_avg"] > 0) / max(len(valid), 1) * 100, 1)
+
+    return {
+        "weeks": weeks, "sample": len(n_vals),
+        "engine": {"hit_rate": hit_rate, "hits": n_hits,
+                   "avg_return": round(sum(n_vals) / max(len(n_vals), 1), 2),
+                   "vs_pool_avg_spread": round(sum(spreads) / max(len(spreads), 1), 2)},
+        "pool_avg": {"hit_rate": pool_hit, "avg_return": round(
+            sum(w["pool_avg"] for w in valid) / max(len(valid), 1), 2)},
+        "caveats": [
+            "macro_overlay/sector_flow/pipeline_score 取中性；引擎权重为 in-sample 调参",
+            "8月 QVIX 用缓存末值(07-31)近似；不足10交易日用已实现部分",
+            "基准=候选池等权均值，非可交易策略；引擎 top3 含行业去重约束",
+        ],
+    }
+
+
 def _collect_factors_pit(candidates, trend_map):
     """PIT 版 _collect_factors：pipeline_score 取标称 5.0（近似，权重仅0.03）。"""
     raw_factors: dict[str, list[float]] = {f["name"]: [] for f in twp.FACTORS}
@@ -293,7 +414,33 @@ def main():
     parser.add_argument("--max", type=int, default=80, help="候选池上限")
     parser.add_argument("--profile", type=str, default="均衡")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--weekly", action="store_true",
+                        help="长窗口滚动回测（每周一），需配合 --start/--end")
+    parser.add_argument("--start", type=str, default="2026-02-16", help="weekly 起始日")
+    parser.add_argument("--end", type=str, default="2026-08-08", help="weekly 结束日")
+    parser.add_argument("--kline-days", type=int, default=200, help="weekly K线深度")
     args = parser.parse_args()
+
+    if args.weekly:
+        report = run_weekly_backtest(args.start, args.end, profile=args.profile,
+                                     max_candidates=args.max, kline_days=args.kline_days)
+        if args.json:
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return
+        e, p = report["engine"], report["pool_avg"]
+        print(f"长窗口滚动回测（{len(report['weeks'])} 周，样本 {report['sample']} 只，候选池≤{args.max}）")
+        print(f"  新引擎: 命中率 {e['hit_rate']}% ({e['hits']}/{report['sample']}), 均10日 {e['avg_return']:+.2f}%")
+        print(f"  池均值基准: 命中率 {p['hit_rate']}%, 均10日 {p['avg_return']:+.2f}%")
+        print(f"  引擎 vs 池均值超额: 均 {e['vs_pool_avg_spread']:+.2f}pp/只")
+        print("\n逐周明细（引擎 top3 vs 池均值）:")
+        for w in report["weeks"]:
+            rets = _fmt_ret(w["new_returns"])
+            print(f"  {w['date']} [{w['regime']}] {w['new_codes'][0]}/{w['new_codes'][1]}/{w['new_codes'][2]} "
+                  f"→ {rets} | 池均值 {w['pool_avg']:+.1f}%")
+        print("\n已知近似:")
+        for c in report["caveats"]:
+            print(f"  - {c}")
+        return
 
     report = run_walk_forward(profile=args.profile, max_candidates=args.max)
     if args.json:
