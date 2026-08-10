@@ -103,7 +103,13 @@ def main():
         print(f"[auto_sentiment] 无 {RAW_FILE}，跳过", file=sys.stderr)
         return 1
     raw = json.loads(RAW_FILE.read_text(encoding="utf-8"))
-    items = raw.get("items", [])
+    raw_items = raw.get("items", [])
+
+    # ── d751: 可交易性门禁（过滤个股公告/娱乐等噪音，只对可交易新闻出信号）──
+    from traded_news_filter import filter_tradable, is_tradable
+    items, noise_items = filter_tradable(raw_items)
+    from collections import Counter
+    noise_reasons = Counter(is_tradable(it)[1] for it in noise_items)
 
     # ── P1-1: 合并政策独立源（gov.cn）──
     policy_agg = {}
@@ -227,13 +233,19 @@ def main():
 
     out = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
-        "source": f"auto_sentiment: {len(items)}条新闻 + 政策{policy_merged}行业",
+        "source": f"auto_sentiment: {len(raw_items)}条新闻(可交易{len(items)}/噪音{len(noise_items)}) + 政策{policy_merged}行业",
         "sectors": sectors_out,
+        "stats": {
+            "total": len(raw_items),
+            "tradable_count": len(items),
+            "noise_count": len(noise_items),
+            "filtered_reasons": dict(noise_reasons),
+        },
     }
     OUT_FILE.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[auto_sentiment] 写入 {OUT_FILE}")
+    print(f"  过滤噪音新闻: {len(noise_items)}条 (增持减持公告/个股日常/娱乐体育等)")
     print(f"  sectors: {len(sectors_out)} | 政策合并: {policy_merged}")
-    from collections import Counter
     c = Counter(v["direction"] for v in sectors_out.values())
     print(f"  方向分布: {dict(c)}")
     if "--stdout" in sys.argv:
