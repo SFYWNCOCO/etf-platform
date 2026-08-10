@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0] - 2026-08-10
+
+### Empirical: 走前向(PIT)回测 + 策略锦标赛，实证选定最优方案
+
+无需等待正向样本，用**截至各历史预测日可得的数据**重跑引擎做 A/B 与多策略 PK。
+
+- **`optimize/walk_forward_bt.py`（新增）**：PIT 复算引擎（QVIX regime 序列切片 / kline 切片复刻 `get_trend` 数学 / 候选池纯函数复现）；金丝雀测试钉死复刻与生产逐字段一致。`run_weekly_backtest` 长窗口滚动 + `run_walk_forward` 日志 A/B
+- **策略锦标赛**：同周池同前向度量 PK 6 策略（current_factor/momentum/oversold/low_vol/defensive_momentum/random）
+- **`_fetch_kline` 腾讯上限 200→800**：放行 500 天深历史 PIT 切片（生产 `get_trend` 默认 63 不受影响），窗口扩到 105 周 / 315 次选择
+- **prediction_monitor 修复后 cohort**：≥2026-08-10 预测单独统计（`post_fix_cohort`），供正向验证隔离新旧引擎
+
+### 实证结论（105 周 / 315 选，真实数据）
+
+- current_factor（生产引擎）均 10 日收益 **+1.78% 全场最高**，超池 +0.57pp、超 momentum +0.42pp
+- momentum 近一年（2025-08+）反超至 +1.92%，但配对 t=0.82 不显著；全窗口 t=-0.54；fearful 期 momentum 明显更差（-2.08pp）
+- low_vol / defensive_momentum / random 全线落后；池等权命中率 61% 最高，但该对比为"周均分散" vs "单只命中"粒度差异，收益超额为负
+- **裁定：维持 current_factor。** 周收益波动 8.6pp，功效分析显示现有数据无法在 α=0.05 区分 1pp 级策略差异（需 ~580 周）——动量翻转属噪声，据此加规则即过拟合；正向 cohort（≥08-17 每周一累积）是唯一真正的 out-of-sample 判别测试
+
+### Infrastructure
+- walk_forward_bt 默认窗口深化（--start 2024-08-01 / --kline-days 500）
+- 测试新增 `test_walk_forward_bt.py`（18）+ kline 深历史支持
+
 ## [0.3.0] - 2026-08-10
 
 ### Fixed（08-10 全流程审计修复，227 tests pass）

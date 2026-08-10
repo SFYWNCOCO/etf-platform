@@ -354,6 +354,7 @@ def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
             "macro_overlay/sector_flow/pipeline_score 取中性；引擎权重为 in-sample 调参",
             "8月 QVIX 用缓存末值(07-31)近似；不足10交易日用已实现部分",
             "基准=候选池等权均值，非可交易策略；引擎 top3 含行业去重约束",
+            "候选池用当前 etfs.yaml（后上市 ETF 生存偏差），但所有策略同池受影响，相对排序仍有效",
         ],
     }
 
@@ -500,9 +501,9 @@ def main():
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--weekly", action="store_true",
                         help="长窗口滚动回测（每周一），需配合 --start/--end")
-    parser.add_argument("--start", type=str, default="2026-02-16", help="weekly 起始日")
+    parser.add_argument("--start", type=str, default="2024-08-01", help="weekly 起始日")
     parser.add_argument("--end", type=str, default="2026-08-08", help="weekly 结束日")
-    parser.add_argument("--kline-days", type=int, default=200, help="weekly K线深度")
+    parser.add_argument("--kline-days", type=int, default=500, help="weekly K线深度")
     parser.add_argument("--tournament", action="store_true",
                         help="打印多策略锦标赛排名表")
     args = parser.parse_args()

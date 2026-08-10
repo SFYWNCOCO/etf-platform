@@ -108,7 +108,9 @@ def _fetch_kline(code: str, days: int = 63) -> Optional[list]:
     # Try Tencent (primary, works as of 2026-07)
     try:
         prefix = sina_code(code)
-        url = TENCENT_KLINE_URL % (prefix, code, min(days, 200))
+        # 上限 800（约3.4年）：生产调用默认 63 不受影响，仅放行 walk_forward 回测
+        # 取深历史做 PIT 切片（腾讯接口实测 datalen=500 返回完整 501 根）。
+        url = TENCENT_KLINE_URL % (prefix, code, min(days, 800))
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             raw = resp.read().decode("utf-8")
