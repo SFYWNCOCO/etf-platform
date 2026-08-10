@@ -204,3 +204,52 @@ class TestWeeklyBacktest:
         assert report["weeks"] and all(len(w["new_codes"]) == 3 for w in report["weeks"])
         assert "vs_pool_avg_spread" in report["engine"]
         assert "pool_avg" in report
+        # 锦标赛策略表完整且每策略都有样本
+        assert set(report["strategies"]) == {
+            "current_factor", "momentum", "oversold", "low_vol",
+            "defensive_momentum", "random"}
+        for s in report["strategies"].values():
+            assert 0 <= s["hit_rate"] <= 100
+
+
+class TestStrategyPicks:
+    def _trend_map(self):
+        rows_a = _trend_rows(30, base=100, step=1.0)    # 缓涨: change_20d≈+18%
+        rows_b = _trend_rows(30, base=200, step=-1.0)   # 缓跌: change_20d≈-10%
+        rows_c = _trend_rows(30, base=300, step=0.2)    # 微涨: 波动小
+        return {
+            "AAA": wf._trend_at("AAA", rows_a, date(2026, 6, 30)),
+            "BBB": wf._trend_at("BBB", rows_b, date(2026, 6, 30)),
+            "CCC": wf._trend_at("CCC", rows_c, date(2026, 6, 30)),
+        }
+
+    def _cands(self):
+        return [("AAA", {"sector": "半导体", "name": "A"}),
+                ("BBB", {"sector": "消费", "name": "B"}),
+                ("CCC", {"sector": "医药", "name": "C"})]
+
+    def test_momentum_prefers_strong_steady_riser(self):
+        tm = self._trend_map()
+        picks = wf._rank_pick(self._cands(), tm, wf.STRATEGIES["momentum"])
+        # AAA 涨18%波幅适中 → risk_adj 最高，排第一（3行业去重后 BBB 也入选但垫底）
+        assert picks[0] == "AAA"
+        assert picks[-1] == "BBB"
+
+    def test_oversold_prefers_dropper(self):
+        tm = self._trend_map()
+        picks = wf._rank_pick(self._cands(), tm, wf.STRATEGIES["oversold"])
+        assert picks[0] == "BBB"
+
+    def test_low_vol_prefers_least_volatile(self):
+        tm = self._trend_map()
+        picks = wf._rank_pick(self._cands(), tm, wf.STRATEGIES["low_vol"])
+        # CCC 波动最小（step=0.2）
+        assert picks[0] == "CCC"
+
+    def test_random_is_deterministic_per_seed(self):
+        tm = self._trend_map()
+        a = wf._random_pick(self._cands(), tm, "2026-06-15")
+        b = wf._random_pick(self._cands(), tm, "2026-06-15")
+        c = wf._random_pick(self._cands(), tm, "2026-06-22")
+        assert a == b and a != c
+        assert len(a) == 3

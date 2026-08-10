@@ -185,6 +185,59 @@ def _weekly_dates(start_iso: str, end_iso: str) -> list[date]:
     return out
 
 
+DEFENSIVE_SECTORS = {
+    "红利价值", "红利/价值", "高股息", "公用事业", "贵金属", "黄金",
+    "利率债", "消费", "食品饮料", "医药", "白酒消费",
+}
+
+
+def _rank_pick(cands, trend_map, key_fn, defensive_only: bool = False, n: int = 3):
+    """按 key_fn（越大越好）排序取 top-n，带行业去重（与引擎约束一致）。"""
+    ranked = []
+    for code, info in cands:
+        t = trend_map.get(code)
+        if t is None or t.data_days < 10:
+            continue
+        if defensive_only and info.get("sector", "") not in DEFENSIVE_SECTORS:
+            continue
+        ranked.append((code, info.get("sector", ""), key_fn(t)))
+    ranked.sort(key=lambda x: x[2], reverse=True)
+    out, seen = [], set()
+    for code, sector, _v in ranked:
+        if sector not in seen:
+            out.append(code)
+            seen.add(sector)
+        if len(out) >= n:
+            break
+    return out
+
+
+# 策略清单：key_fn 返回"越大越好"的排序值
+STRATEGIES = {
+    "momentum": lambda t: t.change_20d / max(t.volatility_20d, 1),
+    "oversold": lambda t: -t.change_20d,
+    "low_vol": lambda t: -t.volatility_20d,
+    "defensive_momentum": lambda t: t.change_20d / max(t.volatility_20d, 1),
+}
+
+
+def _random_pick(cands, trend_map, seed_str: str, n: int = 3):
+    """确定性伪随机选 3（按周稳定 seed），行业去重——零信息基准。"""
+    import random as _r
+    rng = _r.Random(seed_str)
+    pool = [(c, info.get("sector", "")) for c, info in cands
+            if c in trend_map and trend_map[c].data_days >= 10]
+    rng.shuffle(pool)
+    out, seen = [], set()
+    for code, sector in pool:
+        if sector not in seen:
+            out.append(code)
+            seen.add(sector)
+        if len(out) >= n:
+            break
+    return out
+
+
 def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
                         max_candidates: int = 80, kline_days: int = 200) -> dict:
     """长窗口滚动回测：每周一 PIT 重跑新引擎，对比候选池均值基准。
@@ -236,11 +289,22 @@ def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
                          if _fwd_return(_kline(c), d) is not None]
             pool_avg = sum(pool_rets) / len(pool_rets) if pool_rets else 0.0
 
+            # 策略锦标赛：同一周池、同一前向度量下 PK（含当前因子引擎）
+            strat_returns = {}
+            for sname, key_fn in STRATEGIES.items():
+                picks = _rank_pick(candidates, trend_map, key_fn,
+                                   defensive_only=(sname == "defensive_momentum"))
+                strat_returns[sname] = {c: _fwd_return(_kline(c), d) for c in picks}
+            strat_returns["random"] = {c: _fwd_return(_kline(c), d)
+                                       for c in _random_pick(candidates, trend_map, d.isoformat())}
+            strat_returns["current_factor"] = new_returns
+
             weeks.append({
                 "date": d.isoformat(), "regime": regime,
                 "new_codes": [r["code"] for r in new_top3],
                 "new_returns": new_returns,
                 "pool_avg": round(pool_avg, 2),
+                "strat_returns": strat_returns,
             })
     finally:
         twp._get_macro_boost = _orig_macro
@@ -259,6 +323,25 @@ def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
     hit_rate = round(n_hits / max(len(n_vals), 1) * 100, 1) if n_vals else 0.0
     pool_hit = round(sum(1 for w in valid if w["pool_avg"] > 0) / max(len(valid), 1) * 100, 1)
 
+    # 各策略聚合：命中率 / 均10日 / vs池均值超额
+    strat_names = ["current_factor", "momentum", "oversold", "low_vol",
+                   "defensive_momentum", "random"]
+    strategies = {}
+    for sname in strat_names:
+        vals, hits, spr = [], 0, []
+        for w in valid:
+            for c, v in w["strat_returns"][sname].items():
+                if v is None:
+                    continue
+                vals.append(v)
+                hits += v > 0
+                spr.append(v - w["pool_avg"])
+        strategies[sname] = {
+            "hit_rate": round(hits / max(len(vals), 1) * 100, 1),
+            "avg_return": round(sum(vals) / max(len(vals), 1), 2),
+            "vs_pool_avg_spread": round(sum(spr) / max(len(spr), 1), 2),
+        }
+
     return {
         "weeks": weeks, "sample": len(n_vals),
         "engine": {"hit_rate": hit_rate, "hits": n_hits,
@@ -266,6 +349,7 @@ def run_weekly_backtest(start: str, end: str, profile: str = "均衡",
                    "vs_pool_avg_spread": round(sum(spreads) / max(len(spreads), 1), 2)},
         "pool_avg": {"hit_rate": pool_hit, "avg_return": round(
             sum(w["pool_avg"] for w in valid) / max(len(valid), 1), 2)},
+        "strategies": strategies,
         "caveats": [
             "macro_overlay/sector_flow/pipeline_score 取中性；引擎权重为 in-sample 调参",
             "8月 QVIX 用缓存末值(07-31)近似；不足10交易日用已实现部分",
@@ -419,6 +503,8 @@ def main():
     parser.add_argument("--start", type=str, default="2026-02-16", help="weekly 起始日")
     parser.add_argument("--end", type=str, default="2026-08-08", help="weekly 结束日")
     parser.add_argument("--kline-days", type=int, default=200, help="weekly K线深度")
+    parser.add_argument("--tournament", action="store_true",
+                        help="打印多策略锦标赛排名表")
     args = parser.parse_args()
 
     if args.weekly:
@@ -429,9 +515,18 @@ def main():
             return
         e, p = report["engine"], report["pool_avg"]
         print(f"长窗口滚动回测（{len(report['weeks'])} 周，样本 {report['sample']} 只，候选池≤{args.max}）")
-        print(f"  新引擎: 命中率 {e['hit_rate']}% ({e['hits']}/{report['sample']}), 均10日 {e['avg_return']:+.2f}%")
+        if args.tournament:
+            print("\n策略锦标赛（同周池同度量 PK，样本 = 周数×3 只）:")
+            rows = []
+            for sname, s in report["strategies"].items():
+                rows.append((sname, s["hit_rate"], s["avg_return"], s["vs_pool_avg_spread"]))
+            rows.sort(key=lambda x: -x[2])  # 按均10日收益排序
+            print("  策略              命中率   均10日   vs池均值超额")
+            for sname, hr, ar, spr in rows:
+                print(f"  {sname:<18}{hr:>6}%  {ar:+6.2f}%  {spr:+6.2f}pp")
+            print(f"  池均值基准        {p['hit_rate']:>5}%  {p['avg_return']:+6.2f}%   0.00pp")
+        print(f"\n  新引擎: 命中率 {e['hit_rate']}% ({e['hits']}/{report['sample']}), 均10日 {e['avg_return']:+.2f}%")
         print(f"  池均值基准: 命中率 {p['hit_rate']}%, 均10日 {p['avg_return']:+.2f}%")
-        print(f"  引擎 vs 池均值超额: 均 {e['vs_pool_avg_spread']:+.2f}pp/只")
         print("\n逐周明细（引擎 top3 vs 池均值）:")
         for w in report["weeks"]:
             rets = _fmt_ret(w["new_returns"])
