@@ -130,9 +130,12 @@ def check_risk_flags() -> dict:
             flags["message"] = f"组合回撤 {portfolio_dd:.1%}, 建议减仓至50%"
     
     # Build stop-loss message
+    # 修复：止损消息追加而非覆盖——组合回撤临界("清仓")是比单只止损更高级别的
+    # 告警，同时触发时两者都要可见（原实现 DD 消息被吞）。
     if flags["stop_loss_hit"]:
         names = [s["name"] for s in flags["stop_loss_hit"]]
-        flags["message"] = f"止损触发: {', '.join(names)} 跌幅超15%, 建议立即卖出"
+        sl_msg = f"止损触发: {', '.join(names)} 跌幅超15%, 建议立即卖出"
+        flags["message"] = f"{flags['message']} | {sl_msg}" if flags["message"] else sl_msg
 
     # k189 组合分散化检查（无法获取 returns 时 checked=False）
     try:

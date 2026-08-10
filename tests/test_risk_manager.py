@@ -171,3 +171,105 @@ class TestStoicScoreJitter:
         assert 1.0 <= result["score"] <= 10.0
         assert 0 <= result["controllability"] <= 10
         assert 0 <= result["tail_risk_score"] <= 10
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# decision/risk_manager.py（持仓跟踪/止损/组合回撤/分散化）— 审计补审转测试
+# ─────────────────────────────────────────────────────────────────────────
+
+def _pos(pnl, price=10.0, entry=10.0, shares=1, code="512480", name="半导体ETF"):
+    return {
+        code: {
+            "name": name, "entry_price": entry, "current_price": price,
+            "pnl_pct": pnl, "shares": shares, "entry_date": "2026-08-01",
+        }
+    }
+
+
+def _flags(positions, peak=None):
+    from etf_platform.decision import risk_manager as rm
+    data = {"positions": positions, "history": []}
+    if peak is not None:
+        data["portfolio_peak"] = peak
+    rm._load_positions = lambda: data
+    return rm.check_risk_flags()
+
+
+class TestPositionStopLoss:
+    def test_no_positions_empty_flags(self):
+        f = _flags({})
+        assert f["stop_loss_hit"] == []
+        assert not f["portfolio_dd_critical"]
+        assert not f["portfolio_dd_warning"]
+
+    def test_stop_loss_triggers_at_minus_15(self):
+        f = _flags(_pos(pnl=-16.0))
+        assert len(f["stop_loss_hit"]) == 1
+        assert f["stop_loss_hit"][0]["code"] == "512480"
+        assert "止损触发" in f["message"]
+
+    def test_stop_loss_boundary_exact(self):
+        """-15.0% 整值触发；-14.9% 不触发。"""
+        assert len(_flags(_pos(pnl=-15.0))["stop_loss_hit"]) == 1
+        assert _flags(_pos(pnl=-14.9))["stop_loss_hit"] == []
+
+
+class TestPortfolioDrawdown:
+    def test_dd_warning_at_minus_10(self):
+        # price/entry = 8.8/10 = 0.88 → DD=-12% → warning（未到临界）
+        f = _flags(_pos(pnl=-12.0, price=8.8), peak=1.0)
+        assert f["portfolio_dd_warning"]
+        assert not f["portfolio_dd_critical"]
+
+    def test_dd_critical_at_minus_20(self):
+        f = _flags(_pos(pnl=-25.0, price=7.5), peak=1.0)
+        assert f["portfolio_dd_critical"]
+
+    def test_dd_and_stop_loss_messages_both_visible(self):
+        """止损与组合回撤临界同时触发 → 消息追加而非覆盖（DD 告警不被吞）。"""
+        f = _flags(_pos(pnl=-25.0, price=7.5), peak=1.0)
+        assert "清仓" in f["message"], "组合回撤清仓建议被吞"
+        assert "止损触发" in f["message"], "止损告警缺失"
+
+    def test_missing_peak_guarded(self):
+        """旧 positions.json 缺 portfolio_peak → 兜底 1.0（不崩、不误报临界）。"""
+        f = _flags(_pos(pnl=-8.0, price=9.2))
+        assert not f["portfolio_dd_critical"]
+
+
+class TestDiversificationGuard:
+    def test_insufficient_returns(self):
+        from etf_platform.decision import risk_manager as rm
+        out = rm.check_diversification(
+            [{"code": "a", "weight": 1}, {"code": "b", "weight": 1}],
+            returns_by_code={},
+        )
+        assert out["checked"] is False
+        assert out["reason"] == "insufficient_data"
+
+    def test_single_holding_insufficient(self):
+        from etf_platform.decision import risk_manager as rm
+        out = rm.check_diversification(
+            [{"code": "a", "weight": 1}],
+            returns_by_code={"a": [0.01] * 30},
+        )
+        assert out["checked"] is False
+        assert out["reason"] == "insufficient_data"
+
+    def test_high_correlation_warns(self, monkeypatch):
+        from etf_platform.decision import risk_manager as rm
+        monkeypatch.setattr(
+            "etf_platform.analysis.cross_asset_correlation.correlation_matrix",
+            lambda *a, **k: ({"a_b": 0.95}, {}),
+        )
+        monkeypatch.setattr(
+            "etf_platform.analysis.cross_asset_correlation.detect_diversification_failure",
+            lambda *a, **k: {"failure": True, "high_ratio": 1.0, "avg_corr": 0.95},
+        )
+        out = rm.check_diversification(
+            [{"code": "a", "weight": 1}, {"code": "b", "weight": 1}],
+            returns_by_code={"a": [0.01] * 30, "b": [0.01] * 30},
+        )
+        assert out["checked"] is True
+        assert out["diversification_failure"] is True
+        assert "分散化失效" in out["warning"]

@@ -169,11 +169,26 @@ def evaluate_prediction(days_back: int = 10):
     avg_return = sum(return_avg) / max(len(return_avg), 1)
     hit_rate = hits / max(len(results), 1) * 100
 
+    # 修复后 cohort（2026-08-10 审计修复引擎产出的预测）——隔离新引擎命中率。
+    # 旧样本（修复前前视偏差引擎）混在总命中率里，需单独看新引擎表现。
+    # 每周一 cron 自动回测，样本累积到 ~15-20 后再与 53.3% 基线对比。
+    fix_deploy = date(2026, 8, 10)
+    post_fix_results = [r for r in results if date.fromisoformat(r["date"]) >= fix_deploy]
+    post_fix = {
+        "count": len(post_fix_results),
+        "hits": sum(1 for r in post_fix_results if r["hit"]),
+        "hit_rate": round(
+            sum(1 for r in post_fix_results if r["hit"]) / max(len(post_fix_results), 1) * 100, 1),
+        "avg_return_10d": round(
+            sum(r["return_horizon"] for r in post_fix_results) / max(len(post_fix_results), 1), 2),
+    }
+
     return {
         "total_predictions": len(results),
         "hits": hits,
         "hit_rate": round(hit_rate, 1),
         "avg_return_10d": round(avg_return, 2),
+        "post_fix_cohort": post_fix,
         "details": sorted(results, key=lambda x: -x["pred_score"])[:10],
     }
 
@@ -219,6 +234,14 @@ def status_report() -> str:
         lines.append(f"\n回测 ({eval_result['total_predictions']}次预测):")
         lines.append(f"  ✅ 命中率: {eval_result['hit_rate']}% ({eval_result['hits']}/{eval_result['total_predictions']})")
         lines.append(f"  📈 平均10日收益: {eval_result['avg_return_10d']:+.2f}%")
+        pf = eval_result.get("post_fix_cohort", {})
+        if pf.get("count"):
+            lines.append(
+                f"  🔧 修复后引擎(≥08-10)命中率: {pf['hit_rate']}% "
+                f"({pf['hits']}/{pf['count']}, 10日收益{pf['avg_return_10d']:+.2f}%)"
+            )
+        else:
+            lines.append("  🔧 修复后引擎(≥08-10)预测尚在验证期(<5天)，下周起计入")
     else:
         lines.append(f"\n{eval_result.get('error', '')}")
     
