@@ -231,14 +231,23 @@ def main():
                 sectors_out[sec]["note"] = f"{old.get('note','')} | [政策确认] {psig['note']}"
             policy_merged += 1
 
+    # d751 ③: 产业链传导 — 上游信号联动下游（新能源看多→有色/汽车传导）
+    try:
+        from src.etf_platform.analysis.industry_chain import apply_chain_to_signals
+    except ImportError:
+        from etf_platform.analysis.industry_chain import apply_chain_to_signals
+    sectors_after = apply_chain_to_signals(sectors_out)
+    chain_added = len(sectors_after) - len(sectors_out)
+
     out = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
         "source": f"auto_sentiment: {len(raw_items)}条新闻(可交易{len(items)}/噪音{len(noise_items)}) + 政策{policy_merged}行业",
-        "sectors": sectors_out,
+        "sectors": sectors_after,
         "stats": {
             "total": len(raw_items),
             "tradable_count": len(items),
             "noise_count": len(noise_items),
+            "chain_propagated": chain_added,
             "filtered_reasons": dict(noise_reasons),
         },
     }

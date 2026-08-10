@@ -20,16 +20,26 @@ factor_dynamic_weights.py — Regime-conditional动态因子权重 v1.0
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any
+
+# d751 新闻情绪因子数据源（复用 macro_overlay.news_sentiment.json）
+BASE = Path(__file__).resolve().parent.parent.parent.parent  # etf-platform/
+SENT_FILE = BASE / "data" / "news_sentiment.json"
 
 # ── Base weights (from IC analysis, factor_correlation.py) ────────
 # 这些是"市场中性"状态下的最优权重
+# d751: oversold_depth 0.40→0.38, risk_adj_momentum 0.25→0.23,
+#       drawdown_recov 0.22→0.20, sector_flow 0.10→0.08，合计让出 0.08 给 news_sentiment
+#       (0.38+0.23+0.20+0.08+0.03+0.08 = 1.00)
 BASE_WEIGHTS: dict[str, float] = {
-    "oversold_depth": 0.40,
-    "risk_adj_momentum": 0.25,
-    "drawdown_recov": 0.22,
-    "sector_flow": 0.10,
+    "oversold_depth": 0.38,
+    "risk_adj_momentum": 0.23,
+    "drawdown_recov": 0.20,
+    "sector_flow": 0.08,
     "quality_elastic": 0.03,
+    "news_sentiment": 0.08,
 }
 
 # ── Regime-conditional weight multipliers ──────────────────────────
@@ -46,6 +56,7 @@ REGIME_MULTIPLIERS: dict[str, dict[str, float]] = {
         "drawdown_recov": 0.8,       # 回撤修复信号减弱
         "sector_flow": 1.0,          # 资金流正常
         "quality_elastic": 1.2,      # 高质量弹性更重要
+        "news_sentiment": 1.0,       # 贪婪期情绪跟风有效但易过热
     },
     "normal": {
         # 正常期: 基准权重(乘数=1.0)
@@ -54,6 +65,7 @@ REGIME_MULTIPLIERS: dict[str, dict[str, float]] = {
         "drawdown_recov": 1.0,
         "sector_flow": 1.0,
         "quality_elastic": 1.0,
+        "news_sentiment": 1.0,
     },
     "cautious": {
         # 谨慎期: 防御为主,反转信号开始有效
@@ -62,6 +74,7 @@ REGIME_MULTIPLIERS: dict[str, dict[str, float]] = {
         "drawdown_recov": 1.1,       # 回撤修复信号增强
         "sector_flow": 0.8,          # 资金流噪声增大
         "quality_elastic": 1.0,
+        "news_sentiment": 1.3,       # 谨慎期情绪信号更重要
     },
     "fearful": {
         # 恐慌期: 反转因子大幅失效(恐慌抛售≠即将反弹)
@@ -71,6 +84,7 @@ REGIME_MULTIPLIERS: dict[str, dict[str, float]] = {
         "drawdown_recov": 0.6,       # 回撤修复信号减弱
         "sector_flow": 1.5,          # 资金流向防御板块的信号增强
         "quality_elastic": 1.4,      # 高质量+防御属性更重要
+        "news_sentiment": 1.5,       # 恐慌期情绪反转价值高
     },
 }
 
@@ -141,6 +155,12 @@ def get_factor_list(regime: str) -> list[dict[str, Any]]:
             "desc": "质量弹性(动态)",
         },
         {
+            "name": "news_sentiment",
+            "raw": lambda t, p: _get_sentiment_raw(p.get("sector", ""), p.get("etf_code", "")),
+            "weight": weights.get("news_sentiment", 0.08),
+            "desc": "新闻情绪因子(d751)",
+        },
+        {
             "name": "behavioral",
             "raw": lambda t, p: _calc_behavioral_alpha(p) - 50,
             "weight": 0.00,  # 永久移除(IC=0.00)
@@ -150,6 +170,36 @@ def get_factor_list(regime: str) -> list[dict[str, Any]]:
 
 
 # ── 从two_week_picker.py导入的helper ─────────────────────────
+
+def _get_sentiment_raw(sector: str, etf_code: str = "") -> float:
+    """新闻情绪原始分(d751)，复用 macro_overlay.get_news_boost 的 sector 匹配逻辑。
+
+    读取 data/news_sentiment.json 的 sectors（key in sector or sector in key），
+    返回原始分数: 看多强→+1.0, 看多中→+0.6, 看多弱→+0.3, 看空强→-1.0,
+    看空中→-0.6, 看空弱→-0.3, 中性→0.0。文件不存在/异常 → 0.0。
+    """
+    if not sector or not SENT_FILE.exists():
+        return 0.0
+    try:
+        with open(SENT_FILE, encoding="utf-8") as f:
+            d = json.load(f)
+        sectors = d.get("sectors", {})
+    except (OSError, ValueError):
+        return 0.0
+    for key, value in sectors.items():
+        if not isinstance(value, dict):
+            continue
+        if key in sector or sector in key:
+            direction = value.get("direction", "")
+            strength = value.get("strength", "")
+            sent_map = {
+                ("看多", "强"): 1.0, ("看多", "中"): 0.6, ("看多", "弱"): 0.3,
+                ("看空", "强"): -1.0, ("看空", "中"): -0.6, ("看空", "弱"): -0.3,
+                ("中性", "强"): 0.0, ("中性", "中"): 0.0, ("中性", "弱"): 0.0,
+            }
+            return sent_map.get((direction, strength), 0.0)
+    return 0.0
+
 
 def _get_sector_flow_raw(sector: str, etf_code: str = "") -> float:
     """Get sector flow raw value. Fallback to 0 on any error."""
