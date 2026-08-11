@@ -18,6 +18,11 @@ _HERE = Path(__file__).resolve().parent  # etf-platform/
 DATA = _HERE / "data"
 RAW_FILE = DATA / "news_raw_sources.json"
 OUT_FILE = DATA / "news_sentiment.json"
+HISTORY_FILE = DATA / "news_sentiment_history.jsonl"  # d762: 历史方向分布校准
+HISTORY_KEEP = 60       # history 只保留最近 60 行
+CALIB_WINDOW = 30       # 校准读取最近 30 次记录
+CALIB_MIN_RECORDS = 5   # 有效记录 < 5 次不校准（向后兼容）
+CALIB_MAX_BUMP = 3      # 阈值最多上调 3 次 (1.5→3.0)
 
 # ── 方向关键词（对称）──
 POS_STRONG = ["突破", "新高", "超预期", "暴涨", "涨停", "大涨", "创新高", "业绩预增",
@@ -98,7 +103,99 @@ def judge_direction(text: str, is_bearish: bool = False) -> tuple:
         return "中性", net, ""
     return "中性", net, ""
 
+def _archive_old_sentiment() -> None:
+    """d762: 把上次 news_sentiment.json 归档为 history 一行，仅保留最近 60 行。"""
+    if not OUT_FILE.exists():
+        return
+    try:
+        old = json.loads(OUT_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return
+    secs = old.get("sectors")
+    if not isinstance(secs, dict) or not secs:
+        return
+    row = {"updated": old.get("updated", ""),
+           "sectors": {s: v["direction"] for s, v in secs.items()
+                       if isinstance(v, dict) and v.get("direction")}}
+    lines = HISTORY_FILE.read_text(encoding="utf-8").splitlines() if HISTORY_FILE.exists() else []
+    lines.append(json.dumps(row, ensure_ascii=False))
+    HISTORY_FILE.write_text("\n".join(lines[-HISTORY_KEEP:]) + "\n", encoding="utf-8")
+
+def calibrate_directions(sectors_out: dict, history_file: Path, max_bump: int = CALIB_MAX_BUMP) -> tuple:
+    """d762: 历史分布校准——用历史方向比例对齐动态阈值，修正固定阈值系统性偏差。
+
+    返回 (sectors_out, stats)。只校准新闻 sector（带 net 且非政策层）——政策是
+    高权重独立层，不参与降级。net 由调用方在校准后剥离。
+    """
+    def _hist_ratio() -> tuple:
+        if not history_file.exists():
+            return None, None, []
+        recs = []
+        for ln in history_file.read_text(encoding="utf-8").splitlines()[-CALIB_WINDOW:]:
+            if not ln.strip():
+                continue
+            try:
+                secs = json.loads(ln).get("sectors")
+            except (json.JSONDecodeError, AttributeError):
+                continue
+            if isinstance(secs, dict) and secs:
+                recs.append(secs)
+        if len(recs) < CALIB_MIN_RECORDS:
+            return None, None, recs
+        from collections import Counter
+        cnt = Counter(d for secs in recs for d in secs.values())
+        total = sum(cnt.values()) or 1
+        return cnt.get("看多", 0) / total, cnt.get("看空", 0) / total, recs
+
+    bull_ratio, bear_ratio, recs = _hist_ratio()
+    if bull_ratio is None:
+        return sectors_out, {"bull_ratio": None, "bear_ratio": None, "threshold": 1.5,
+                             "bumped": 0, "note": f"history<{CALIB_MIN_RECORDS}({len(recs)})"}
+
+    # 候选：排除政策层（policy 合并写 "[政策" 标记，高权重独立层）
+    cand = {s: v for s, v in sectors_out.items()
+            if isinstance(v, dict) and "net" in v and "[政策" not in v.get("note", "")}
+    if not cand:
+        return sectors_out, {"bull_ratio": None, "bear_ratio": None, "threshold": 1.5,
+                             "bumped": 0, "note": "no_candidates"}
+
+    def _now_ratio() -> tuple:
+        b = sum(1 for v in cand.values() if v["direction"] == "看多")
+        r = sum(1 for v in cand.values() if v["direction"] == "看空")
+        return b / len(cand), r / len(cand)
+
+    bull_now, bear_now = _now_ratio()
+    threshold, bumped = 1.5, 0
+    for _ in range(max_bump):
+        bull_over = bull_now - bull_ratio > 0.15
+        bear_over = bear_now - bear_ratio > 0.15
+        if not bull_over and not bear_over:
+            break
+        threshold += 0.5
+        bumped += 1
+        if bull_over:
+            for v in cand.values():
+                if v["direction"] == "看多" and v["net"] < threshold:
+                    v["direction"], v["strength"] = "中性", "弱"
+        if bear_over:
+            for v in cand.values():
+                if v["direction"] == "看空" and v["net"] > -threshold:
+                    v["direction"], v["strength"] = "中性", "弱"
+        bull_now, bear_now = _now_ratio()
+
+    # 强度校准：降级后剩余看多/看空 net>=3.0 为强（原逻辑不变）
+    for v in cand.values():
+        if v["direction"] == "看多":
+            v["strength"] = "强" if v["net"] >= 3.0 else "中"
+        elif v["direction"] == "看空":
+            v["strength"] = "强" if v["net"] <= -3.0 else "中"
+        else:
+            v["strength"] = "弱"
+    return sectors_out, {"bull_ratio": bull_ratio, "bear_ratio": bear_ratio,
+                         "threshold": threshold, "bumped": bumped}
+
 def main():
+    _archive_old_sentiment()  # d762: 读 RAW 前先归档上次输出 → history
     if not RAW_FILE.exists():
         print(f"[auto_sentiment] 无 {RAW_FILE}，跳过", file=sys.stderr)
         return 1
@@ -201,6 +298,7 @@ def main():
             "direction": direction,
             "strength": strength,
             "note": note,
+            "net": net,  # d762: 校准用临时字段，输出前剥离
         }
 
     # ── P1-1: 政策信号合并（政策是高权重独立层，覆盖新闻情绪）──
@@ -231,6 +329,9 @@ def main():
                 sectors_out[sec]["note"] = f"{old.get('note','')} | [政策确认] {psig['note']}"
             policy_merged += 1
 
+    # d762: 历史分布校准（政策合并后、产业链传导前；校准最终新闻+政策信号，政策层除外）
+    sectors_out, calib_stats = calibrate_directions(sectors_out, HISTORY_FILE)
+
     # d751 ③: 产业链传导 — 上游信号联动下游（新能源看多→有色/汽车传导）
     try:
         from src.etf_platform.analysis.industry_chain import apply_chain_to_signals
@@ -238,6 +339,11 @@ def main():
         from etf_platform.analysis.industry_chain import apply_chain_to_signals
     sectors_after = apply_chain_to_signals(sectors_out)
     chain_added = len(sectors_after) - len(sectors_out)
+
+    # 剥离校准临时字段 net，保持 sectors 输出结构不变（policy 覆盖/产业链 sector 无此字段，pop 安全）
+    for v in sectors_after.values():
+        if isinstance(v, dict):
+            v.pop("net", None)
 
     out = {
         "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
@@ -248,6 +354,7 @@ def main():
             "tradable_count": len(items),
             "noise_count": len(noise_items),
             "chain_propagated": chain_added,
+            "calibration": calib_stats,
             "filtered_reasons": dict(noise_reasons),
         },
     }
