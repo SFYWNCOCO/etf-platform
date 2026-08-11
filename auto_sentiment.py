@@ -116,7 +116,8 @@ def _archive_old_sentiment() -> None:
         return
     row = {"updated": old.get("updated", ""),
            "sectors": {s: v["direction"] for s, v in secs.items()
-                       if isinstance(v, dict) and v.get("direction")}}
+                       if isinstance(v, dict) and v.get("direction")
+                       and "[政策" not in v.get("note", "")}}
     lines = HISTORY_FILE.read_text(encoding="utf-8").splitlines() if HISTORY_FILE.exists() else []
     lines.append(json.dumps(row, ensure_ascii=False))
     HISTORY_FILE.write_text("\n".join(lines[-HISTORY_KEEP:]) + "\n", encoding="utf-8")
@@ -195,10 +196,10 @@ def calibrate_directions(sectors_out: dict, history_file: Path, max_bump: int = 
                          "threshold": threshold, "bumped": bumped}
 
 def main():
-    _archive_old_sentiment()  # d762: 读 RAW 前先归档上次输出 → history
     if not RAW_FILE.exists():
         print(f"[auto_sentiment] 无 {RAW_FILE}，跳过", file=sys.stderr)
         return 1
+    _archive_old_sentiment()  # d762: 确认是真运行（RAW 存在）后再归档上次输出 → history
     raw = json.loads(RAW_FILE.read_text(encoding="utf-8"))
     raw_items = raw.get("items", [])
 
