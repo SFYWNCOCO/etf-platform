@@ -183,7 +183,7 @@ fetch_news_sources.py (6源: sina/eastmoney/tonghuashun/360news/search_pipeline)
 - **policy_fetcher playwright 版本不匹配**（08-06）：chromium_headless_shell-1200 vs 期望 -1234，cron 08:05 失败，未修
 - **L9_NewsEnhanced / L9_SentimentWeight 无新闻时=0**：属降级正常，但输出可读性可优化
 - **data_integrity.py 未自动集成 pipeline**：手动门禁，非自动
-- **skill 文档与代码漂移**：skill 说 592 只 ETF，实际 1071（etfs.yaml 扩充后未同步文档）；层数 29→30→36 也在漂移
+- **skill 文档与代码漂移**：skill 说 592 只 ETF，实际 1071（etfs.yaml 扩充后未同步文档）；层数 29→30→36 也在漂移 → 08-12 已治理：删除 `config/etfs_additions.yaml`（479 只全与 etfs.yaml 重叠），`etfs.yaml`=1071 为唯一事实源；`market_etfs_full.json`(1560)=行情抓取快照、非配置
 - **宽基过滤硬性**：所有输出必须过滤宽基（38关键词+正则），用户明确要求
 - **输出偏好**：不要报价表格、只要3只ETF、数据优先（先展示裸数据让用户选角度）
 

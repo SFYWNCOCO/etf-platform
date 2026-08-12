@@ -563,7 +563,7 @@ def _vol_weighted(fused_top3: list[dict], max_exposure: float) -> AllocationResu
     # 分析波动率差异
     max_vol = max(vols)
     min_vol = min(vols)
-    note = f"波动率加权: 波动范围 {min_vol:.0f}%~{max_vol:.0%}"
+    note = f"波动率加权: 波动范围 {min_vol:.0f}%~{max_vol:.0f}%"
     if max_vol / min_vol > 3:
         note += " [波动率差异大, 分配差异显著]"
 

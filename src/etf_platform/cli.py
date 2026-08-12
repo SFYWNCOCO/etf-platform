@@ -184,6 +184,7 @@ def app():
         print("  etf chain [CODE]         Supply chain risk analysis")
         print("  etf health <CODE>        ETF ecosystem health score")
         print("  etf holdings <CODE>      Top-10 holdings penetration")
+        print("  etf holdings-refresh [--limit=N] [--codes=a,b] 全量刷新持仓缓存 ★NEW")
         print("  etf insight [--json]     Decision history analysis")
         print("  etf rotation             Sector rotation snapshot")
         print("  etf screen [--top=N]     Market scan & ranking [--profile=均衡]")
@@ -437,28 +438,63 @@ def app():
 
 
     elif cmd == "holdings":
-        """持仓穿透数据"""
+        """持仓穿透数据：真实持仓缓存/在线抓取，静态版 fallback"""
         code = args[1] if len(args) > 1 else ""
-        from etf_platform.analysis.holdings import get_holdings, get_concentration_analysis, list_covered_etfs
+        from etf_platform.analysis.holdings_fetcher import get_top_holdings, get_concentration_metrics
+        from etf_platform.analysis.holdings import list_covered_etfs
         if code:
-            h = get_holdings(code)
-            ca = get_concentration_analysis(code)
-            if h:
+            top = get_top_holdings(code, top_n=10)
+            conc = get_concentration_metrics(code)
+            if top:
                 print("")
-                print("  [持仓穿透] %s %s" % (code, h["name"]))
+                print("  [持仓穿透] %s (%s)" % (code, top[0]["quarter"]))
                 print("  %s" % ("="*55))
-                print("  前10集中度: %.0f%% | 加权进口依赖: %.1f%%" % (ca["top10_weight"]*100, ca["weighted_import_dep"]*100))
-                print("  风险: %s" % ca["risk_summary"])
+                print("  前10集中度: %.1f%% | 总持仓: %d只" % (conc["top10_pct"], conc["total_holdings"]))
                 print("  持仓明细:")
-                print("  %-14s %-8s %-6s %-16s %s" % ("股票","代码","权重","链位置","技术等级"))
-                for s in h["top10"]:
-                    print("  %-14s %-8s %.1f%% %-16s %s" % (s["stock"],s["code"],s["weight"]*100,s["chain"][:16],s["tech"][:24]))
+                print("  %-16s %-8s %-7s" % ("股票","代码","权重"))
+                for s in top:
+                    print("  %-16s %-8s %.2f%%" % (s["name"], s["code"], s["pct_nav"]))
                 print("")
             else:
-                print("  ⚠️ %s 暂无持仓数据, 可用 etf report %s" % (code, code))
-                print("  Covered ETFs:", ", ".join(list_covered_etfs()))
+                # 静态手工版 fallback（覆盖 import_dep 供应链字段）
+                from etf_platform.analysis.holdings import get_holdings, get_concentration_analysis
+                h = get_holdings(code)
+                ca = get_concentration_analysis(code)
+                if h:
+                    print("")
+                    print("  [持仓穿透(静态)] %s %s" % (code, h["name"]))
+                    print("  %s" % ("="*55))
+                    print("  前10集中度: %.0f%% | 加权进口依赖: %.1f%%" % (ca["top10_weight"]*100, ca["weighted_import_dep"]*100))
+                    print("  风险: %s" % ca["risk_summary"])
+                    print("  持仓明细:")
+                    print("  %-14s %-8s %-6s %-16s %s" % ("股票","代码","权重","链位置","技术等级"))
+                    for s in h["top10"]:
+                        print("  %-14s %-8s %.1f%% %-16s %s" % (s["stock"],s["code"],s["weight"]*100,s["chain"][:16],s["tech"][:24]))
+                    print("")
+                else:
+                    print("  ⚠️ %s 暂无持仓数据(在线+静态均无), 可先 etf holdings-refresh --codes=%s" % (code, code))
+                    print("  静态已覆盖:", ", ".join(list_covered_etfs()))
         else:
-            print("  Covered ETFs: %s" % ", ".join(list_covered_etfs()))
+            print("  Usage: etf holdings <CODE>")
+            print("  静态已覆盖:", ", ".join(list_covered_etfs()))
+            print("  提示: etf holdings-refresh 可全量刷新真实持仓缓存")
+
+    elif cmd == "holdings-refresh":
+        """全量刷新持仓缓存（eastmoney 直连）"""
+        limit = None
+        codes = None
+        for a in args[1:]:
+            if a.startswith("--limit="):
+                limit = int(a.split("=")[1])
+            elif a.startswith("--codes="):
+                codes = [c for c in a.split("=")[1].split(",") if c]
+        from etf_platform.analysis.holdings_fetcher import refresh_all
+        stats = refresh_all(codes=codes, limit=limit)
+        print("  total=%d ok=%d empty=%d failed=%d ratio=%.0f%% saved=%s" % (
+            stats["total"], stats["ok"], stats["empty"], stats["failed"],
+            stats["success_ratio"]*100, stats["saved"]))
+        if not stats["saved"]:
+            print("  ⚠️ 有效请求比例过低，已保留旧缓存（源故障保护）")
 
     elif cmd == "insight":
         """策略决策分析"""

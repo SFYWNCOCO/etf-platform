@@ -71,6 +71,30 @@ class TestPipelineCore:
         assert diffs >= 2
 
 
+class TestLayerFailures:
+    """08-12: 层失败不再静默——_layer_failed 累计 + run_full 返回 layer_failures。"""
+
+    def test_layer_failure_recorded_and_degrades(self, monkeypatch):
+        from etf_platform import pipeline as pp
+        from etf_platform.analysis import l2_holdings_bridge as bridge
+
+        def boom(*args, **kwargs):
+            raise RuntimeError("simulated L2 failure")
+
+        monkeypatch.setattr(bridge, "apply_l2_score", boom)
+        pp._LAYER_FAILURES.clear()
+        try:
+            r = pp.run_full(ETF_CODE_HS300, live=False)
+            assert "L2_Holdings" in r["layer_failures"]
+            assert r["layer_scores"]["L2_Holdings"] == 5.0
+        finally:
+            pp._LAYER_FAILURES.clear()
+
+    def test_normal_run_has_empty_failures(self, chip_result):
+        assert "layer_failures" in chip_result
+        assert isinstance(chip_result["layer_failures"], dict)
+
+
 class TestPipelineBatch:
     def test_batch_full_returns_list(self):
         from etf_platform.pipeline import batch_full

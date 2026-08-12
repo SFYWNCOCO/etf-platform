@@ -173,6 +173,20 @@ def get_l2_score_heuristic(code: str, sector: str = None, risk_level: float = 0.
     v7.5: Added risk_level and fee parameters for ETF-level differentiation.
     Without these, all ETFs in the same sector get identical L2 scores.
     """
+    # v2.0: 真实持仓缓存优先（只读磁盘/内存，不触发网络）。集中度越低、持仓越分散 → 分数越高
+    try:
+        from .holdings_fetcher import get_cached_holdings, _latest_quarter_holdings
+        cached = get_cached_holdings(code)
+        if cached:
+            latest = _latest_quarter_holdings(cached)
+            top10 = sum(sorted([h.get("pct_nav") or 0 for h in latest], reverse=True)[:10])
+            n = len(latest)
+            score = 10.0 - (top10 / 100.0) * 5.0 + min(n, 10) * 0.15
+            rl_mod = (0.5 - risk_level) * 0.3
+            return round(max(1.0, min(10.0, score + rl_mod)), 1)
+    except (KeyError, IndexError, TypeError, ValueError, ImportError) as e:
+        logger.warning("[L2] 真实持仓评分失败，降级到静态/启发式: %s", e)
+
     # Try direct holdings data first (most accurate)
     try:
         from .holdings import get_holdings
@@ -189,7 +203,7 @@ def get_l2_score_heuristic(code: str, sector: str = None, risk_level: float = 0.
             rl_mod = (0.5 - risk_level) * 0.3
             return round(max(1.0, min(10.0, score + rl_mod)), 1)
     except (KeyError, IndexError, TypeError, ValueError) as e:
-        logger.debug("holdings-based L2 score failed: %s", e)
+        logger.warning("[L2] 静态持仓评分失败，降级到启发式: %s", e)
         pass
 
     # Use sector heuristic as the primary fallback

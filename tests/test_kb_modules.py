@@ -155,6 +155,19 @@ def test_allocator_black_litterman():
     assert weights.get("512890", 0) >= weights.get("512100", 0)
 
 
+def test_vol_weighted_note_percent_format():
+    """回归：note 的 max_vol 曾用 :.0% 把 30.5（%）显示成 3050%。"""
+    from etf_platform.decision.position_allocator import _vol_weighted
+    fused = [
+        {"code": "510300", "name": "沪深300", "volatility": 20.0, "weighted_score": 80, "sector": "宽基"},
+        {"code": "510500", "name": "中证500", "volatility": 30.5, "weighted_score": 60, "sector": "宽基"},
+    ]
+    r = _vol_weighted(fused, max_exposure=1.0)
+    note = r.notes[0]
+    assert "30%" in note
+    assert "3050%" not in note
+
+
 # ── k190 hurst → L33 校准 ──────────────────────────────────────────
 def test_l33_hurst_calibration():
     from etf_platform.layers.l33_regime_factor import score_l33_layer

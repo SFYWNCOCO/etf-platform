@@ -136,6 +136,8 @@ etfs.yaml(1071) ──► Sina hq.sinajs.cn 实时行情 (586只, ~3s) ──►
 
 **新增层模板（Phase 3.6）**：模块文件 `layers/lXX_xxx.py` → 导出 `score_lXX_layer(...) -> {"score", "detail"}` → pipeline `_apply_xxx(scores, details, ...)` → `EXCLUDE_KEYS` 同步 → 推荐引擎 `SCORING_WEIGHTS` 加权重 → 验证 ast+ruff+pytest+run_full。
 
+**层失败可见性（08-12）**：关键层 except 不再静默——`_layer_failed()` 累计层失败（run_full 返回 `layer_failures` 字段）并打 warning。正常运行时层不应失败；触发即数据源/代码异常，巡检据此发现"全库静默中性分"（原为 30+ 处 `except Exception: pass`，数据源挂了 1071 只全 5.0 且日志不可见）。
+
 ---
 
 ## 5. KB 注册表（kb/registry.py）
@@ -224,6 +226,7 @@ fetch_news_sources.py (6源: sina/eastmoney/tonghuashun/360news/search_pipeline)
 | a60a666331d9 | ETF价格缓存每日刷新 | 工作日 15:10 | ✅ no_agent wrapper |
 | 0170f59b3e44 | ETF 2周预测+回测闭环 | 周一 8:45 | ✅ no_agent wrapper |
 | 6e878757cfc7 | 生产级健康巡检 | 每日 10:00 | ✅ |
+| (待注册) | ETF持仓缓存周度刷新 | 交易日 15:20 | 📋 `etf_holdings_refresh.py`（08-12 建成，全量 1071 只已实测 ok=1032/empty=39/failed=0、ratio=1.0、saved=True；待 cron 注册） |
 
 **price_cache 刷新坑**：`price_cache.refresh_all()` 逐只 get_price → EastMoney/Sina 挂了就回退 akshare（587 只 × ~25s ≈ 4h）不可行。真源用 `price_cache_refresh.py`（Sina 批量全量 ~13s）+ prev_close 兜底 + 有效条目 <50 保留旧缓存不覆盖。
 

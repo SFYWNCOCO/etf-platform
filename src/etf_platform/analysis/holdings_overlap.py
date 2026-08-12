@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
@@ -40,6 +41,7 @@ class OverlapResult:
     sector_overlap: float      # 行业配置重叠率
     risk_level: str           # "high", "medium", "low"
     recommendation: str       # 建议
+    common_detail: list = field(default_factory=list)  # 共同持仓明细 [{code,name_a,weight_a,name_b,weight_b,max_weight}]
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
 
     def to_dict(self) -> dict:
@@ -174,6 +176,7 @@ class HoldingsOverlapAnalyzer:
             etf_b=etf_b_name or "ETF_B",
             overlap_ratio=overlap,
             common_holdings=len(common),
+            common_detail=common,
             total_holdings_a=len(etf_a_holdings),
             total_holdings_b=len(etf_b_holdings),
             max_single_overlap=max_single,
@@ -219,6 +222,15 @@ class HoldingsOverlapAnalyzer:
                     lines.append(f"\n### {r.etf_a} vs {r.etf_b}")
                     lines.append(f"**重叠率**: {r.overlap_ratio:.1%} | **风险**: {r.risk_level}")
                     lines.append(f"**建议**: {r.recommendation}")
+                    lines.append("")
+                    lines.append("| 股票 | A权重 | B权重 | 最大权重 |")
+                    lines.append("|------|-------|-------|---------|")
+                    for c in r.common_detail:
+                        name = c.get("name_a") or c.get("name_b") or c.get("code", "")
+                        lines.append(
+                            f"| {name}({c.get('code')}) | {c.get('weight_a', 0):.2%} "
+                            f"| {c.get('weight_b', 0):.2%} | {c.get('max_weight', 0):.2%} |"
+                        )
 
         return "\n".join(lines)
 
@@ -265,8 +277,64 @@ class HoldingsOverlapAnalyzer:
         return report, [result]
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+def _etf_label(code: str) -> str:
+    """ETF 显示名：优先 config 名称，否则回退代码。"""
+    try:
+        from ..config_loader import load_etfs
+        name = load_etfs().get(code, {}).get("name", "")
+        return f"{name}({code})" if name else code
+    except Exception:
+        return code
+
+
+def _load_real_holdings(code: str) -> list[dict]:
+    """从真实持仓缓存读最新季度持仓；缺失/为空时 fail loud。"""
+    from .holdings_fetcher import get_cached_holdings, _latest_quarter_holdings
+    cached = get_cached_holdings(code)
+    if cached is None:
+        raise ValueError(
+            f"[holdings_overlap] 缓存中无 {code} 持仓数据，请先运行 "
+            "`python -m etf_platform.analysis.holdings_fetcher --refresh`"
+        )
+    holdings = _latest_quarter_holdings(cached)
+    if not holdings:
+        raise ValueError(f"[holdings_overlap] {code} 缓存无股票持仓数据")
+    return holdings
+
+
+def run_real_pair(code_a: str, code_b: str) -> tuple[str, list[OverlapResult]]:
+    """用真实持仓缓存分析两只 ETF 的重叠度并生成报告。"""
+    from .holdings_fetcher import get_sector_exposure
     analyzer = HoldingsOverlapAnalyzer()
-    report, results = analyzer.run_demo()
+    result = analyzer.analyze_pair(
+        _load_real_holdings(code_a),
+        _load_real_holdings(code_b),
+        etf_a_name=_etf_label(code_a),
+        etf_b_name=_etf_label(code_b),
+        sector_a=get_sector_exposure(code_a),
+        sector_b=get_sector_exposure(code_b),
+    )
+    report = analyzer.generate_report([result])
+    return report, [result]
+
+
+def main() -> int:
+    logging.basicConfig(level=logging.INFO)
+    args = sys.argv[1:]
+    if len(args) == 2:
+        try:
+            report, _results = run_real_pair(args[0], args[1])
+        except ValueError as e:
+            print(e, file=sys.stderr)
+            return 1
+        print(report)
+        return 0
+    # 无参数：保留原 run_demo() 演示分支（向后兼容）
+    analyzer = HoldingsOverlapAnalyzer()
+    report, _results = analyzer.run_demo()
     print(report)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
