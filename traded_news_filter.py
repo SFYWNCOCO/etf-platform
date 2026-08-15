@@ -41,11 +41,30 @@ _INDUSTRY_STRONG_RE = re.compile(
     r"政策|规划|补贴|招标|中标|扩产|涨价|降价|新规|国产替代|产业链|"
     r"出口|进口|关税|反倾销|景气|产能"
 )
-_MACRO_RE = re.compile(r"央行|降准|降息|利率|CPI|PPI|GDP|PMI|社融|M2|美联储|加息|缩表|通胀|通缩|非农")
+_MACRO_RE = re.compile(r"央行|降准|降息|利率|CPI|PPI|GDP|PMI|社融|M2|美联储|加息|缩表|通胀|通缩|非农|美债|国债|收益率|汇率")
 
 # ── 强信号事件：需有明确对象（6 位代码）才可交易 ──
 _STRONG_EVENT_RE = re.compile(r"涨停|跌停|暴涨|暴跌|崩盘|爆雷|违约|退市")
 _CODE_RE = re.compile(r"\d{6}")
+
+# ── 异常/拐点信号（d807 发现能力落地：多年首次/历史新高/停工重启是拐点）──
+_ANOMALY_PATTERNS = [
+    ("首次型", re.compile(r"多年首次|历史首次|史上首次|首次突破|首次超过|首次超越|首次实现|首次.{0,8}(突破|超过|达成|跨越)")),
+    ("纪录型", re.compile(r"历史新高|历史新低|创纪录|破纪录")),
+    ("重启型", re.compile(r"停工.{0,12}重启|重启.{0,12}(工厂|产线|建设|项目)")),
+    ("拐点型", re.compile(r"里程碑|拐点")),
+]
+
+
+def detect_anomaly(text: str) -> list:
+    """检测新闻中的异常/拐点信号（多年首次/历史新高/停工重启等）。
+
+    Returns:
+        命中的异常类型列表，如 ['纪录型', '重启型']；无命中返回 []
+    """
+    if not text:
+        return []
+    return [name for name, pat in _ANOMALY_PATTERNS if pat.search(text)]
 
 
 def is_tradable(item: dict) -> tuple:
@@ -78,20 +97,25 @@ def is_tradable(item: dict) -> tuple:
             return False, f"个股{why}"
         # 含翻案强词 → 继续按行业/宏观判定
 
-    # 3) 行业词 / 政策产业词 → 可交易
+    # 3) 异常/拐点信号（d807）→ 优先升级：命中 + 行业/宏观锚定即可交易并标记
     sectors = match_sector(text)
+    anomalies = detect_anomaly(text)
+    if anomalies and (sectors or _MACRO_RE.search(text)):
+        return True, "异常信号:" + "/".join(anomalies)
+
+    # 4) 行业词 / 政策产业词 → 可交易
     if sectors:
         return True, f"行业词:{sectors[0]}"
     if _INDUSTRY_STRONG_RE.search(text):
         return True, "政策/产业词"
 
-    # 4) 宏观 / 强信号事件（有明确对象）→ 可交易
+    # 5) 宏观 / 强信号事件（有明确对象）→ 可交易
     if _MACRO_RE.search(text):
         return True, "宏观信号"
     if _STRONG_EVENT_RE.search(text) and _CODE_RE.search(text):
         return True, "强信号事件"
 
-    # 5) 其余 → 拒
+    # 6) 其余 → 拒
     return False, "无关动态/无行业词"
 
 
