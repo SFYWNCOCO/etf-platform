@@ -1,0 +1,63 @@
+{
+  "config": {
+    "pool": 20,
+    "window_days": 600,
+    "method": "共同交易日按周重采样(每周最后交易日), 期初等权买入持有, 整段窗口三指标"
+  },
+  "four_paths": {
+    "equal_weight_OFF": {
+      "codes_top5": [
+        "159263",
+        "159326",
+        "159506",
+        "159387",
+        "159570"
+      ],
+      "total_return": 0.202958,
+      "annualized_sharpe": 0.891762,
+      "max_drawdown": -0.180877
+    },
+    "equal_weight_ON": {
+      "codes_top5": [
+        "159263",
+        "159326",
+        "159387",
+        "159506",
+        "159338"
+      ],
+      "total_return": 0.262957,
+      "annualized_sharpe": 1.168814,
+      "max_drawdown": -0.172132
+    },
+    "screener_OFF": {
+      "codes_top5": [
+        "159326",
+        "159263",
+        "159506",
+        "159227",
+        "159387"
+      ],
+      "total_return": 0.196204,
+      "annualized_sharpe": 0.857458,
+      "max_drawdown": -0.2158
+    },
+    "screener_ON": {
+      "codes_top5": [
+        "159263",
+        "159326",
+        "159387",
+        "159227",
+        "159506"
+      ],
+      "total_return": 0.196204,
+      "annualized_sharpe": 0.857458,
+      "max_drawdown": -0.2158
+    }
+  },
+  "degradation": {
+    "screener_sharpe_off": 0.8574579223312343,
+    "screener_sharpe_on": 0.8574579223312343,
+    "ratio": 1.0
+  },
+  "generated_at": "2026-08-26 13:40:42"
+}
