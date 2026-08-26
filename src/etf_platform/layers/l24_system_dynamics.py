@@ -8,7 +8,6 @@ prone to destabilizing dynamics under stress.
 Source knowledge: k238 (systems thinking), k268 (self-improvement research with SD)
 """
 
-import random
 from typing import Dict, Optional
 
 
@@ -185,8 +184,8 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
 def _compute_feedback_ratio(profile: Dict) -> float:
     """Compute FDR from raw input, scaled and bounded [-1, 1]."""
     raw = profile.get("typical_fdr", 0.0)
-    variation = random.uniform(0.85, 1.15)
-    result = raw * 0.92 * variation
+    # deterministic: no jitter — same input must yield identical score/insights (T9)
+    result = raw * 0.92
     return max(-1.0, min(1.0, result))
 
 
