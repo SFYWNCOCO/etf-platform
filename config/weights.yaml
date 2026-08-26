@@ -44,3 +44,14 @@
   风控面: 0.03
   增强面: 0.10
   行为面: 0.26
+
+# CC T8 (P1-C): composite 层权重 — 负相关层配置化降权, 依据 composite_score_architecture_issue.md
+# enabled=false 或回测门禁 FAIL 回滚时, pipeline 恢复纯等权原行为(机制保留)。
+composite_layer_weights:
+  enabled: false          # 回测门禁失败时改回 false(机制保留行为关闭)
+  default: 1.0
+  overrides:             # 权重=按负相关强度衰减, 依据上表
+    L20_OptionVol: 0.3
+    L1_ETF: 0.5
+    L12_PoliticalRisk: 0.6
+source_note: knowledge/composite_score_architecture_issue.md correlation table (2026-08-26)

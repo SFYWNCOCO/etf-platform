@@ -1,0 +1,76 @@
+{
+  "config": {
+    "pool": 50,
+    "screen_pool": 80,
+    "screen_days": 500,
+    "min_kline": 405,
+    "kline_days": 800,
+    "min_weeks": 81,
+    "sharpe_floor": 0.9,
+    "mdd_floor": 1.1,
+    "weights_loaded": {
+      "L20_OptionVol": 0.3,
+      "L1_ETF": 0.5,
+      "L12_PoliticalRisk": 0.6
+    },
+    "weights_yaml_enabled_at_run": true
+  },
+  "judged": true,
+  "verdict": "no-difference",
+  "reason": "top5_identical",
+  "common_weeks": 102,
+  "min_weeks": 81,
+  "baseline_top5": [
+    "159691",
+    "510880",
+    "159326",
+    "511880",
+    "511010"
+  ],
+  "treatment_top5": [
+    "159691",
+    "510880",
+    "159326",
+    "511880",
+    "511010"
+  ],
+  "per_code_weeks": {
+    "159691": 170,
+    "510880": 170,
+    "159326": 102,
+    "511880": 170,
+    "511010": 170
+  },
+  "baseline": {
+    "codes_top5": [
+      "159691",
+      "510880",
+      "159326",
+      "511880",
+      "511010"
+    ],
+    "total_return": 0.27073222141873066,
+    "annualized_sharpe": 1.2253275692466954,
+    "max_drawdown": -0.11615735432310959,
+    "weeks": 102
+  },
+  "treatment": {
+    "codes_top5": [
+      "159691",
+      "510880",
+      "159326",
+      "511880",
+      "511010"
+    ],
+    "total_return": 0.27073222141873066,
+    "annualized_sharpe": 1.2253275692466954,
+    "max_drawdown": -0.11615735432310959,
+    "weeks": 102
+  },
+  "gate": {
+    "gate_pass": null,
+    "no_difference": true,
+    "enabled_disabled": true
+  },
+  "generated_at": "2026-08-26 14:43:49"
+}

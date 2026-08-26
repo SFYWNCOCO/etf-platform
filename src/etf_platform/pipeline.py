@@ -600,12 +600,36 @@ def percentile_calibrate(results: list[dict], enable: bool = True) -> list[dict]
     return out
 
 
-def _compute_composite_score(scores: dict) -> float:
-    """Weighted composite: exclude bonus/non-score keys, fall back to arithmetic mean."""
+# CC T8 (P1-C): composite 层权重惰性缓存。enabled 时 Σ(w·s)/Σw 加权, 否则纯等权原行为。
+_LAYER_WEIGHTS: Optional[dict] = None
+_LAYER_WEIGHTS_LOADED = False
+
+
+def _get_layer_weights() -> Optional[dict]:
+    """惰性加载 composite 层权重; 未启用/异常返回 None(=纯等权)。"""
+    global _LAYER_WEIGHTS, _LAYER_WEIGHTS_LOADED
+    if not _LAYER_WEIGHTS_LOADED:
+        from .utils.layer_weights import load_composite_layer_weights
+        _LAYER_WEIGHTS = load_composite_layer_weights()
+        _LAYER_WEIGHTS_LOADED = True
+    return _LAYER_WEIGHTS
+
+
+def _compute_composite_score(scores: dict, weights: Optional[dict] = None) -> float:
+    """Weighted composite: exclude bonus/non-score keys; Σ(w·s)/Σw if weights, else equal-weight mean."""
     numeric = {k: v for k, v in scores.items()
                if k not in _COMPOSITE_EXCLUDE_KEYS and isinstance(v, (int, float))}
     if not numeric:
         return 0.0
+    if weights:
+        num = 0.0
+        den = 0.0
+        for k, v in numeric.items():
+            w = weights.get(k, 1.0)  # 未覆盖层用 default 1.0
+            num += w * v
+            den += w
+        if den > 0:
+            return round(num / den, 2)
     # Equal-weight composite (pipeline doesn't own screener's variance-based weights)
     return round(sum(numeric.values()) / len(numeric), 2)
 
@@ -614,7 +638,7 @@ def _build_result(code: str, name: str, sector: str, info: dict, rl: float,
                   scores: dict, cycle_info: dict, profile: str,
                   layer_details: dict) -> dict:
     """Assemble final result dictionary."""
-    composite = _compute_composite_score(scores)
+    composite = _compute_composite_score(scores, _get_layer_weights())
     # score must use same exclusion logic as composite_score — previously
     # simple mean over ALL numeric values differed from composite (which
     # excludes bonus/detail keys), causing inconsistent rankings.
