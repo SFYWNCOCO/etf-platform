@@ -46,4 +46,8 @@ reviewer 判定 cc_batch_d_fix.md 中"评分层百分位 夏普1.53→1.06"为[�
 
 ## verdict
 
-`verdict: needs-repair — 方向未复现, 需说明差异来源或调整复现口径`
+`verdict: needs-repair — 方向未复现, 需说明差异来源或调整复现口径
+
+## 结论注记（captain 决断①, 2026-08-26）
+
+**"夏普 1.53→1.06" 为 [自报·未复现]，此后不得再被引用为门禁证据**；现行保护 = T8 及未来任何评分行为变更必须通过独立回测门禁（tool-proven 落盘 knowledge/）。S5 现状为零行为变更注解版，已经两轮独立复验，与该数字真伪无关。本 verdict 保持 needs-repair 不作修饰。`[consumption]``
