@@ -1,0 +1,196 @@
+materials:
+  20号胶:
+    current: 待补充
+    trend: → -0.3% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  丙烯:
+    current: 待补充
+    trend: ↓ 7% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  乙二醇:
+    current: 待补充
+    trend: → +1.2% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  低硫燃料油:
+    current: 待补充
+    trend: ↓ 9% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  原木:
+    current: 待补充
+    trend: → +2.5% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  合成橡胶:
+    current: 待补充
+    trend: ↓ 16% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  对二甲苯:
+    current: 待补充
+    trend: ↓ 13% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  工业硅:
+    current: 待补充
+    trend: → +0.8% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  棉纱:
+    current: 待补充
+    trend: → +2.7% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  氧化铝:
+    current: 待补充
+    trend: → -1.1% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  油菜籽:
+    current: 待补充
+    trend: ↑ 6% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  液化石油气:
+    current: 待补充
+    trend: ↓ 15% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  烧碱:
+    current: 待补充
+    trend: ↓ 7% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  热卷:
+    current: 待补充
+    trend: ↓ 6% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  焦煤:
+    current: 待补充
+    trend: → +3.5% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  燃油:
+    current: 待补充
+    trend: ↓ 20% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  短纤:
+    current: 待补充
+    trend: ↓ 9% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  粳米:
+    current: 待补充
+    trend: → +2.1% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  红枣:
+    current: 待补充
+    trend: ↓ 11% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  纤维板:
+    current: 待补充
+    trend: → 待确认
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  纯碱:
+    current: 待补充
+    trend: ↓ 21% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  纯苯:
+    current: 待补充
+    trend: → 待确认
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  纸浆:
+    current: 待补充
+    trend: ↓ 8% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  线材:
+    current: 待补充
+    trend: → +1.9% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  聚丙烯:
+    current: 待补充
+    trend: ↓ 7% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  胶版纸:
+    current: 待补充
+    trend: → 待确认
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  花生:
+    current: 待补充
+    trend: → -0.1% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  苯乙烯:
+    current: 待补充
+    trend: ↓ 10% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  苹果:
+    current: 待补充
+    trend: → +1.7% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  菜籽油:
+    current: 待补充
+    trend: ↑ 6% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  菜籽粕:
+    current: 待补充
+    trend: ↓ 6% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  豆一:
+    current: 待补充
+    trend: → +3.4% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  豆二:
+    current: 待补充
+    trend: ↑ 8% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  豆油:
+    current: 待补充
+    trend: → +0.1% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  钯:
+    current: 待补充
+    trend: → 待确认
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  铁矿石:
+    current: 待补充
+    trend: ↓ 11% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  铂:
+    current: 待补充
+    trend: ↓ 17% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  锰硅:
+    current: 待补充
+    trend: → -3.0% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
+  鸡蛋:
+    current: 待补充
+    trend: ↓ 8% (60日, 主力连续)
+    warning: 🆕 期货品种自动发现, 待确认 affects 映射
+    affects: []
