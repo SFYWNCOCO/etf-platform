@@ -57,3 +57,16 @@ scripts/portfolio_comparison_backtest.py.bak*
 references/kb-integration-2026-07-24/_archive_temp_files/
 src/data_migrated_backup/
 src/etf_platform/portfolio/risk_parity.py.bak*
+
+# === cron 运行时产物 (2026-08-26 T6/T7 决策: 不跟踪, 有输入/配置语义的 data 文件除外) ===
+data/recommendations_log.jsonl
+data/two_week_predictions.jsonl
+data/attribution_history.jsonl
+data/etf_attribution_history.jsonl
+data/news_sentiment_history.jsonl
+data/news_etf_signals.json.tmp
+data/*.tmp
+data/predictions/
+data/etf_close_report_latest.md
+data/multi_dimension_alert_latest.md
+# 继续跟踪: data/kb_registry.json / data/sector_flow_map.json 等配置语义文件
