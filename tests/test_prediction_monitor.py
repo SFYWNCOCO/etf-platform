@@ -4,7 +4,7 @@
 避免前视偏差引擎的旧样本稀释新引擎的真实表现。
 """
 import json
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -28,7 +28,6 @@ def _write_log(tmp_path, preds):
 class TestEvaluateHitRate:
     def _run(self, log_path, returns):
         from etf_platform.decision import prediction_monitor as pm
-        import etf_platform.decision.prediction_monitor as pm_mod
         pm.LOG_FILE = log_path
         pm._return_since = lambda d, c, h=10: returns.get(c)
         return pm.evaluate_prediction()
@@ -45,7 +44,8 @@ class TestEvaluateHitRate:
     def test_recent_prediction_excluded(self, tmp_path):
         """5 天内预测不可验证 → 跳过。"""
         from etf_platform.decision import prediction_monitor as pm
-        log = _write_log(tmp_path, [_pred("2026-08-09", codes=("AAA",))])
+        recent_date = (date.today() - timedelta(days=2)).isoformat()
+        log = _write_log(tmp_path, [_pred(recent_date, codes=("AAA",))])
         pm.LOG_FILE = log
         pm._return_since = lambda d, c, h=10: 1.0
         res = pm.evaluate_prediction()

@@ -9,8 +9,25 @@
 """
 from typing import Dict
 
+# 连续分段线性锚点 (角度, 分数)：恐慌底→高分，过热→低分。端点之间线性插值。
+# 08-12 修复：原 panic 分支 (angle+25)/5 符号反转（越恐慌得分越低），且分段
+# 边界跳变 1.5~2.5 分。改为单调连续，angle<-30 逼近 10，>30 封底 1.0。
+_PENDULUM_ANCHORS = (
+    (-30, 9.5), (-15, 8.0), (-5, 6.5), (5, 5.0), (15, 3.5), (25, 2.0), (30, 1.0),
+)
 
-def _pendulum_angle(change_20d_pct: float, vol_20d: float, 
+
+def _pendulum_score(angle: float) -> float:
+    if angle <= _PENDULUM_ANCHORS[0][0]:
+        return min(10.0, _PENDULUM_ANCHORS[0][1] + (_PENDULUM_ANCHORS[0][0] - angle) * 0.1)
+    for (a0, s0), (a1, s1) in zip(_PENDULUM_ANCHORS, _PENDULUM_ANCHORS[1:]):
+        if angle <= a1:
+            t = (angle - a0) / (a1 - a0)
+            return s0 + t * (s1 - s0)
+    return max(1.0, _PENDULUM_ANCHORS[-1][1] - (angle - _PENDULUM_ANCHORS[-1][0]) * 0.1)
+
+
+def _pendulum_angle(change_20d_pct: float, vol_20d: float,
                     volume_ratio: float, premium_pct: float) -> float:
     """计算周期钟摆角度 (-45°=恐慌底, +45°=狂热顶)
     
@@ -170,24 +187,9 @@ def score_pendulum_layer(sector: str, risk_level: float = 0.5,
     regime = _angle_to_regime(angle)
     
     # 钟摆越接近恐慌底, 潜在收益越高
-    # v8.14: Replace step function with continuous scoring + intra-regime differentiation
-    # Previously: 5 discrete scores (1.5/2.5/4.0/5.0/6.5/8.0/9.0) caused 50% clustering
-    # Now: base score from regime + intra-regime refinement using angle magnitude
-    if angle <= -25:
-        base_score = 9.0 + min(1.0, (angle + 25) / 5.0)  # panic: 9.0-9.5 for angle<=-30
-    elif angle <= -15:
-        base_score = 8.0 + (angle + 15) / 10.0 * 1.0  # fear: 8.0-9.0 for -15 to -5
-    elif angle <= -5:
-        base_score = 6.5 + (angle + 5) / 10.0 * 1.0  # cautious: 6.5-7.5
-    elif angle <= 5:
-        base_score = 5.0 + angle / 10.0 * 1.0  # neutral: 4.5-5.5
-    elif angle <= 15:
-        base_score = 4.0 - (angle - 5) / 10.0 * 1.0  # optimistic: 3.0-4.0
-    elif angle <= 25:
-        base_score = 2.5 - (angle - 15) / 10.0 * 1.0  # greed: 1.5-2.5
-    else:
-        base_score = 1.5 - min(0.5, (angle - 25) / 20.0)  # euphoria: 1.0-1.5
-    
+    # v8.15: 连续分段线性评分（08-12 修复 panic 符号反转 + 分段边界跳变）
+    base_score = _pendulum_score(angle)
+
     score = base_score
     
     # 行业修正: 防御型行业在过热期加分, 进攻型在恐慌期加分

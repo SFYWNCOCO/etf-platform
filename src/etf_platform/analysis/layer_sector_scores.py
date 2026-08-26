@@ -123,6 +123,8 @@ SECTOR_LAYER_SCORES = {
 
 
 def get_sector_layer_scores(sector, risk_level=0.5):
+    if sector is None:
+        sector = "其他"
     base = SECTOR_LAYER_SCORES.get(sector)
     if not base:
         best = None

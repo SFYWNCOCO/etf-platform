@@ -370,7 +370,12 @@ def _collect_factors_pit(candidates, trend_map):
         pipe = {"score": 5.0, "sector": info.get("sector", ""), "etf_code": code}
         scored_indices.append(idx)
         for f in twp.FACTORS:
-            raw_factors[f["name"]].append(f["raw"](trend, pipe))
+            if f["name"] == "news_sentiment":
+                # 08-18: news_sentiment 无 PIT 历史快照，用当前文件会引入前视偏差；
+                # 回测中按中性 0 处理，策略锦标赛不把未来情绪当已知信息。
+                raw_factors[f["name"]].append(0.0)
+            else:
+                raw_factors[f["name"]].append(f["raw"](trend, pipe))
     z_factors = {}
     for f in twp.FACTORS:
         z_factors[f["name"]] = twp._clamp_z(zscore(raw_factors[f["name"]]))

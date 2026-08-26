@@ -611,39 +611,35 @@ def get_live_signals_with_data(
             "composite_score_adjusted": float,
         }
     """
-    # 离线评分
-    base = get_live_signals(
-        sector=sector,
-        daily_amount_yi=daily_amount_yi,
-        premium_pct=0.0,
-        is_cross_border=is_cross_border,
-        etf_code=etf_code,
-        fee=fee,
-    )
-
-    # 实时数据
+    # 实时数据（先取，真实折溢价需在离线评分前拿到才能纳入评分）
     snapshot = get_etf_snapshot(etf_code) if etf_code else None
     dip = get_realtime_dip_signals([etf_code] if etf_code else None)
     flow = get_realtime_flow_signals([etf_code] if etf_code else None)
 
-    # 用真实折溢价率修正评分
+    # 用真实折溢价率修正评分（离线无快照时为 0.0，行为不变）
     realtime_premium = 0.0
     if snapshot and snapshot.premium_pct is not None:
         realtime_premium = snapshot.premium_pct
     elif dip.get("alerts"):
         realtime_premium = dip["alerts"][0].get("premium_rate", 0.0)
 
-    prem_signal = score_premium_signal(realtime_premium, is_cross_border)
-    base["premium"] = prem_signal
+    base = get_live_signals(
+        sector=sector,
+        daily_amount_yi=daily_amount_yi,
+        premium_pct=realtime_premium,
+        is_cross_border=is_cross_border,
+        etf_code=etf_code,
+        fee=fee,
+    )
 
-    # 资金流向信号修正
+    # 资金流向信号修正（signal 字段显式携带方向，避免关键字漏判"量价齐跌/散户追高"）
     flow_signal = "neutral"
     flow_score_adj = 0.0
     if flow.get("alerts"):
         high_alerts = [a for a in flow["alerts"] if a["alert_level"] == "high"]
         if high_alerts:
             flow_signal = high_alerts[0]["divergence_type"]
-            flow_score_adj = -0.5 if "出货" in flow_signal or "恐慌" in flow_signal else 0.3
+            flow_score_adj = -0.5 if high_alerts[0].get("signal") in ("bearish", "divergence_bearish") else 0.3
         else:
             flow_signal = flow["alerts"][0]["divergence_type"]
 

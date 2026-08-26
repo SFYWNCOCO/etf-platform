@@ -14,6 +14,8 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from ..utils.thread_timeout import run_with_timeout
+
 logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).parent.parent.parent.parent / "data" / "screener_cache"
@@ -26,7 +28,9 @@ def _fetch_pmi():
     """Latest PMI. <50 = contraction."""
     try:
         import akshare as ak
-        df = ak.macro_china_pmi_yearly()
+        df = run_with_timeout(ak.macro_china_pmi_yearly, timeout=30)
+        if df is None:
+            return 50.0
         last = df.dropna(subset=["今值"]).tail(1)
         if not last.empty:
             return float(last.iloc[0]["今值"])
@@ -39,7 +43,9 @@ def _fetch_social_financing():
     """Latest social financing (亿元)."""
     try:
         import akshare as ak
-        df = ak.macro_china_shrzgm()
+        df = run_with_timeout(ak.macro_china_shrzgm, timeout=30)
+        if df is None:
+            return 30000
         last = df.tail(3)
         vals = [float(last.iloc[i]["社会融资规模增量"]) for i in range(len(last))]
         return sum(vals) / len(vals)  # 3-month avg

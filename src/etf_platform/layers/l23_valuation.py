@@ -473,8 +473,8 @@ def _load_cache(code):
     if entry and isinstance(entry, dict):
         try:
             _L23_DISK_CACHE.pop(code, None)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("[l23_valuation] 失效缓存剔除失败 %s: %s", code, e)
     return None
 
 

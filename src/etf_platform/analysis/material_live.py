@@ -4,10 +4,13 @@
 v5.6: Replaces hardcoded deep.py materials with live akshare data.
 """
 
+import math
 import sys
 import time
 import statistics
 import threading
+
+from ..utils.thread_timeout import run_with_timeout
 
 COMMODITY_SECTOR_MAP = {
     "原油": ["能源化工", "周期/资源"], "燃料油": ["能源化工"], "动力煤": ["煤炭", "周期/资源"],
@@ -49,8 +52,10 @@ def _fetch_commodities():
             return _cache["commodities"]
     try:
         import akshare as ak
-        df = ak.futures_spot_price_previous()
+        df = run_with_timeout(ak.futures_spot_price_previous, timeout=30)
         commodities = []
+        if df is None:
+            raise TimeoutError("futures_spot_price_previous 超时")
         for _, row in df.iterrows():
             name = str(row.get("\u5546\u54c1", "")).strip()
             spot = float(row.get("\u73b0\u8d27\u4ef7\u683c", 0) or 0)
@@ -58,6 +63,9 @@ def _fetch_commodities():
             change_pct = float(row.get("\u4e3b\u529b\u5408\u7ea6\u53d8\u52a8\u767e\u5206\u6bd4", 0) or 0)
             basis = spot - future if spot > 0 and future > 0 else 0
             basis_pct = (basis / future * 100) if future > 0 else 0
+            # NaN 过滤: float(x or 0) 不滤 NaN，abs(nan)>15 恒 False 会漏进均值
+            if math.isnan(spot) or math.isnan(future) or math.isnan(change_pct) or math.isnan(basis_pct):
+                continue
             # 异常值过滤: 期货单日涨跌停一般 <=10-12%, 超 15% 为合约切换/除权等数据异常,
             # 不算入信号(否则 -19.6% 焦炭这类异常值会与真实行情对冲掩盖)
             if abs(change_pct) > 15 or abs(basis_pct) > 15:

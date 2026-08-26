@@ -35,6 +35,7 @@ def log_prediction(predictions: list, profile: str = "均衡"):
                 "two_week_score": p["two_week_score"],
                 "pipeline_score": p.get("pipeline_score", 5.0),
                 "z_composite": p.get("z_composite", 0),
+                "z_factors": p.get("z_factors", {}),
                 "trend_signal": p["trend_signal"],
                 "change_20d": p["change_20d"],
                 "change_10d": p.get("return_10d", 0),

@@ -93,16 +93,15 @@ def apply_factors(sector: str, base_scores: dict) -> dict:
     adjusted = dict(base_scores)
     for lk, fk in zip(layer_keys, factor_keys):
         if lk in adjusted:
+            base = adjusted[lk]
             mult = factors.get(fk, 1.0)
-            raw = adjusted[lk] * mult
-            # v7.5: Cap factor multiplication to prevent ceiling saturation
-            # If raw exceeds 10.0, use linear interpolation instead of clamp
-            # This preserves differentiation between high-scoring ETFs
+            raw = base * mult
+            # v7.5: Cap factor multiplication to prevent ceiling saturation.
+            # 08-12 修复：原 `raw * (10/raw)` 恒等于 10.0，等于钳死、抗饱和空转。
+            # 改为把"到 10 的差距"除以 mult：mult 越大离 10 越近但永不超 10，
+            # 高分 ETF 之间保持区分度（如 base=9.2 mult=1.15 → 10-0.8/1.15≈9.30）。
             if raw > 10.0:
-                # Scale down proportionally: map [base, base*mult] → [base, 10.0]
-                # This way a 1.15x factor on 9.2 → 9.8 instead of clamped 10.0
-                ratio = 10.0 / raw
-                adjusted[lk] = round(max(1.0, min(10.0, raw * ratio)), 1)
+                adjusted[lk] = round(max(1.0, min(10.0, 10.0 - (10.0 - base) / mult)), 1)
             else:
                 adjusted[lk] = round(max(1.0, min(10.0, raw)), 1)
 

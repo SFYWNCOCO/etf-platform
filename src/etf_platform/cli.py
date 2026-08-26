@@ -198,7 +198,6 @@ def app():
         print("  etf archive [collect|list|show]  Daily data archive")
         print("  etf events [recent|log]          Market event timeline")
         print("  etf batch [--limit=N]    Batch analysis")
-        print("  etf archive [collect|list|show]  Daily archive for research")
         print("  etf cycle [sector]       Three-cycle macro report (k001+k002)")
         print("  etf factor <CODE>        Fama-French factor exposure (k003)")
         print("  etf factors              Full sector factor map")

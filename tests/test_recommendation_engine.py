@@ -49,7 +49,6 @@ class TestWeeklyTop3StrongBearishVeto:
 
     def test_stale_strong_bearish_not_excluded(self):
         """旧闻（fresh_days=8, decay=0.1）强看空只减 -0.5，不应被排除。"""
-        import weekly_top3 as wt
         news = {
             "科技": {"direction": "看空", "strength": "强", "fresh_days": 8},
             "消费": {"direction": "中性", "strength": "弱", "fresh_days": 1},
@@ -99,6 +98,7 @@ class TestTwoWeekPickerDynamicWeights:
                 "oversold_depth": 0.0, "risk_adj_momentum": 1.0,
                 "drawdown_recov": 0.0, "sector_flow": 0.0,
                 "quality_elastic": 0.0, "behavioral": 0.0,
+                "news_sentiment": 0.0,
             }
 
         monkeypatch.setattr(tw, "_get_factor_weights", fake_weights)

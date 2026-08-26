@@ -41,11 +41,14 @@ def _cache_valid() -> bool:
 
 
 def _fetch_eastmoney() -> dict[str, float]:
-    """东方财富批量ETF折溢价率. 超时15s."""
+    """东方财富批量ETF折溢价率. 挂起即丢弃（08-12 修复：docstring 声称超时但调用并无保护）。"""
     import akshare as ak  # noqa: PLC0415
 
-    df = ak.fund_etf_spot_em()
+    from ..utils.thread_timeout import run_with_timeout
+    df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
     result: dict[str, float] = {}
+    if df is None:
+        return result
     for _, row in df.iterrows():
         code = str(row.get("代码", "")).strip()
         if not code or not code[:6].isdigit():

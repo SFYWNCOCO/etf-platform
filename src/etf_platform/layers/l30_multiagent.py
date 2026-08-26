@@ -230,13 +230,17 @@ def _compute_resilience(coord_density: float, heterogeneity: float) -> float:
 
 def _compute_l30_composite(heterogeneity: float, coordination_density: float,
                           feedback_strength: float, resilience: float) -> float:
-    """Composite L30 score (0-12) aggregating all MAS metrics."""
-    weighted = (heterogeneity * 0.35 + 
-                (1.0 - feedback_strength) * 0.30 + 
-                resilience * 0.20 + 
+    """Composite L30 score (0-10) aggregating all MAS metrics.
+
+    08-12 修复：原 ×12 缩放为 0-12，与平台 0-10 约定不符，pipeline 等权
+    平均时 L30 系统性超重；改 ×10。
+    """
+    weighted = (heterogeneity * 0.35 +
+                (1.0 - feedback_strength) * 0.30 +
+                resilience * 0.20 +
                 (1.0 - abs(coordination_density - 0.5)) * 0.15)
-    scaled = weighted * 12.0
-    return max(0.0, min(12.0, scaled))
+    scaled = weighted * 10.0
+    return max(0.0, min(10.0, scaled))
 
 
 def _generate_mas_insights(heterogeneity: float, coordination_density: float,

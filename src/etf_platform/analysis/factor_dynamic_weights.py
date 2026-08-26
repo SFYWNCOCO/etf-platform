@@ -21,6 +21,7 @@ factor_dynamic_weights.py — Regime-conditional动态因子权重 v1.0
 from __future__ import annotations
 
 import json
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -171,20 +172,29 @@ def get_factor_list(regime: str) -> list[dict[str, Any]]:
 
 # ── 从two_week_picker.py导入的helper ─────────────────────────
 
+@lru_cache(maxsize=4)
+def _load_sentiment_data(path: str) -> dict:
+    """按路径缓存 news_sentiment.json 内容；文件不存在/损坏返回 {}。"""
+    try:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
 def _get_sentiment_raw(sector: str, etf_code: str = "") -> float:
     """新闻情绪原始分(d751)，复用 macro_overlay.get_news_boost 的 sector 匹配逻辑。
 
     读取 data/news_sentiment.json 的 sectors（key in sector or sector in key），
     返回原始分数: 看多强→+1.0, 看多中→+0.6, 看多弱→+0.3, 看空强→-1.0,
     看空中→-0.6, 看空弱→-0.3, 中性→0.0。文件不存在/异常 → 0.0。
+    08-18 优化：文件内容按路径 lru 缓存，批量扫描避免重复磁盘 IO。
     """
-    if not sector or not SENT_FILE.exists():
+    if not sector:
         return 0.0
-    try:
-        with open(SENT_FILE, encoding="utf-8") as f:
-            d = json.load(f)
-        sectors = d.get("sectors", {})
-    except (OSError, ValueError):
+    sectors = _load_sentiment_data(str(SENT_FILE)).get("sectors", {})
+    if not isinstance(sectors, dict):
         return 0.0
     for key, value in sectors.items():
         if not isinstance(value, dict):

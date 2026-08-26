@@ -42,6 +42,7 @@ class FundFlowAlert:
     medium_net: float        # 中单净流入
     small_net: float         # 小单净流入
     divergence_type: str     # "price_up_flow_out", "price_down_flow_in", "none"
+    signal: str              # "bullish", "bearish", "divergence_bullish", "divergence_bearish", "neutral"
     alert_level: str         # "high", "medium", "low", "none"
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
     message: str = ""
@@ -76,7 +77,8 @@ class FundFlowAnalyzer:
         """获取ETF实时行情数据"""
         try:
             import akshare as ak
-            df = ak.fund_etf_spot_em()
+            from ..utils.thread_timeout import run_with_timeout
+            df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
             logger.info(f"[FLOW] 获取到 {len(df)} 只ETF资金流数据")
             return df
         except ImportError:
@@ -170,6 +172,7 @@ class FundFlowAnalyzer:
                 medium_net=medium,
                 small_net=small,
                 divergence_type=pattern,
+                signal=signal,
                 alert_level="none"
             )
 
@@ -188,6 +191,7 @@ class FundFlowAnalyzer:
 
             if super_large < -self.MAIN_FLOW_THRESHOLD and price_chg > 0:
                 alert.alert_level = "high"
+                alert.signal = "bearish"
                 alert.message = f"⚠️ 超大单大幅流出{abs(super_large)/1e8:.2f}亿，股价却涨{price_chg:+.2f}%，警惕出货"
 
             if alert.alert_level != "none":

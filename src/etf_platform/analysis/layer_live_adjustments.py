@@ -16,6 +16,8 @@ import json
 import logging
 from pathlib import Path
 
+from ..utils.thread_timeout import run_with_timeout
+
 logger = logging.getLogger(__name__)
 
 _CACHE_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data" / "live_cache"
@@ -88,7 +90,7 @@ def _get_commodity_trend(symbol: str) -> float:
         sym = SYMBOL_MAP.get(symbol)
         if not sym:
             return 0.0
-        df = ak.futures_zh_daily_sina(symbol=sym)
+        df = run_with_timeout(ak.futures_zh_daily_sina, symbol=sym, timeout=30)
         if df is None or len(df) < 21:
             return 0.0
         closes = df["close"].tail(21).astype(float)
@@ -105,10 +107,11 @@ def _get_pmi_signal() -> float:
     """Get latest PMI deviation from 50. Returns -1 to +1."""
     try:
         import akshare as ak
-        df = ak.macro_china_pmi()
+        df = run_with_timeout(ak.macro_china_pmi, timeout=30)
         if df is None or len(df) == 0:
             return 0.0
-        latest = float(df.iloc[-1]["制造业-指数"])
+        # akshare PMI 为 newest-first（iloc[0]=最新月，实测 2026-07 在首行）；原 iloc[-1] 恒取 2008 年陈旧值
+        latest = float(df.iloc[0]["制造业-指数"])
         # PMI 50 = neutral, 55+ = expansion, <45 = contraction
         signal = (latest - 50) / 10.0
         return round(max(-1.0, min(1.0, signal)), 3)
@@ -123,8 +126,9 @@ def _get_sector_momentum(sector: str) -> float:
         import akshare as ak
         from datetime import datetime
         # symbol=sector 取该行业日线; 默认 end_date 停在 20240108, 必须动态传当前日期
-        df = ak.stock_board_industry_index_ths(
-            symbol=sector, end_date=datetime.now().strftime("%Y%m%d"))
+        df = run_with_timeout(
+            ak.stock_board_industry_index_ths,
+            symbol=sector, end_date=datetime.now().strftime("%Y%m%d"), timeout=30)
         if df is None or len(df) < 21:
             return 0.0
         closes = df["收盘价"].tail(21).astype(float)

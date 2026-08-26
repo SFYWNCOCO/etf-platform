@@ -1,72 +1,9 @@
 #!/usr/bin/env python3
 """L24 System Dynamics Layer — 系统动力学穿透层
 
-This layer computes SD-based metrics that capture systemic properties invisible to 
-traditional finance-only analysis. Inspired by Donella Meadows' "Leverage Points" 
-and Sterman's "Business
-
-def _compute_feedback_ratio(p):
-    raw = p.get("typical_fdr", 0.0)
-    v = random.uniform(0.85, 1.15)
-    return max(-1.0, min(1.0, raw * 0.92 * v))
-
-
-def _compute_leverage_points(p):
-    base = p.get("typical_lp", 5.0)
-    return max(0.0, min(10.0, base * 0.95))
-
-
-def _compute_damping_ratio(p):
-    raw = p.get("typical_damping", 0.7)
-    return max(0.3, min(1.5, raw * 0.98))
-
-
-def _compute_resonance_risk(fdr, damping):
-    fw = (max(0, (fdr + 1)/2) if fdr > 0 else 0)
-    dp = max(0, 1 - damping / 1.0)
-    return max(0.0, min(1.0, fw * dp))
-
-
-def _compute_sd_composite(fdr, lp, damping, rr):
-    comp = (1 - abs(fdr))*5 + (lp/10)*4 + (1 - abs(damping-1))*3 + (1-rr)*2
-    return max(0.0, min(15.0, comp * 15.0/14))
-
-
-def _generate_insights(fdr, lp, damping, rr, sector, code):
-    insights = []
-    
-    if fdr > 0.6:
-        insights.append("⚠️ Strong positive feedback detected.")
-    elif fdr < -0.6:
-        insights.append("💼 Dominant mean-reversion feedback.")
-    else:
-        insights.append("🔄 Mixed feedback pattern.")
-    
-    if lp > 7:
-        insights.append(f"🔑 High leverage point potential ({lp:.1f}/10).")
-    elif lp > 4:
-        insights.append(f"📍 Moderate leverage point relevance ({lp:.1f}/10).")
-    else:
-        insights.append(f"📉 Low leverage point activity ({lp:.1f}/10).")
-    
-    if damping < 0.6:
-        insights.append("📉 Underdamped system.")
-    elif damping > 1.2:
-        insights.append("⏳ Overdamped system.")
-    else:
-        insights.append("⚖️ Near-critically damped response.")
-    
-    if rr > 0.6:
-        insights.append("🔴 HIGH resonance risk.")
-    elif rr > 0.3:
-        insights.append("🟡 Elevated resonance risk.")
-    else:
-        insights.append("🟢 Low resonance risk.")
-    
-    return insights
-
- Dynamics", these metrics help identify ETFs with robust 
-structural resilience versus those prone to destabilizing dynamics under stress.
+Inspired by Donella Meadows' "Leverage Points" and Sterman's "Business Dynamics",
+these metrics help identify ETFs with robust structural resilience versus those
+prone to destabilizing dynamics under stress.
 
 Source knowledge: k238 (systems thinking), k268 (self-improvement research with SD)
 """
@@ -83,8 +20,9 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     sector_lower = sector.lower()
     
     # New Energy/Clean Tech - policy-driven strong positive feedback
-    new_energy_keywords = ["new energy", "clean energy", "renewable", "solar", "wind", 
-                           "battery", "EV", "electric vehicle", "hydrogen", "storage"]
+    new_energy_keywords = ["new energy", "clean energy", "renewable", "solar", "wind",
+                           "battery", "EV", "electric vehicle", "hydrogen", "storage",
+                           "新能源", "光伏", "风电", "储能", "锂电", "电池", "氢能"]
     if any(kw in sector_lower for kw in new_energy_keywords):
         return {
             "typical_fdr": 0.85,
@@ -93,9 +31,10 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
         }
     
     # Digital Economy/Platforms
-    digital_keywords = ["digital economy", "platform economy", "e-commerce", 
+    digital_keywords = ["digital economy", "platform economy", "e-commerce",
                         "social media", "marketplace", "app ecosystem", "data services",
-                        "cloud computing", "digital transformation", "internet platforms"]
+                        "cloud computing", "digital transformation", "internet platforms",
+                        "数字经济", "互联网", "平台", "云计算", "5g", "通信"]
     if any(kw in sector_lower for kw in digital_keywords):
         return {
             "typical_fdr": 0.65,
@@ -106,7 +45,7 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     # AI/Machine Learning
     ai_keywords = ["artificial intelligence", "ai", "machine learning", "deep learning",
                    "large language model", "llm", "generative ai", "transformer",
-                   "neural network", "algorithmic trading ai"]
+                   "neural network", "algorithmic trading ai", "人工智能", "算力"]
     if any(kw in sector_lower for kw in ai_keywords):
         return {
             "typical_fdr": 0.8,
@@ -127,7 +66,8 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     
     # Chip/Fabrication (Foundries)
     chip_fab_keywords = ["semiconductor fabrication", "wafer foundry", "chip manufacturing",
-                         "semiconductor foundry", "semiconductors", "integrated circuits"]
+                         "semiconductor foundry", "semiconductors", "integrated circuits",
+                         "半导体", "芯片", "集成电路"]
     if any(kw in sector_lower for kw in chip_fab_keywords):
         return {
             "typical_fdr": 0.6,
@@ -137,7 +77,8 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     
     # Biotechnology/Drug Discovery
     bio_keywords = ["biotechnology", "bio", "biotech", "drug discovery", "gene therapy",
-                    "precision medicine", "cell therapy", "immunotherapy", "vaccine development"]
+                    "precision medicine", "cell therapy", "immunotherapy", "vaccine development",
+                    "医药", "生物", "创新药", "医疗器械", "疫苗", "制药"]
     if any(kw in sector_lower for kw in bio_keywords):
         return {
             "typical_fdr": 0.15,
@@ -158,7 +99,7 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     # Advanced Manufacturing / Robotics
     robot_industrial_keywords = ["industrial robotics", "collaborative robot", "cobots",
                                  "smart factory", "industry 4.0", "manufacturing automation",
-                                 "robotic process automation", "RPA"]
+                                 "robotic process automation", "RPA", "军工", "机器人", "自动化"]
     if any(kw in sector_lower for kw in robot_industrial_keywords):
         return {
             "typical_fdr": 0.4,
@@ -167,8 +108,9 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
         }
     
     # Traditional Tech/Software
-    tech_keywords = ["tech", "technology", "computer", "software", "internet", 
-                     "saaS", "enterprise software", "cloud", "platform", "big data"]
+    tech_keywords = ["tech", "technology", "computer", "software", "internet",
+                     "saaS", "enterprise software", "cloud", "platform", "big data",
+                     "软件", "计算机", "电子", "信息技术"]
     if any(kw in sector_lower for kw in tech_keywords):
         return {
             "typical_fdr": 0.75,
@@ -179,7 +121,8 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     # Financial Services
     finance_keywords = ["finance", "banking", "insurance", "securities",
                        "asset management", "investment banking", "hedge fund",
-                       "fintech", "payment processing", "credit", "derivatives"]
+                       "fintech", "payment processing", "credit", "derivatives",
+                       "金融", "银行", "证券", "保险", "地产"]
     if any(kw in sector_lower for kw in finance_keywords):
         return {
             "typical_fdr": 0.4,
@@ -189,7 +132,7 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     
     # Healthcare (general)
     health_keywords = ["healthcare", "hospital", "medical devices", "telemedicine",
-                       "health insurance", "treatment", "diagnosis"]
+                       "health insurance", "treatment", "diagnosis", "医疗", "健康"]
     if any(kw in sector_lower for kw in health_keywords):
         return {
             "typical_fdr": 0.0,
@@ -198,9 +141,10 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
         }
     
     # Advanced Manufacturing / Industrial
-    manufacturing_keywords = ["advanced manufacturing", "industrial automation", 
+    manufacturing_keywords = ["advanced manufacturing", "industrial automation",
                               "heavy machinery", "industrial supplies", "capital goods",
-                              "equipment", "machinery", "fabricated metal products"]
+                              "equipment", "machinery", "fabricated metal products",
+                              "制造", "机械", "工业", "基建", "高端装备"]
     if any(kw in sector_lower for kw in manufacturing_keywords):
         return {
             "typical_fdr": 0.1,
@@ -211,7 +155,7 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     # Consumer/Staples
     consumer_keywords = ["consumer", "retail", "food", "beverage", "personal care",
                         "household products", "discretionary spending", "supermarket",
-                        "consumer goods"]
+                        "consumer goods", "消费", "食品", "饮料", "零售", "红利", "养殖"]
     if any(kw in sector_lower for kw in consumer_keywords):
         return {
             "typical_fdr": -0.5,
@@ -221,7 +165,9 @@ def _get_sector_profile(sector: str) -> Optional[Dict]:
     
     # Energy/Resources
     energy_keywords = ["energy", "oil", "natural gas", "coal", "mining",
-                       "metal", "commodity", "agriculture", "fossil fuels", "minerals"]
+                       "metal", "commodity", "agriculture", "fossil fuels", "minerals",
+                       "能源", "石油", "煤炭", "资源", "周期", "化工", "有色", "钢铁",
+                       "贵金属", "黄金", "农业", "公用事业"]
     if any(kw in sector_lower for kw in energy_keywords):
         return {
             "typical_fdr": -0.2,
