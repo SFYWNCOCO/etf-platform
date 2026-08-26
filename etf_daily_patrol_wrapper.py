@@ -34,6 +34,33 @@ def _safe(value, decimals=2):
         return str(value)[:8]
 
 
+def _run_acceptance():
+    """尾部自动验收：断言今日产物，写 data/etf_acceptance_latest.json。"""
+    print()
+    print("## ✅ 自动验收")
+    try:
+        import acceptance_check
+        result = acceptance_check.validate_daily_outputs()
+        checks = result.get("checks", []) if isinstance(result, dict) else []
+        if not isinstance(result, dict) or not isinstance(checks, list):
+            raise ValueError("validate_daily_outputs 返回结构异常")
+    except Exception as e:
+        print(f"❌ 验收器故障: {type(e).__name__}: {str(e)[:200]}")
+        return
+
+    if not result.get("all_ok", False):
+        print("⚠️ 验收告警")
+    for c in checks:
+        mark = "✅" if c.get("ok") else "❌"
+        print(f"- {mark} {c.get('name', '?')}: {c.get('detail', '')}")
+
+    out = BASE / "data" / "etf_acceptance_latest.json"
+    try:
+        out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as e:
+        print(f"❌ 验收结果写入失败: {type(e).__name__}: {str(e)[:120]}")
+
+
 def main():
     print(f"# 🦞 ETF 每日巡检快报")
     print(f"> {datetime.now().strftime('%Y-%m-%d %H:%M')} | 轻量模式(<60s)")
@@ -147,6 +174,8 @@ def main():
         print(f"> ⚠️ Top3 计算失败: {type(e).__name__}: {str(e)[:140]}")
         print("> 跳过推荐模块（不影响市场概览数据）")
 
+    print()
+    _run_acceptance()
     print()
     print("## ⚠️ 风险提示")
     print("- 数据来源: Sina 实时行情 + 20日动量排名")
