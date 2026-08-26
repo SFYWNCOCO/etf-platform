@@ -658,10 +658,20 @@ def _build_data_sources(code, kline_ts, quote_meta, news_label):
 def _kb_reasons_for_sector(sector, registry=None):
     """返回与板块相关的至多 3 条 KB 依据 [{kcode, title}]。
 
-    匹配策略：registry 条目的 title/consumer 含板块关键词（SECTOR_TO_MEGA 键），
-    或 mode∈{signal,layer} 且 consumer 属于分析链（analysis/layers/decision 下）。
-    简单关键词映射，不做语义检索；任何异常返回 []（失败安全）。
+    未显式传入 registry 时（生产路径）优先查 sector_kb_map 板块映射（附 title），
+    未命中回退到 registry 关键词匹配；显式传入 registry 表示调用方指定数据源，
+    走 registry 匹配。匹配策略：registry 条目的 title/consumer 含板块关键词
+    （SECTOR_TO_MEGA 键），或 mode∈{signal,layer} 且 consumer 属于分析链。
+    任何异常返回 []（失败安全）。
     """
+    if registry is None:
+        try:
+            from etf_platform.kb.sector_kb_map import get_sector_kb_codes
+            mapped = get_sector_kb_codes(sector)
+            if mapped:
+                return [{"kcode": m["kcode"], "title": m["title"]} for m in mapped[:3]]
+        except Exception:
+            pass
     try:
         if registry is None:
             from etf_platform.kb.registry import KBRegistry

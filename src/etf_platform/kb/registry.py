@@ -70,25 +70,52 @@ class KBRegistry:
         self._load_or_seed()
 
     def _load_or_seed(self):
-        """从数据文件加载注册表；文件缺失或损坏时回退到内置初始数据。"""
+        """从数据文件加载注册表；文件缺失或损坏时回退到内置初始数据，并补登板块映射 code。"""
         try:
             data = json.loads(self.path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             data = None
         if isinstance(data, dict):
             self._registry = {k: v for k, v in data.items() if isinstance(v, dict)}
-            return
-        for code in _BUILTIN_CODES:
-            meta = _BUILTIN_META.get(code, {})
-            self._registry[code] = {
-                "code": code,
-                "title": meta.get("title", "<unknown>"),
-                "source_file": meta.get("source_file", "<unknown>"),
-                "consumer": meta.get("consumer", "<unknown>"),
-                "mode": meta.get("mode", "research"),
-                "status": "active",
-            }
+        else:
+            for code in _BUILTIN_CODES:
+                meta = _BUILTIN_META.get(code, {})
+                self._registry[code] = {
+                    "code": code,
+                    "title": meta.get("title", "<unknown>"),
+                    "source_file": meta.get("source_file", "<unknown>"),
+                    "consumer": meta.get("consumer", "<unknown>"),
+                    "mode": meta.get("mode", "research"),
+                    "status": "active",
+                }
+        # 仅默认注册表路径合并板块映射：临时注册表（测试注入）保持独立语义
+        if self.path == _DEFAULT_REGISTRY_PATH:
+            self._merge_sector_map_codes()
         self._save()
+
+    def _merge_sector_map_codes(self):
+        """把 sector_kb_map 板块映射中的 k-code 补登入注册表（title/source_file 取自映射）。
+
+        保证"0假集成"：代码中引用的每个 k\\d{3} 都有登记记录。sector_kb_map
+        由 L34 催化剂层与周度推荐真实消费，故 mode 记 layer、consumer 记映射文件。
+        """
+        try:
+            from etf_platform.kb.sector_kb_map import SECTOR_KB_CODES
+        except Exception:
+            return
+        for items in SECTOR_KB_CODES.values():
+            for item in items:
+                code = item.get("kcode")
+                if not code or code in self._registry:
+                    continue
+                self._registry[code] = {
+                    "code": code,
+                    "title": item.get("title", "<unknown>"),
+                    "source_file": item.get("source_file", "<unknown>"),
+                    "consumer": "kb/sector_kb_map.py",
+                    "mode": "layer",
+                    "status": "active",
+                }
 
     def _save(self):
         """将注册表写入数据文件，目录不存在时自动创建。

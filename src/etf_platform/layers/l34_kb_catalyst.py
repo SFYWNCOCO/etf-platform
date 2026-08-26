@@ -415,18 +415,29 @@ def score_l34_layer(sector: str) -> dict[str, Any]:
 
 
 def get_kb_catalyst_summary(sector: str) -> str:
-    """生成L34催化剂摘要(供报告展示)."""
+    """生成L34催化剂摘要(供报告展示)，尾部追加板块KB依据段(至多3条)。"""
     result = score_l34_layer(sector)
     detail = result["detail"]
     if not detail["catalysts"] and not detail["risks"]:
-        return "L34: 无KB催化剂信号"
+        parts = ["L34: 无KB催化剂信号"]
+    else:
+        parts = [f"L34={result['score']:.1f}"]
+        for c in detail["catalysts"][:3]:
+            parts.append(f"+{c['boost']:.1f} {c['name']}({c['k_code']})")
+        for r in detail["risks"][:2]:
+            parts.append(f"-{r['penalty']:.1f} {r['name']}({r['k_code']})")
+    base = " | ".join(parts)
 
-    parts = [f"L34={result['score']:.1f}"]
-    for c in detail["catalysts"][:3]:
-        parts.append(f"+{c['boost']:.1f} {c['name']}({c['k_code']})")
-    for r in detail["risks"][:2]:
-        parts.append(f"-{r['penalty']:.1f} {r['name']}({r['k_code']})")
-    return " | ".join(parts)
+    try:
+        from etf_platform.kb.sector_kb_map import get_sector_kb_codes
+        mapped = get_sector_kb_codes(sector)[:3]
+        if mapped:
+            base += " | KB依据: " + "; ".join(
+                f"{m['kcode']} {m['title']}" for m in mapped
+            )
+    except Exception:
+        pass
+    return base
 
 
 # CLI入口

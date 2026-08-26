@@ -140,24 +140,49 @@ def main():
                 vol_m = f"{int(volume)/1e6:.1f}M" if isinstance(volume, (int,float)) and volume >= 1e6 else str(volume)
                 print(f"| {rec.get('rank','?')} | {sector} | {code} | {name} | {float(momentum):.2f}% | {vol_m} |")
 
+            # P2-B: 单行理由链（新格式，layer_breakdown 存在时）；旧格式退化为溯源+KB两行
             for rec in data.get('recommendations', [])[:3]:
-                ds = rec.get('data_sources') or {}
-                if not isinstance(ds, dict):
+                lb = rec.get('layer_breakdown') if isinstance(rec.get('layer_breakdown'), dict) else {}
+                ds = rec.get('data_sources') if isinstance(rec.get('data_sources'), dict) else {}
+                kb = rec.get('kb_reasons') if isinstance(rec.get('kb_reasons'), list) else []
+                has_layer = lb.get('momentum') is not None or lb.get('net_layers') is not None or lb.get('gated_out') is not None
+                if has_layer:
+                    chain = []
+                    mom = lb.get('momentum')
+                    if mom is not None:
+                        try:
+                            chain.append(f"动量<{float(mom):+.2f}%(20d)>")
+                        except (TypeError, ValueError):
+                            pass
+                    net = lb.get('net_layers')
+                    if net is not None:
+                        filt = f"净{net}层同向"
+                        if lb.get('gated_out'):
+                            filt += "/低置信gated"
+                        chain.append(f"过滤<{filt}>")
+                    if ds.get("kline_as_of"):
+                        chain.append(f"K线<{ds['kline_as_of']}>")
+                    if ds.get("quote_source"):
+                        chain.append(f"行情<{ds['quote_source']}>")
+                    if ds.get("news_status"):
+                        chain.append(f"新闻<{ds['news_status']}>")
+                    if kb:
+                        kcodes = ",".join(r.get("kcode", "") for r in kb if isinstance(r, dict) and r.get("kcode"))
+                        if kcodes:
+                            chain.append(f"KB<{kcodes}>")
+                    if chain:
+                        print(f"- **{rec.get('name', rec.get('code', '?'))}** 理由链: {' | '.join(chain)}")
                     continue
+                # 旧格式退化：溯源行 + KB依据行（字段缺失时跳过该行）
                 if not any(ds.get(k) for k in ("kline_as_of", "quote_source", "quote_as_of", "news_status")):
                     continue
                 k = ds.get("kline_as_of") or "N/A"
                 q = ds.get("quote_source") or "N/A"
                 n = ds.get("news_status") or "N/A"
                 print(f"- **{rec.get('name', rec.get('code', '?'))}** 溯源: K线<{k}> | 行情<{q}> | 新闻<{n}>")
-
-            # 批次D: k-code 推荐理由摘要（.get 容错，空则跳过）
-            for rec in data.get('recommendations', [])[:3]:
-                kb = rec.get('kb_reasons') or []
-                if not isinstance(kb, list) or not kb:
-                    continue
-                kcodes = ", ".join(f"{r.get('kcode', '?')}" for r in kb if isinstance(r, dict))
-                print(f"- **{rec.get('name', rec.get('code', '?'))}** KB依据: {kcodes}")
+                if kb:
+                    kcodes = ", ".join(f"{r.get('kcode', '?')}" for r in kb if isinstance(r, dict))
+                    print(f"- **{rec.get('name', rec.get('code', '?'))}** KB依据: {kcodes}")
 
             top_sectors = data.get("momentum_top3_sectors", data.get("top_sectors", []))
             if top_sectors:
