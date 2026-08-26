@@ -1,0 +1,40 @@
+{
+  "date": "2026-08-10",
+  "profile": "均衡",
+  "timestamp": "2026-08-10T10:11:03.328711",
+  "top3": [
+    {
+      "code": "159732",
+      "name": "消费电子ETF华夏",
+      "sector": "消费",
+      "two_week_score": 88,
+      "pipeline_score": 5.17,
+      "z_composite": 0.618,
+      "trend_signal": "weak",
+      "change_20d": -11.5,
+      "change_10d": -2.6
+    },
+    {
+      "code": "518880",
+      "name": "黄金ETF华安",
+      "sector": "贵金属",
+      "two_week_score": 75,
+      "pipeline_score": 5.02,
+      "z_composite": 0.057,
+      "trend_signal": "neutral",
+      "change_20d": 6.1,
+      "change_10d": 5.0
+    },
+    {
+      "code": "512690",
+      "name": "酒ETF",
+      "sector": "白酒消费",
+      "two_week_score": 72,
+      "pipeline_score": 4.94,
+      "z_composite": -0.021,
+      "trend_signal": "overbought",
+      "change_20d": 14.5,
+      "change_10d": 7.1
+    }
+  ]
+}

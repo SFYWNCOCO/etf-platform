@@ -1,0 +1,67 @@
+{
+  "date": "2026-08-25",
+  "profile": "均衡",
+  "timestamp": "2026-08-25T02:38:42.111627",
+  "top3": [
+    {
+      "code": "512480",
+      "name": "半导体ETF",
+      "sector": "半导体设备",
+      "two_week_score": 89,
+      "pipeline_score": 4.43,
+      "z_composite": 1.167,
+      "z_factors": {
+        "oversold_depth": 2.0,
+        "risk_adj_momentum": -1.08,
+        "drawdown_recov": 1.85,
+        "sector_flow": 3.0,
+        "quality_elastic": 1.07,
+        "news_sentiment": 0.19,
+        "behavioral": 0.0
+      },
+      "trend_signal": "plunging",
+      "change_20d": -10.1,
+      "change_10d": -6.6
+    },
+    {
+      "code": "159995",
+      "name": "芯片ETF",
+      "sector": "半导体",
+      "two_week_score": 84,
+      "pipeline_score": 4.56,
+      "z_composite": 1.292,
+      "z_factors": {
+        "oversold_depth": 2.48,
+        "risk_adj_momentum": -1.28,
+        "drawdown_recov": 1.85,
+        "sector_flow": 3.0,
+        "quality_elastic": 0.67,
+        "news_sentiment": 0.19,
+        "behavioral": 0.0
+      },
+      "trend_signal": "plunging",
+      "change_20d": -12.6,
+      "change_10d": -7.3
+    },
+    {
+      "code": "159819",
+      "name": "AI ETF",
+      "sector": "AI算力",
+      "two_week_score": 82,
+      "pipeline_score": 4.69,
+      "z_composite": 0.923,
+      "z_factors": {
+        "oversold_depth": 2.49,
+        "risk_adj_momentum": -1.49,
+        "drawdown_recov": 0.56,
+        "sector_flow": -0.3,
+        "quality_elastic": 0.28,
+        "news_sentiment": 2.8,
+        "behavioral": 0.0
+      },
+      "trend_signal": "plunging",
+      "change_20d": -12.7,
+      "change_10d": -7.6
+    }
+  ]
+}
