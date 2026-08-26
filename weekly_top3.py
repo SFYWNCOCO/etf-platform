@@ -622,6 +622,38 @@ def _get_news_freshness_label(news_signals):
         return f"🔴 {min_age}天前（建议刷新）"
 
 
+def _build_data_sources(code, kline_ts, quote_meta, news_label):
+    """构建单只推荐的数据溯源信息（纯增量字段，不影响推荐逻辑）。
+
+    返回 {"kline_as_of": iso|None, "quote_source": str|None,
+          "quote_as_of": iso|None, "news_status": str}
+    """
+    kline_as_of = None
+    if kline_ts:
+        try:
+            if isinstance(kline_ts, (int, float)) and not isinstance(kline_ts, bool):
+                kline_as_of = datetime.fromtimestamp(kline_ts).isoformat()
+            else:
+                kline_as_of = str(kline_ts)
+        except (ValueError, OverflowError, OSError):
+            kline_as_of = None
+
+    quote_source = None
+    quote_as_of = None
+    if isinstance(quote_meta, dict):
+        quote_source = quote_meta.get("source")
+        qts = quote_meta.get("ts") or quote_meta.get("timestamp")
+        if qts:
+            quote_as_of = str(qts)
+
+    return {
+        "kline_as_of": kline_as_of,
+        "quote_source": quote_source,
+        "quote_as_of": quote_as_of,
+        "news_status": news_label or "",
+    }
+
+
 def _assess_momentum_maturity(mega, trends, mega_sectors):
     """
     判断大板块的动量处于什么阶段:
@@ -690,11 +722,13 @@ def main():
     
     # 获取实时行情中的成交量数据（用于流动性排序）
     live_prices = {}
+    quote_meta = None
     try:
         from etf_platform.data.live_price_bridge import fetch_live_prices
         all_codes = list(trends.keys())
         # 限制数量避免超时
         prices = fetch_live_prices(all_codes[:300])
+        quote_meta = prices.get("_meta") if isinstance(prices, dict) else None
         if prices and "_meta" not in prices:
             live_prices = prices
         else:
@@ -795,7 +829,8 @@ def main():
     
     # ── P1-2: 每个板块的层贡献分值（供归因）──
     mega_layer_map = {s: d for s, d in selected_mega}
-    
+    from etf_platform.data.kline import _trend_ts as _kline_ts_map
+
     for i, p in enumerate(final_picks, 1):
         p_mega = code_to_sector.get(p["code"], ("?", "?"))[1]
         md = mega_layer_map.get(p_mega, {})
@@ -819,6 +854,9 @@ def main():
                 "net_layers": md.get("net_layers", 0),
                 "gated_out": md.get("gated_out", False),
             },
+            "data_sources": _build_data_sources(
+                p["code"], _kline_ts_map.get(p["code"]), quote_meta, news_age_info,
+            ),
         }
         output["recommendations"].append(rec)
     
@@ -862,6 +900,7 @@ def main():
                     "name": rec["name"],
                     "mega_sector": rec["mega_sector"],
                     "layer_breakdown": rec["layer_breakdown"],
+                    "data_sources": rec["data_sources"],
                     "position_pct": per_etf_pct,
                     "regime": regime_label,
                 }, ensure_ascii=False) + "\n")

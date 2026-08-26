@@ -113,6 +113,17 @@ def main():
                 vol_m = f"{int(volume)/1e6:.1f}M" if isinstance(volume, (int,float)) and volume >= 1e6 else str(volume)
                 print(f"| {rec.get('rank','?')} | {sector} | {code} | {name} | {float(momentum):.2f}% | {vol_m} |")
 
+            for rec in data.get('recommendations', [])[:3]:
+                ds = rec.get('data_sources') or {}
+                if not isinstance(ds, dict):
+                    continue
+                if not any(ds.get(k) for k in ("kline_as_of", "quote_source", "quote_as_of", "news_status")):
+                    continue
+                k = ds.get("kline_as_of") or "N/A"
+                q = ds.get("quote_source") or "N/A"
+                n = ds.get("news_status") or "N/A"
+                print(f"- **{rec.get('name', rec.get('code', '?'))}** 溯源: K线<{k}> | 行情<{q}> | 新闻<{n}>")
+
             top_sectors = data.get("momentum_top3_sectors", data.get("top_sectors", []))
             if top_sectors:
                 print()
