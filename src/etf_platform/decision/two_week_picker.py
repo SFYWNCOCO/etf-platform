@@ -52,6 +52,7 @@ from pathlib import Path
 BASE = Path(__file__).resolve().parent.parent.parent.parent  # etf-platform root
 sys.path.insert(0, str(BASE / "src"))
 
+from etf_platform.analysis.factor_dynamic_weights import _get_sentiment_raw
 from etf_platform.config_loader import load_etfs
 from etf_platform.data.kline import get_trend
 
@@ -79,13 +80,14 @@ def _clamp_z(z_vals: list[float], cap: float = 3.0) -> list[float]:
 # We Z-score the raw values, then weighted-composite.
 
 FACTORS = [
+    # 权重与 factor_dynamic_weights.BASE_WEIGHTS / d751 对齐：
+    # news_sentiment 从 oversold_depth/risk_adj_momentum/drawdown_recov/sector_flow
+    # 各让出 0.02，合计 0.08；quality_elastic 保持 0.03。
     # NOTE v3.3: 已移除 trend_momentum (与 oversold_depth 完全共线 r=-1.00, VIF=∞).
-    # 两者权重合计50%在Z-score标准化后完全抵消 — 实际贡献为0.
-    # 实证来自 factor_correlation.py 120只ETF分析 (2026-07-18).
     {
         "name": "oversold_depth",
         "raw": lambda t, p: -t.change_20d if t else 0,
-        "weight": 0.40,  # ← 原25%+25%合并，留10%重新分配 (IC=0.876)
+        "weight": 0.38,  # IC=0.876，让 0.02 给 news_sentiment
         "desc": "超跌深度(合并后)",
     },
     {
@@ -93,32 +95,38 @@ FACTORS = [
         "raw": lambda t, p: (
             (t.change_20d / max(t.volatility_20d, 1)) if t else 0
         ),
-        "weight": 0.25,  # +3% → IC=0.781
+        "weight": 0.23,  # IC=0.781，让 0.02 给 news_sentiment
         "desc": "风险调整动量(Z)",
     },
     {
         "name": "drawdown_recov",
         "raw": lambda t, p: -t.max_drawdown if t else 0,
-        "weight": 0.22,  # +3% → IC=0.680
+        "weight": 0.20,  # IC=0.680，让 0.02 给 news_sentiment
         "desc": "回撤修复潜力(Z)",
     },
     {
         "name": "sector_flow",
         "raw": lambda t, p: _get_sector_flow_raw(p.get("sector", ""), p.get("etf_code", "")),
-        "weight": 0.10,  # +3% → IC=0.255
+        "weight": 0.08,  # IC=0.255，让 0.02 给 news_sentiment
         "desc": "行业资金流(Z)",
     },
     {
         "name": "quality_elastic",
         "raw": lambda t, p: -p.get("score", 5.0),
-        "weight": 0.03,  # +1% → IC=0.076（不显著但保留为噪声阻尼）
+        "weight": 0.03,  # IC=0.076（不显著但保留为噪声阻尼）
         "desc": "质量弹性(Z)",
+    },
+    {
+        "name": "news_sentiment",
+        "raw": lambda t, p: _get_sentiment_raw(p.get("sector", ""), p.get("etf_code", "")),
+        "weight": 0.08,  # d751：新闻情绪进因子体系，fearful 期由动态权重放大
+        "desc": "新闻情绪因子(d751)",
     },
     {
         "name": "behavioral",
         "raw": lambda t, p: _calc_behavioral_alpha(p) - 50,
         "weight": 0.00,  # IC=0.000, p=1.00 — 完全无效
-        "desc": "行为Alpha(Z) [已实证移除]",
+        "desc": "行为Alpha(Z) [已实证移除，保留观察]",
     },
 ]
 
@@ -232,7 +240,8 @@ def _get_qvix_regime(debug: bool = False) -> str:
         if debug:
             print(f"  QVIX: {regime} (50={rd.get('qvix_50',0):.0f}/500={rd.get('qvix_500',0):.0f})")
         return regime
-    except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError):
+    except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError) as e:
+        logger.warning("two_week_picker: QVIX regime 获取失败，回退 normal: %s", str(e)[:120])
         return "normal"
 
 
@@ -325,7 +334,7 @@ def _collect_factors(candidates: list[tuple[str, dict]], pipe_map: dict[str, dic
     trend_map: dict[str, object] = {}
     new_scored: list[int] = []
 
-    for idx, (code, info) in enumerate(candidates):
+    for idx, (code, _info) in enumerate(candidates):
         trend = get_trend(code)
         if trend is None or trend.data_days < 10:
             continue
@@ -514,24 +523,25 @@ def format_report(top3: list[dict], date_str: str = "") -> str:
             if r["risk_level"] >= 0.7
             else ("🟡" if r["risk_level"] >= 0.4 else "🟢")
         )
+        score_display = f"{r['two_week_score']}/100" if r['two_week_score'] is not None else "N/A"
         lines.extend([
             f"\n  {i}. {r['code']} {r['name']}",
             f"     {'=' * 55}",
-            f"     Z-score综合: {r['two_week_score']}/100 | 穿透分: {r['pipeline_score']:.1f} | {c}风险: {r['risk_level']:.2f}",
+            f"     Z-score综合: {score_display} | 穿透分: {r['pipeline_score']:.1f} | {c}风险: {r['risk_level']:.2f}",
             f"     {'─' * 55}",
             f"     趋势: {r['trend_signal']} | 20日{r['change_20d']:+.1f}% | 10日{r['return_10d']:+.1f}%",
             f"     回撤{r['max_drawdown']:.1f}% | 波动率{r['volatility']:.0f}% | 量比{r['volume_ratio']:.2f}",
             f"     位置{r['position_pct']:.0f}% | 行业:{r['sector']}",
         ])
-        # Show Z-factor breakdown if available
+        # Show Z-factor breakdown if available（字段与 FACTORS 对齐，不再引用已移除的 vol_health）
         if "z_factors" in r:
             zf = r["z_factors"]
             lines.append(
                 f"     Z因子: 超跌{zf.get('oversold_depth',0):+.1f} "
-                f"回撤{zf.get('drawdown_recov',0):+.1f} "
-                f"弹性{zf.get('quality_elastic',0):+.1f} "
-                f"量比{zf.get('vol_health',0):+.1f} "
-                f"行为{zf.get('behavioral',0):+.1f}"
+                f"风险动量{zf.get('risk_adj_momentum',0):+.1f} "
+                f"回撤修复{zf.get('drawdown_recov',0):+.1f} "
+                f"资金流{zf.get('sector_flow',0):+.1f} "
+                f"情绪{zf.get('news_sentiment',0):+.1f}"
             )
 
     lines.append(f"\n{'=' * 65}")
