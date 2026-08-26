@@ -17,6 +17,14 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# 材料时效报告: 记录来自 yaml/plugin 静态条目的 as-of/stale 标记
+MATERIAL_FRESHNESS_REPORT = {}
+
+
+def material_freshness_report():
+    """返回 {mat_name: {"_data_as_of", "_stale"}} 时效报告."""
+    return MATERIAL_FRESHNESS_REPORT
+
 
 def _get_material_signals():
     """Get all materials from deep.py with caching.
@@ -74,9 +82,19 @@ def _get_material_signals():
                 "warning": f"来自material_capacity: {supply_risk}风险, {mat.get('capacity_level','')}",
                 "_source": "material_capacity.json",  # source marker
             }
-    except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+    except (IOError, OSError, json.JSONDecodeError, KeyError, ValueError, TypeError, AttributeError) as e:
         logger.debug("material_capacity merge failed: %s", e)
         pass
+
+    # 填充时效报告: 仅统计来自 yaml/plugin 的静态条目
+    MATERIAL_FRESHNESS_REPORT.clear()
+    for _name, _mat in merged.items():
+        _src = str(_mat.get("_source", ""))
+        if "yaml" in _src or "plugin" in _src:
+            MATERIAL_FRESHNESS_REPORT[_name] = {
+                "_data_as_of": _mat.get("_data_as_of"),
+                "_stale": _mat.get("_stale"),
+            }
 
     return merged
 
@@ -127,14 +145,17 @@ def material_layer_adjustments(etf_code: str) -> dict:
         # Signal = direction * bottleneck * (1-sub_years/10) * readiness_factor
         # High bottleneck + low substitution -> strong signal
         signal = direction * bottleneck * max(0.1, (1 - sub_years/10)) * (tech_readiness / 10)
-        mat_signals.append((mat_name, signal, mat.get("warning", ""), bottleneck))
-    
+        # 静态价陈旧: 降权为先验(×0.3), 不静默当实时
+        if mat.get("_stale"):
+            signal *= 0.3
+        mat_signals.append((mat_name, signal, mat.get("warning", ""), bottleneck, bool(mat.get("_stale"))))
+
     if mat_signals:
         # Aggregate: sum of all material signals, compressed non-linearly.
         # 修复: 原 cap ±2.0 在 253 材料库下被轻松打满(20+ 命中即恒 1.4),
         # 材料层对所有 ETF 失去区分度。改用 tanh 压缩: 保留单调性与方向,
         # 大信号饱和但不会抹平差异, 且不受命中数量线性放大影响。
-        total_signal = sum(s for _, s, _, _ in mat_signals)
+        total_signal = sum(s for _, s, _, _, _ in mat_signals)
         import math
         total_signal = 3.0 * math.tanh(total_signal / 5.0)
         
@@ -176,8 +197,8 @@ def material_layer_adjustments(etf_code: str) -> dict:
         
         prob = m.get("probability", 0.5)
         # Count completed steps
-        completed = sum(1 for s in m["milestones"] if "完成" in s.get("status", ""))
-        total = len(m["milestones"])
+        completed = sum(1 for s in m.get("milestones", []) if "完成" in s.get("status", ""))
+        total = len(m.get("milestones", []))
         progress = completed / total if total > 0 else 0
         
         # Signal: above 50% prob = positive, progress matters

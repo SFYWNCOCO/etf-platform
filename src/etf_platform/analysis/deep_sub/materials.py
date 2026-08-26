@@ -16,6 +16,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .materials_data import MATERIAL_PRICE_MONITOR
+from ...utils.freshness import as_of
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -64,12 +65,17 @@ def register_from_file(path):
     mats = cfg["materials"]
     if mats is None or not isinstance(mats, dict):
         return 0
+    # 静态快照时效: mtime 过旧 → 盖上 _stale, 消费端降权为先验
+    freshness = as_of(path)
     count = 0
     for name, data in mats.items():
         # 无 data = 注释占位, 跳过
         if data is None:
             continue
-        register_material(name, data)
+        entry = dict(data)
+        entry["_data_as_of"] = freshness["mtime_iso"]
+        entry["_stale"] = freshness["status"] == "stale"
+        register_material(name, entry)
         count += 1
     return count
 
@@ -83,8 +89,11 @@ def get_all_materials():
     return merged
 
 
-def _auto_load_plugins():
-    """模块加载时自动扫描 config/ 下的材料 YAML 文件."""
+# _auto_load_plugins 与 materials_freshness 共用的插件扫描范围
+_PLUGIN_YAMLS = ("material_prices.yaml", "emerging_materials.yaml", "material_quick_add.yaml")
+
+
+def _plugin_config_dir():
     # 路径修复: 本模块位于 etf_platform/analysis/deep_sub/materials.py
     # 5 级 .parent 到达 etf-platform/ 项目根目录:
     #   .parent            = deep_sub/
@@ -92,8 +101,18 @@ def _auto_load_plugins():
     #   .parent^3          = etf_platform/
     #   .parent^4          = src/
     #   .parent^5          = etf-platform/  ← + "/config"
-    config_dir = Path(__file__).resolve().parent.parent.parent.parent.parent / "config"
-    for fname in ("material_prices.yaml", "emerging_materials.yaml", "material_quick_add.yaml"):
+    return Path(__file__).resolve().parent.parent.parent.parent.parent / "config"
+
+
+def materials_freshness():
+    """返回三个插件 yaml 的时效快照 {fname: as_of(...)}."""
+    return {fname: as_of(_plugin_config_dir() / fname) for fname in _PLUGIN_YAMLS}
+
+
+def _auto_load_plugins():
+    """模块加载时自动扫描 config/ 下的材料 YAML 文件."""
+    config_dir = _plugin_config_dir()
+    for fname in _PLUGIN_YAMLS:
         p = config_dir / fname
         if p.exists():
             register_from_file(p)
