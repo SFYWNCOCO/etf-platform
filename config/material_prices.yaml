@@ -1,3 +1,4 @@
+_refreshed_at: '2026-08-26T13:10:09'
 _refreshed_at: '2026-08-26T12:11:46'
 _refreshed_at: '2026-08-26T12:11:34'
 materials:
@@ -144,7 +145,8 @@ materials:
   # ═══════════════════════════════════════════
   碳酸锂(电池级):
     current: "11.54万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 从60万跌至成本线"
     unit: "万元/吨"
     affects: ["516160","515030","159755","588800"]
@@ -250,7 +252,8 @@ materials:
 
   光伏玻璃(2.0mm):
     current: "18.65元/㎡"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 供需平衡"
     unit: "元/㎡"
     affects: ["516160","515030","159755"]
@@ -314,7 +317,8 @@ materials:
 
   镍(电解镍):
     current: "14.42万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 印尼产能释放"
     unit: "万元/吨"
     affects: ["512660","512670"]
@@ -579,7 +583,8 @@ materials:
 
   铝(电解铝):
     current: "2.05万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 震荡"
     unit: "万元/吨"
     affects: ["512400"]
@@ -595,7 +600,8 @@ materials:
 
   锌(0#锌锭):
     current: "2.34万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 需求偏弱"
     unit: "万元/吨"
     affects: ["512400"]
@@ -611,7 +617,8 @@ materials:
 
   铅(1#铅锭):
     current: "1.70万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 铅酸电池稳定需求"
     unit: "万元/吨"
     affects: ["512400"]
@@ -627,7 +634,8 @@ materials:
 
   锡:
     current: "26.28万元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↑ 焊料+光伏焊带需求"
     unit: "万元/吨"
     affects: ["512400","159819"]
@@ -643,7 +651,8 @@ materials:
 
   硅铁(75#):
     current: "6,464元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 钢铁行业减产"
     unit: "元/吨"
     affects: ["512400"]
@@ -722,7 +731,8 @@ materials:
 
   PTA:
     current: "5,940元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 产能过剩"
     unit: "元/吨"
     affects: ["159985","515170"]
@@ -738,7 +748,8 @@ materials:
 
   甲醇:
     current: "2,652元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 煤制甲醇成本支撑"
     unit: "元/吨"
     affects: ["159985","515170"]
@@ -754,7 +765,8 @@ materials:
 
   PVC:
     current: "5,556元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 地产需求疲弱"
     unit: "元/吨"
     affects: ["159985","515170","512400"]
@@ -770,7 +782,8 @@ materials:
 
   尿素:
     current: "2,436元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 淡储+出口政策博弈"
     unit: "元/吨"
     affects: ["159825","515170"]
@@ -897,7 +910,8 @@ materials:
   # ═══════════════════════════════════════════
   大豆(进口):
     current: "4,730元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↑ 巴西减产+中美关税"
     unit: "元/吨"
     affects: ["159825","159865","515170"]
@@ -913,7 +927,8 @@ materials:
 
   玉米:
     current: "2,299元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 国储拍卖稳价"
     unit: "元/吨"
     affects: ["159825","159865"]
@@ -929,7 +944,8 @@ materials:
 
   生猪(三元):
     current: "14.85元/kg"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 产能去化缓慢"
     unit: "元/kg"
     affects: ["159825","159865"]
@@ -960,7 +976,8 @@ materials:
 
   白糖(SR):
     current: "6,650元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↑ 国际糖价走强"
     unit: "元/吨"
     affects: ["159825","515170"]
@@ -976,7 +993,8 @@ materials:
 
   棉花(328):
     current: "16,640元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 新疆产量新高"
     unit: "元/吨"
     affects: ["159825","515170"]
@@ -992,7 +1010,8 @@ materials:
 
   天然橡胶(TSR20):
     current: "13,560元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↑ 轮胎出口+厄尔尼诺"
     unit: "元/吨"
     affects: ["159825","512400"]
@@ -1011,7 +1030,8 @@ materials:
   # ═══════════════════════════════════════════
   螺纹钢(HRB400):
     current: "3,586元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "↓ 地产开工低迷"
     unit: "元/吨"
     affects: ["512400","510300","159915"]
@@ -1072,7 +1092,8 @@ materials:
 
   沥青:
     current: "3,681元/吨"
-    price_as_of: '2026-08-26T12:11:46'
+    price_as_of: '2026-08-26T13:10:09'
+    price_source: "akshare"
     trend: "→ 基建托底+原油联动"
     unit: "元/吨"
     affects: ["512400","510300"]

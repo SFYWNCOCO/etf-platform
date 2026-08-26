@@ -9,8 +9,12 @@
   1. 主路径：Sina 批量全量 → 归一化为 price_cache 格式
   2. 兜底：price<=0（盘前/停牌）时用 prev_close，change_pct=0
   3. 保护：有效条目过少（<50）视为源故障 → 保留旧缓存不覆盖
+
+尾部挂钩 (t5, 15:10 同批): save_cache 成功后 subprocess 调 scripts/material_price_refresh.py
+(timeout=180s); 挂钩失败只 loud 打印, 不影响主职责退出码。
 """
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -21,6 +25,26 @@ if str(SRC) not in sys.path:
 
 CACHE_FILE = BASE / "data" / "price_cache.json"
 MIN_VALID = 50  # 低于此数视为源故障，保留旧缓存
+MATERIAL_SCRIPT = BASE / "scripts" / "material_price_refresh.py"
+
+
+def _hook_material_refresh():
+    """材料刷新挂钩: 双检(存在+py_compile)后运行, 失败 loud 打印不中断主职责."""
+    if not MATERIAL_SCRIPT.exists():
+        print(f"[price_cache] ⚠️ 未找到 {MATERIAL_SCRIPT.name}, 跳过材料刷新", file=sys.stderr); return
+    if subprocess.run([sys.executable, "-m", "py_compile", str(MATERIAL_SCRIPT)],
+                      capture_output=True).returncode != 0:
+        print(f"[price_cache] ⚠️ {MATERIAL_SCRIPT.name} py_compile 失败, 跳过挂钩", file=sys.stderr); return
+    try:
+        p = subprocess.run([sys.executable, str(MATERIAL_SCRIPT)], capture_output=True, text=True, errors="replace", timeout=180)
+    except subprocess.TimeoutExpired:
+        print("[price_cache] ❌ 材料刷新超时(>180s), 不中断主职责", file=sys.stderr); return
+    for line in (p.stdout or "").splitlines():
+        print(f"  [material] {line}")
+    if p.returncode != 0:
+        print(f"[price_cache] ❌ 材料刷新失败 rc={p.returncode}", file=sys.stderr)
+        if p.stderr:
+            print(f"[price_cache]   stderr: {(p.stderr or '').strip()[:300]}", file=sys.stderr)
 
 
 def _load_old_cache() -> dict:
@@ -65,6 +89,7 @@ def main() -> int:
 
     if save_cache(prices):
         print(f"[price_cache] ✅ 刷新 {len(prices)} 只 → {CACHE_FILE.name}")
+        _hook_material_refresh()
         return 0
     print("[price_cache] ❌ save_cache 失败", file=sys.stderr)
     return 1
