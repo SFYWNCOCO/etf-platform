@@ -527,7 +527,8 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
         l1 = ls.get("L1_ETF", 5)
         rl = max(0.1, min(0.9, (10 - l1) / 10)) if isinstance(l1, (int, float)) else 0.5
         composite = _compute_composite(ls, weights)  # trend not yet available at batch stage
-        ranked.append({"rank":0,"code":code,"name":r.get("name",""),"sector":r.get("sector",""),"risk_level":rl,"composite_score":composite,"layer_scores":ls,"reason":"","trend":{}, "_news_count": 0})
+        # composite_percentile 透传: pipeline 批量注解(展示用横截面百分位)随 ranked 输出, 供报告/日报读取
+        ranked.append({"rank":0,"code":code,"name":r.get("name",""),"sector":r.get("sector",""),"risk_level":rl,"composite_score":composite,"layer_scores":ls,"reason":"","trend":{}, "_news_count": 0, "composite_percentile": r.get("composite_percentile")})
 
     # v5.6: Filter non-investment sectors (cash equivalents have no alpha)
     investable = [r for r in ranked if r.get("sector", "") not in NON_INVESTMENT_SECTORS]
