@@ -471,6 +471,17 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
     elif codes is not None and results is not None:
         print(f"  穿透完成 ({len(results)}只)")
 
+    # ── S5 (批次D修正/选项3): 展示层注解，零行为变更 ──
+    # 挂点说明：weekly_top3 不消费 pipeline 分数（独立动量系统），故挂在
+    # screener 批量聚合点（全批 results 到齐后一次性注解，跨 chunk 一致）。
+    # 纯函数不改分值，仅拿注解列表并 merge composite_percentile 回 results；
+    # 权重计算/死层检测读到的仍是原始 layer_scores（回测验证零劣化）。
+    from ..pipeline import percentile_calibrate
+    _annotated = percentile_calibrate(results)
+    for _r, _a in zip(results, _annotated):
+        if isinstance(_a, dict) and "composite_percentile" in _a:
+            _r["composite_percentile"] = _a["composite_percentile"]
+
     # v5.4: Always detect dead layers (not just on first run)
     dead = _detect_dead_layers(results)
     if dead:

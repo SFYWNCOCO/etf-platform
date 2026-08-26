@@ -542,15 +542,68 @@ def _apply_factor_smart_beta(scores: dict, details: dict, sector: str, regime: s
         scores["L27_FactorBeta"] = 5.0
 
 
+# 参与 composite 合成的层键排除规则：bonus/detail 等非评分层不参与
+# （供 _compute_composite_score 使用）
+_COMPOSITE_EXCLUDE_KEYS = {
+    "L1_ControllabilityBonus", "L21_BiasDetail", "L22_Detail",
+    "L23_ValuationDetail", "L23_MicrostructureDetail",
+    "L24_DipFlow", "L24_DipSignal", "L33_Detail",
+    "L34_CatalystDetail", "L25_LiquidityDetail",
+    "L26_VolDetail", "L27_FactorDetail",
+}
+
+# 模块级开关：S5 composite 百分位化可整体关闭（回测对比用）
+PERCENTILE_CALIBRATION = True
+
+
+def _percentile_rank(value: float, sorted_vals: list) -> float:
+    """横截面百分位 [0,100] = rank/(n-1)*100；并列取平均 rank；n=1 返回 50（唯一值位置居中）。"""
+    n = len(sorted_vals)
+    if n <= 1:
+        return 50.0
+    less = sum(1 for v in sorted_vals if v < value)
+    equal = sum(1 for v in sorted_vals if v == value)
+    avg_pos = less + (equal - 1) / 2.0
+    return avg_pos / (n - 1) * 100
+
+
+def percentile_calibrate(results: list[dict], enable: bool = True) -> list[dict]:
+    """S5 (批次D修正/选项3): 展示层注解，零行为变更。
+
+    纯函数：不改输入 results，返回新列表。每个 result 为原 dict 的浅拷贝，
+    新增两个键：
+      - composite_percentile: 该批内最终 score 的横截面百分位 [0,100]
+        （n=1 返回 50，确定性行为）
+      - layer_scores_raw: 原始 layer_scores 的浅拷贝
+    score/composite_score/layer_scores 与输入完全相等。enable=False 或模块
+    开关关闭时同样返回浅拷贝新列表（不加注解）。
+    """
+    if not enable or not PERCENTILE_CALIBRATION:
+        return [dict(r) if isinstance(r, dict) else r for r in results]
+    valid_ids = {id(r) for r in results
+                 if isinstance(r, dict) and isinstance(r.get("layer_scores"), dict)}
+    if not valid_ids:
+        return [dict(r) if isinstance(r, dict) else r for r in results]
+    raw_scores = [r.get("score", 0.0) for r in results if id(r) in valid_ids]
+    raw_scores = [s if isinstance(s, (int, float)) else 0.0 for s in raw_scores]
+    sorted_scores = sorted(raw_scores)
+    out = []
+    for r in results:
+        if id(r) not in valid_ids:
+            out.append(dict(r) if isinstance(r, dict) else r)
+            continue
+        copy_r = dict(r)
+        copy_r["layer_scores_raw"] = dict(r["layer_scores"])
+        copy_r["composite_percentile"] = round(
+            _percentile_rank(r.get("score", 0.0), sorted_scores), 2)
+        out.append(copy_r)
+    return out
+
+
 def _compute_composite_score(scores: dict) -> float:
     """Weighted composite: exclude bonus/non-score keys, fall back to arithmetic mean."""
-    EXCLUDE_KEYS = {"L1_ControllabilityBonus", "L21_BiasDetail", "L22_Detail",
-                    "L23_ValuationDetail", "L23_MicrostructureDetail",
-                    "L24_DipFlow", "L24_DipSignal", "L33_Detail",
-                    "L34_CatalystDetail", "L25_LiquidityDetail",
-                    "L26_VolDetail", "L27_FactorDetail"}
     numeric = {k: v for k, v in scores.items()
-               if k not in EXCLUDE_KEYS and isinstance(v, (int, float))}
+               if k not in _COMPOSITE_EXCLUDE_KEYS and isinstance(v, (int, float))}
     if not numeric:
         return 0.0
     # Equal-weight composite (pipeline doesn't own screener's variance-based weights)

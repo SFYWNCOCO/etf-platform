@@ -151,6 +151,14 @@ def main():
                 n = ds.get("news_status") or "N/A"
                 print(f"- **{rec.get('name', rec.get('code', '?'))}** 溯源: K线<{k}> | 行情<{q}> | 新闻<{n}>")
 
+            # 批次D: k-code 推荐理由摘要（.get 容错，空则跳过）
+            for rec in data.get('recommendations', [])[:3]:
+                kb = rec.get('kb_reasons') or []
+                if not isinstance(kb, list) or not kb:
+                    continue
+                kcodes = ", ".join(f"{r.get('kcode', '?')}" for r in kb if isinstance(r, dict))
+                print(f"- **{rec.get('name', rec.get('code', '?'))}** KB依据: {kcodes}")
+
             top_sectors = data.get("momentum_top3_sectors", data.get("top_sectors", []))
             if top_sectors:
                 print()

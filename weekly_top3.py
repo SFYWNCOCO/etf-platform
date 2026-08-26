@@ -654,6 +654,38 @@ def _build_data_sources(code, kline_ts, quote_meta, news_label):
     }
 
 
+# ── KB 推荐理由注入（批次D：KB透明度，G3/C档增强）──
+def _kb_reasons_for_sector(sector, registry=None):
+    """返回与板块相关的至多 3 条 KB 依据 [{kcode, title}]。
+
+    匹配策略：registry 条目的 title/consumer 含板块关键词（SECTOR_TO_MEGA 键），
+    或 mode∈{signal,layer} 且 consumer 属于分析链（analysis/layers/decision 下）。
+    简单关键词映射，不做语义检索；任何异常返回 []（失败安全）。
+    """
+    try:
+        if registry is None:
+            from etf_platform.kb.registry import KBRegistry
+            registry = KBRegistry()
+        import json as _json
+        entries = _json.loads(registry.to_json())
+    except Exception:
+        return []
+    keywords = list(SECTOR_TO_MEGA.keys())
+    reasons = []
+    for code, meta in entries.items():
+        title = meta.get("title", "") or ""
+        consumer = meta.get("consumer", "") or ""
+        mode = meta.get("mode", "") or ""
+        hit = any(kw in title or kw in consumer for kw in keywords)
+        if not hit and mode in ("signal", "layer") and consumer.startswith(("analysis/", "layers/", "decision/")):
+            hit = True
+        if hit:
+            reasons.append({"kcode": code, "title": title})
+            if len(reasons) >= 3:
+                break
+    return reasons
+
+
 def _assess_momentum_maturity(mega, trends, mega_sectors):
     """
     判断大板块的动量处于什么阶段:
@@ -857,6 +889,7 @@ def main():
             "data_sources": _build_data_sources(
                 p["code"], _kline_ts_map.get(p["code"]), quote_meta, news_age_info,
             ),
+            "kb_reasons": _kb_reasons_for_sector(p_mega),
         }
         output["recommendations"].append(rec)
     
@@ -901,6 +934,7 @@ def main():
                     "mega_sector": rec["mega_sector"],
                     "layer_breakdown": rec["layer_breakdown"],
                     "data_sources": rec["data_sources"],
+                    "kb_reasons": rec.get("kb_reasons", []),
                     "position_pct": per_etf_pct,
                     "regime": regime_label,
                 }, ensure_ascii=False) + "\n")
