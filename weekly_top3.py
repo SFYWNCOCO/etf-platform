@@ -65,14 +65,14 @@ def _check_market_state():
     if t < time(9, 30):
         return "pre_market", "盘前"
     if time(9, 30) <= t < time(11, 30):
-        return "trading_morning", "🟢 早盘交易中"
+        return "trading_morning", " 早盘交易中"
     if time(11, 30) <= t < time(13, 0):
-        return "lunch_break", "🟡 午休"
+        return "lunch_break", " 午休"
     if time(13, 0) <= t < time(15, 0):
-        return "trading_afternoon", "🟢 午盘交易中"
+        return "trading_afternoon", " 午盘交易中"
     if time(15, 0) <= t < time(20, 0):
-        return "post_market", "⚪ 已收盘"
-    return "night", "⚪ 夜间"
+        return "post_market", " 已收盘"
+    return "night", " 夜间"
 
 
 def sector_to_mega(sector):
@@ -131,7 +131,7 @@ def _get_momentum_data():
     all_codes = [str(info.get("code", ck)) for ck, info in etfs.items()
                  if not is_broad_base(info.get("name", ""), info.get("sector", ""))]
     
-    print(f"  📡 获取 {len(all_codes)} 只ETF动量数据...", end="", flush=True)
+    print(f"   获取 {len(all_codes)} 只ETF动量数据...", end="", flush=True)
     trends = get_trend_batch(all_codes, parallel=True, max_workers=16)
     print(f" {len(trends)} 成功", flush=True)
     
@@ -146,19 +146,19 @@ def _get_momentum_data():
 def _get_regime(bench_kline, bench_trend):
     """判断市场状态 → 仓位建议"""
     if bench_trend is None:
-        return "unknown", 1.0, "⚪ 无数据"
+        return "unknown", 1.0, " 无数据"
     
     chg_20d = getattr(bench_trend, 'change_20d', 0)
     chg_60d = getattr(bench_trend, 'change_60d', 0)
     
     if chg_20d > 0 and chg_60d > 3:
-        return "bull", 1.0, "🟢 牛市满仓 (MA20↑ MA60↑)"
+        return "bull", 1.0, " 牛市满仓 (MA20↑ MA60↑)"
     elif chg_20d > -3 and chg_60d > 0:
-        return "cautious", 0.7, "🟡 谨慎7仓 (MA20横 MA60↑)"
+        return "cautious", 0.7, " 谨慎7仓 (MA20横 MA60↑)"
     elif chg_20d > -8:
-        return "risk_off", 0.5, "🟠 半仓防御 (MA20↓)"
+        return "risk_off", 0.5, " 半仓防御 (MA20↓)"
     else:
-        return "bear", 0.3, "🔴 熊市轻仓 (MA20↓ MA60↓)"
+        return "bear", 0.3, " 熊市轻仓 (MA20↓ MA60↓)"
 
 
 def _get_sector_flows(live=False) -> dict:
@@ -222,7 +222,7 @@ def _get_style_rotation(trends: dict) -> list:
             return []
         return recommend_style(momentum_snapshots, code_to_style, top_n=4)
     except Exception as e:
-        print(f"  ⚠️ 风格轮动失败: {e}", file=sys.stderr)
+        print(f"  [警告] 风格轮动失败: {e}", file=sys.stderr)
         return []
 
 
@@ -290,18 +290,18 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
                     decay = 1.0
                 if direction == "看空" and strength == "强":
                     news_adj = -5.0 * decay  # 强看空 → 大幅降权（旧闻衰减）
-                    news_label = "🔴强看空"
+                    news_label = "强看空"
                 elif direction == "看空":
                     news_adj = -2.0 * decay
-                    news_label = "🔶看空"
+                    news_label = "看空"
                 elif direction == "看多" and strength == "强":
                     news_adj = +2.0 * decay  # 强看多 → 加分（旧闻衰减）
-                    news_label = "🟢强看多"
+                    news_label = "强看多"
                 elif direction == "看多":
                     news_adj = +0.5 * decay
-                    news_label = "🟢看多"
+                    news_label = "看多"
                 elif direction == "中性":
-                    news_label = "⚪中性"
+                    news_label = "中性"
             
             # ── 资金流修正（P0-2）──
             flow_adj = 0.0
@@ -311,24 +311,39 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
                 net_pct = fd["net_inflow_pct"]
                 if net_pct > 1.0:
                     flow_adj = +1.0
-                    flow_label = "💰流入"
+                    flow_label = "流入"
                 elif net_pct > 0:
                     flow_adj = +0.3
-                    flow_label = "💰微流入"
+                    flow_label = "微流入"
                 elif net_pct < -1.0:
                     flow_adj = -1.5
-                    flow_label = "💸流出"
+                    flow_label = "流出"
                 elif net_pct < 0:
                     flow_adj = -0.5
-                    flow_label = "💸微流出"
+                    flow_label = "微流出"
                 else:
-                    flow_label = "⚪资金平"
+                    flow_label = "资金平"
             
             # ── 估值/位置修正（P0-2）──
             val = _get_valuation_signal(mega, mega_sectors, trends)
             val_adj = val["valuation_penalty"]
-            
-            adjusted_mom = median_mom + news_adj + flow_adj + val_adj
+
+            # ── 催化状态修正（P2-2026-08-27：未来催化加分，已兑现降权）──
+            catalyst_adj = 0.0
+            catalyst_label = ""
+            try:
+                from scripts.catalyst_status import get_sector_boost
+                cat = get_sector_boost(mega)
+                if cat["status"] == "pending":
+                    catalyst_adj = min(2.0, cat["boost"])  # 未来催化 → 最多+2
+                    catalyst_label = f"⏳催化{cat['boost']:.1f}"
+                elif cat["status"] in ("triggered", "partial"):
+                    catalyst_adj = -min(2.0, cat.get("boost", 0.0) + 1.0)  # 已兑现 → 降权
+                    catalyst_label = "催化已兑现"
+            except Exception:
+                pass  # 催化层失败不影响主流程（信息层）
+
+            adjusted_mom = median_mom + news_adj + flow_adj + val_adj + catalyst_adj
             
             # ── 交叉验证：信号层计数（动量/新闻/资金流/估值）──
             layers_bullish = 0
@@ -359,6 +374,8 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
                 "flow_label": flow_label,
                 "valuation_level": val["valuation_level"],
                 "valuation_adjustment": val_adj,
+                "catalyst_adjustment": catalyst_adj,
+                "catalyst_label": catalyst_label,
                 "layers_bullish": layers_bullish,
                 "layers_bearish": layers_bearish,
                 "etf_count": len(momentum_vals),
@@ -372,7 +389,7 @@ def _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=Non
     # 修复：291 行 news_adj=-5.0*decay 已对旧闻衰减，这里无条件排除会让
     # 过期新闻永久锁死板块（fresh_days>7 时 decay=0.1 → 只该减 -0.5）。
     ranked = [(s, d) for s, d in ranked
-              if not (d.get("news_label") == "🔴强看空"
+              if not (d.get("news_label") == "强看空"
                       and d.get("news_adjustment", 0) <= -2.5)]
     
     # 动量成熟度惩罚：peaking板块降权，early板块加分
@@ -459,7 +476,7 @@ def _refresh_news_data():
                 capture_output=True, text=True, timeout=30, cwd=_HERE
             )
             if result.returncode == 0:
-                print("  ✅ 新闻数据已刷新", flush=True)
+                print("  [OK] 新闻数据已刷新", flush=True)
                 return True
     except Exception:
         pass
@@ -599,7 +616,7 @@ def _load_news_signals():
 def _get_news_freshness_label(news_signals):
     """显示新闻数据时效"""
     if not news_signals:
-        return "⚪ 无新闻数据"
+        return " 无新闻数据"
     
     ages = set()
     for mega, info in news_signals.items():
@@ -607,19 +624,19 @@ def _get_news_freshness_label(news_signals):
         ages.add(days)
     
     if not ages:
-        return "⚪ 无时效信息"
+        return " 无时效信息"
     
     min_age = min(ages)
     max_age = max(ages)
     
     if min_age <= 1:
-        return "🟢 今日新闻" if min_age == 0 else "🟢 昨日新闻"
+        return " 今日新闻" if min_age == 0 else " 昨日新闻"
     elif min_age <= 3:
-        return f"🟡 {min_age}-{max_age}天前"
+        return f" {min_age}-{max_age}天前"
     elif min_age <= 7:
-        return f"🟠 {min_age}天前"
+        return f" {min_age}天前"
     else:
-        return f"🔴 {min_age}天前（建议刷新）"
+        return f" {min_age}天前（建议刷新）"
 
 
 def _build_data_sources(code, kline_ts, quote_meta, news_label):
@@ -724,7 +741,7 @@ def _assess_momentum_maturity(mega, trends, mega_sectors):
             chg_20d.append(t.change_20d)
     
     if len(positions) < 3:
-        return "unknown", "⚪ 数据不足"
+        return "unknown", " 数据不足"
     
     avg_pos = statistics.mean(positions)
     avg_5d = statistics.mean(chg_5d)
@@ -736,21 +753,21 @@ def _assess_momentum_maturity(mega, trends, mega_sectors):
     turning_down = avg_5d < 0
     
     if turning_down and avg_20d > 5:
-        return "peaking", f"🔴 冲顶减速（5d={avg_5d:+.1f}%, 20d={avg_20d:+.1f}%）"
+        return "peaking", f" 冲顶减速（5d={avg_5d:+.1f}%, 20d={avg_20d:+.1f}%）"
     elif near_high and decelerating:
-        return "peaking", "🔴 冲顶（近高点+速度放缓）"
+        return "peaking", " 冲顶（近高点+速度放缓）"
     elif near_high:
-        return "mature", f"🟡 近高点(pos={avg_pos:.0f}%)"
+        return "mature", f" 近高点(pos={avg_pos:.0f}%)"
     elif decelerating and avg_20d > 5:
-        return "mature", f"🟡 动量减速（5d={avg_5d:+.1f}%, 20d={avg_20d:+.1f}%）"
+        return "mature", f" 动量减速（5d={avg_5d:+.1f}%, 20d={avg_20d:+.1f}%）"
     elif avg_5d > 0 and avg_20d > 3:
-        return "early", f"🟢 加速中（5d={avg_5d:+.1f}%）"
+        return "early", f" 加速中（5d={avg_5d:+.1f}%）"
     elif avg_20d < -10:
-        return "crashing", f"🔴 深跌({avg_20d:.0f}%) 等企稳"
+        return "crashing", f" 深跌({avg_20d:.0f}%) 等企稳"
     elif avg_20d < -3:
-        return "weak", "🔶 偏弱"
+        return "weak", " 偏弱"
     else:
-        return "neutral", "⚪ 中性"
+        return "neutral", " 中性"
 
 
 # ── 主入口 ─────────────────────────────────────────────────
@@ -776,7 +793,7 @@ def main():
         else:
             live_prices = prices.get("data", {}) if isinstance(prices, dict) and "_meta" in prices else {}
     except Exception as e:
-        print(f"  ⚠️ 实时行情获取失败: {e}，用kline量代替", file=sys.stderr)
+        print(f"  [警告] 实时行情获取失败: {e}，用kline量代替", file=sys.stderr)
     
     # ── 2. 大盘状态 ──
     regime, position_mult, regime_label = _get_regime(None, bench_trend)
@@ -785,7 +802,7 @@ def main():
     bench_60d = getattr(bench_trend, 'change_60d', 0)
     
     # ── 3. 大板块动量排名 ──
-    print("  📰 正在刷新新闻数据...", end=" ", flush=True)
+    print("   正在刷新新闻数据...", end=" ", flush=True)
     _refresh_news_data()
     
     news_signals = _load_news_signals()
@@ -794,12 +811,12 @@ def main():
     print()
     news_age_info = _get_news_freshness_label(news_signals)
     if news_age_info:
-        print(f"  📰 新闻源: {news_age_info}")
+        print(f"   新闻源: {news_age_info}")
     
     top3_mega = _get_top_mega_sectors(mega_sectors, trends, code_to_sector, news_signals=news_signals, top_n=6)
     
     if not top3_mega:
-        print("❌ 动量数据不足，无法推荐")
+        print("[FAIL] 动量数据不足，无法推荐")
         return
     
     # ── P0-2 门禁分层选板块：优先 ≥3层同向，再 2层，最后 1层(标记低置信) ──
@@ -916,40 +933,41 @@ def main():
     output["per_etf_position"] = f"{per_etf_pct}% (总仓位{int(position_mult*100)}% / 3只)"
     
     # ── P1-2: 持久化推荐日志（JSONL，供回测归因）──
-    # 幂等去重：同一天同一 ETF 只写一次。cron 可能多次触发，否则日志膨胀污染回测统计。
+    # 幂等去重：同一天只写第一次运行的推荐。cron 可能多次触发 (08:00 + 补跑),
+    # 若只按 code 去重, 第二次运行会生成不同 code 的推荐 (动量数据随时间变化)
+    # → 8/27 实测累积 8 只 (超用户红线 2-3只/周)。改为: 同一天已有任何记录则整批跳过。
     try:
         log_path = _HERE / "data" / "recommendations_log.jsonl"
         log_path.parent.mkdir(parents=True, exist_ok=True)
         today = now.strftime("%Y-%m-%d")
-        seen_codes = set()
+        date_already_logged = False
         if log_path.exists():
             with open(log_path, encoding="utf-8") as _f:
                 for _line in _f:
                     try:
                         _row = json.loads(_line)
                         if _row.get("date") == today:
-                            seen_codes.add(_row.get("code"))
+                            date_already_logged = True
+                            break
                     except Exception:
                         continue
-        with open(log_path, "a", encoding="utf-8") as f:
-            for rec in output["recommendations"]:
-                if rec["code"] in seen_codes:
-                    continue
-                seen_codes.add(rec["code"])
-                f.write(json.dumps({
-                    "recommendation_id": rec["recommendation_id"],
-                    "date": now.strftime("%Y-%m-%d"),
-                    "code": rec["code"],
-                    "name": rec["name"],
-                    "mega_sector": rec["mega_sector"],
-                    "layer_breakdown": rec["layer_breakdown"],
-                    "data_sources": rec["data_sources"],
-                    "kb_reasons": rec.get("kb_reasons", []),
-                    "position_pct": per_etf_pct,
-                    "regime": regime_label,
-                }, ensure_ascii=False) + "\n")
+        if not date_already_logged:
+            with open(log_path, "a", encoding="utf-8") as f:
+                for rec in output["recommendations"]:
+                    f.write(json.dumps({
+                        "recommendation_id": rec["recommendation_id"],
+                        "date": now.strftime("%Y-%m-%d"),
+                        "code": rec["code"],
+                        "name": rec["name"],
+                        "mega_sector": rec["mega_sector"],
+                        "layer_breakdown": rec["layer_breakdown"],
+                        "data_sources": rec["data_sources"],
+                        "kb_reasons": rec.get("kb_reasons", []),
+                        "position_pct": per_etf_pct,
+                        "regime": regime_label,
+                    }, ensure_ascii=False) + "\n")
     except OSError as e:
-        print(f"  ⚠️ 推荐日志写入失败: {e}", file=sys.stderr)
+        print(f"  [警告] 推荐日志写入失败: {e}", file=sys.stderr)
     
     # ── 显示输出 ──
     if "--json" in sys.argv:
@@ -957,7 +975,7 @@ def main():
         return
     
     print(f"\n{'='*60}")
-    print(f"🦞 周度ETF推荐 · 回测验证版 v17.0")
+    print(f" 周度ETF推荐 · 回测验证版 v17.0")
     print(f"{'='*60}")
     print(f"  时间: {now.strftime('%Y-%m-%d %H:%M')} | {state_label}")
     print()
@@ -969,15 +987,14 @@ def main():
     print("━━ 大板块动量排名 " + "━" * 25)
     
     for s, d in selected_mega:
-        arrow = "🟢" if d["adjusted_momentum"] > 2 else "🟡" if d["adjusted_momentum"] > 0 else "🔴"
+        arrow = "" if d["adjusted_momentum"] > 2 else "" if d["adjusted_momentum"] > 0 else ""
         news_tag = d.get("news_label", "")
+        cat_tag = d.get("catalyst_label", "")
         mom_raw = d["median_momentum"]
         mom_adj = d["adjusted_momentum"]
         maturity, maturity_label = _assess_momentum_maturity(s, trends, mega_sectors)
-        if news_tag:
-            print(f"  {arrow} {s:10s}: {mom_adj:>+6.1f}% (原始{mom_raw:+.1f}%) {news_tag} {maturity_label} ({d['etf_count']}/{d['total']}只)")
-        else:
-            print(f"  {arrow} {s:10s}: {mom_adj:>+6.1f}% {maturity_label} ({d['etf_count']}/{d['total']}只)")
+        tags = " ".join(t for t in (news_tag, cat_tag) if t)
+        print(f"  {arrow} {s:10s}: {mom_adj:>+6.1f}% (原始{mom_raw:+.1f}%) {tags} {maturity_label} ({d['etf_count']}/{d['total']}只)")
 
     if style_rotation_list:
         print()
@@ -1001,20 +1018,20 @@ def main():
     print("━━ 操作建议 " + "━" * 36)
     print()
     if position_mult < 0.5:
-        print("  ⚠️ 当前市场偏弱，建议轻仓或观望")
+        print("  [警告] 当前市场偏弱，建议轻仓或观望")
     else:
-        print("  🟢 买入（周五14:45前下单）：")
+        print("   买入（周五14:45前下单）：")
         for i, p in enumerate(final_picks, 1):
             print(f"     {p['code']} {p['name']} — 约{per_etf_pct}%资金")
     
     print()
-    print("  🔴 卖出：下周五14:45全清，按新信号换仓")
+    print("   卖出：下周五14:45全清，按新信号换仓")
     print()
     if position_mult < 1.0:
-        print(f"  💡 剩余 {100 - int(position_mult*100)}% 资金建议：货币ETF或逆回购")
+        print(f"  [提示] 剩余 {100 - int(position_mult*100)}% 资金建议：货币ETF或逆回购")
     
     print()
-    print(f"  📊 扫描ETF: {len(trends)}只 | 大板块: {len(mega_sectors)}个")
+    print(f"   扫描ETF: {len(trends)}只 | 大板块: {len(mega_sectors)}个")
     print(f"{'='*60}")
 
 
