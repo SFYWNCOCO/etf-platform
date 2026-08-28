@@ -4,45 +4,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 """two_week_picker.py — 2周潜在涨幅Top-3预测引擎 v3.5
-
-v3.5 (2026-07-19): 动态因子权重 — regime-conditional权重
-  - 恐慌期: oversold_depth 40%→21%, sector_flow 10%→26%
-  - 对标 arxiv:2410.14841 (Dynamic Factor Allocation with Regime-Switching)
-  - 集成 factor_dynamic_weights.py
-
-v3.4 (2026-07-19): 锦标赛融合 — 锦标赛winner获+2.5~7.5分boost
-  - 超跌深度 12%→25% (IC=0.876, 之前严重低估)
-  - 回撤修复 7%→19% (IC=0.680)
-  - 行为Alpha 15%→0% (IC=0.000, 完全无效→移除)
-  - 质量弹性 15%→2% (IC=0.076, p=0.41不显著)
-  - 行业资金流 10%→7% (IC=0.255)
-  - 风险调整动量 25%→22% (与趋势动量高度相关→微降)
-
-v3.1 (2026-07-18): 权重重平衡
-  - 动量50% (趋势25%+风险调整25%) + 弹性15% + 行为15% + 反转20% (超跌12%+回撤8%)
-  - 消除v3.0"跌最多=最高分"的结构性偏差根源
-  - 移除量比健康度/位置健康度(与动量因子信息重叠)
-
-v3.0 (2026-07-18): Z-score标准化多因子体系
-  - 所有因子在候选池内Z-score标准化后加权合成
-  - Top 3强制行业去重（3只必须来自不同行业）
-
-v2.0: 不依赖鬼缓存, batch_full()实时跑pipeline, 排除宽基/债券
-
-核心逻辑（来自l003知识库）:
-  - 高分(>7) = 安全无催化剂 → 不适合短期
-  - 低分(<4) + 强动量 = 催化剂弹性 → 短期大涨潜力最大
-
-评分公式 (v3.1):
-  2W_Score = Σ(Z-score(factor_i) × weight_i) × 100
-  
-  5 factors (behavioral removed, weights normalized):
-    oversold_depth (40%): Z(-change_20d) — 合并后超跌深度 (原trend_momentum已移除, v3.3)
-    risk_adj_momentum (25%): Z(change_20d / volatility) — 风险调整动量
-    quality_elastic (15%): Z(-pipeline_score) — 质量弹性(低分=高弹性)
-    behavioral (15%): Z(behavioral_alpha - 50) — 行为Alpha
-    oversold_depth (12%): Z(-change_20d) — 超跌深度(博弈反弹)
-    drawdown_recov (8%): Z(-max_drawdown) — 回撤修复潜力
+  [2026-08-29 生产审计降级] 回测 8/10: event_accuracy=43.3% (30事件),
+  <50% 随机水平。事件方向判断分化严重 (日本限光刻胶预测利空实际涨13-15%),
+  金ETF突破3000预测方向错误。不在生产链路 (cron 不调用, weekly_top3 不消费).
+  CLI 'etf picker' 保留供人工研究参考, 不用于自动推荐。
+  对标 weekly_top3 (动量轮动 夏普1.75) 作为生产入口。
 """
 import sys
 import json
@@ -480,7 +446,7 @@ def pick_top3(
     candidates = _build_candidate_pool(etfs, qvix_regime, max_candidates, debug)
     if len(candidates) < 3:
         if debug:
-            print("  ⚠️ 候选池不足3只, 无法选Top3")
+            print("  [警告] 候选池不足3只, 无法选Top3")
         return [], []
 
     codes = [c[0] for c in candidates]
@@ -493,7 +459,7 @@ def pick_top3(
     n_valid = len(scored_indices)
     if n_valid < 3:
         if debug:
-            print(f"  ⚠️ 有效数据不足 ({n_valid}<3)")
+            print(f"  [警告] 有效数据不足 ({n_valid}<3)")
         return [], []
 
     top3, all_scored = _compute_scores_and_rank(z_factors, candidates, pipe_map, trend_map, scored_indices, profile, qvix_regime, debug)
@@ -514,14 +480,14 @@ def format_report(top3: list[dict], date_str: str = "") -> str:
         date_str = date.today().isoformat()
 
     lines = [
-        f"📈 ETF 2周预测 Top 3 — {date_str}  [v3.0 Z-score多因子]",
+        f" ETF 2周预测 Top 3 — {date_str}  [v3.0 Z-score多因子]",
         f"{'=' * 65}",
     ]
     for i, r in enumerate(top3, 1):
         c = (
-            "🔴"
+            ""
             if r["risk_level"] >= 0.7
-            else ("🟡" if r["risk_level"] >= 0.4 else "🟢")
+            else ("" if r["risk_level"] >= 0.4 else "")
         )
         score_display = f"{r['two_week_score']}/100" if r['two_week_score'] is not None else "N/A"
         lines.extend([
