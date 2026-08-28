@@ -37,7 +37,7 @@ def _safe(value, decimals=2):
 def _run_acceptance():
     """尾部自动验收：断言今日产物，写 data/etf_acceptance_latest.json。"""
     print()
-    print("## ✅ 自动验收")
+    print("## [OK] 自动验收")
     try:
         import acceptance_check
         result = acceptance_check.validate_daily_outputs()
@@ -45,29 +45,29 @@ def _run_acceptance():
         if not isinstance(result, dict) or not isinstance(checks, list):
             raise ValueError("validate_daily_outputs 返回结构异常")
     except Exception as e:
-        print(f"❌ 验收器故障: {type(e).__name__}: {str(e)[:200]}")
+        print(f"[FAIL] 验收器故障: {type(e).__name__}: {str(e)[:200]}")
         return
 
     if not result.get("all_ok", False):
-        print("⚠️ 验收告警")
+        print("[警告] 验收告警")
     for c in checks:
-        mark = "✅" if c.get("ok") else "❌"
+        mark = "[OK]" if c.get("ok") else "[FAIL]"
         print(f"- {mark} {c.get('name', '?')}: {c.get('detail', '')}")
 
     out = BASE / "data" / "etf_acceptance_latest.json"
     try:
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     except Exception as e:
-        print(f"❌ 验收结果写入失败: {type(e).__name__}: {str(e)[:120]}")
+        print(f"[FAIL] 验收结果写入失败: {type(e).__name__}: {str(e)[:120]}")
 
 
 def main():
-    print(f"# 🦞 ETF 每日巡检快报")
+    print(f"#  ETF 每日巡检快报")
     print(f"> {datetime.now().strftime('%Y-%m-%d %H:%M')} | 轻量模式(<60s)")
     print()
 
     # ==================== Sina 全量 spot ====================
-    print("## 🟢 市场概览 (Sina 实时快照)")
+    print("##  市场概览 (Sina 实时快照)")
     print()
 
     try:
@@ -98,15 +98,15 @@ def main():
             print(f"- 今日最弱: {df.iloc[worst_idx]['代码']} {df.iloc[worst_idx]['名称']} ({df.iloc[worst_idx]['涨跌幅']})")
         else:
             print(f"- 可投 ETF 总数: **{total}**，上涨 {up}，下跌 {down}，平盘 {flat}")
-            print("- ⚠️ 涨跌幅解析失败，仍给出总量统计")
+            print("- [警告] 涨跌幅解析失败，仍给出总量统计")
 
     except Exception as e:
-        print(f"> ⚠️ Sina spot 失败: {type(e).__name__}: {str(e)[:140]}")
+        print(f"> [警告] Sina spot 失败: {type(e).__name__}: {str(e)[:140]}")
 
     print()
 
     # ==================== Top3 推荐（直接复用 weekly_top3.py --json）====================
-    print("## 🏆 本周 Top 3 推荐")
+    print("## [推荐] 本周 Top 3 推荐")
     print()
 
     try:
@@ -118,7 +118,7 @@ def main():
         )
         if proc.returncode == 0:
             out = proc.stdout or ""
-            # weekly_top3.py prints progress lines (📡/📰) before the JSON payload.
+            # weekly_top3.py prints progress lines (/) before the JSON payload.
             # Locate the first '{' to strip human-readable prefix noise.
             json_start = out.find("{")
             if json_start < 0:
@@ -201,22 +201,32 @@ def main():
                     print(f"| {sec} | {mom_s} | {sent} | {cnt} |")
         else:
             err = (proc.stderr or proc.stdout).strip()[-300:]
-            print(f"> ⚠️ weekly_top3 失败(exit={proc.returncode}): {err}")
+            print(f"> [警告] weekly_top3 失败(exit={proc.returncode}): {err}")
 
     except Exception as e:
-        print(f"> ⚠️ Top3 计算失败: {type(e).__name__}: {str(e)[:140]}")
+        print(f"> [警告] Top3 计算失败: {type(e).__name__}: {str(e)[:140]}")
         print("> 跳过推荐模块（不影响市场概览数据）")
 
     print()
     _run_acceptance()
     print()
-    print("## ⚠️ 风险提示")
+    # 补写 feishu 报告 (patrol wrapper 原未调 run_patrol → data/etf_patrol_feishu.md
+    # 停在 2026-07-01 25 天). run_patrol 含 watchlist+screener+feishu 落盘,
+    # 超时 180s 降级不中断 cron.
+    try:
+        sys.path.insert(0, str(BASE / "src"))
+        from etf_platform.patrol.daily import run_patrol
+        run_patrol(archive=False)
+    except Exception as e:
+        print(f"> [警告] patrol_feishu 写入失败: {type(e).__name__}: {str(e)[:140]}")
+    print()
+    print("## [警告] 风险提示")
     print("- 数据来源: Sina 实时行情 + 20日动量排名")
     print("- 轻量巡检不包含深层 KB 穿透；需要完整分析请手动运行 `python weekly_top3.py`")
     print("- 本报告基于量化模型，不构成投资建议")
     print()
     print("---")
-    print("* 报告生成时间目标: <60s *")
+    print("* 报告生成时间目标: <240s *")
 
 
 if __name__ == "__main__":
