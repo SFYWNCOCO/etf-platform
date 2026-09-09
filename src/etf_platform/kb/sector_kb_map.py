@@ -54,7 +54,7 @@ SECTOR_KB_CODES: dict[str, list[dict[str, str]]] = {
         {"kcode": "k924", "title": "钠离子电池 产业化深化 2026", "source_file": "industry/k924_sodium_ion_battery_industrialization_deep_2026.md"},
     ],
     "医药": [
-        {"kcode": "k725", "title": "癌症免疫治疗2026前沿进展", "source_file": "k725_cancer_immunotherapy.md"},
+        {"kcode": "k725", "title": "癌症免疫治疗2026前沿进展", "source_file": "industry/k725_cancer_immunotherapy.md"},
         {"kcode": "k812", "title": "中国医药生物与创新驱动药行业调查 2026", "source_file": "industry/k812_biopharma_innovation_2026.md"},
         {"kcode": "k819", "title": "中国合成生物学产业 2026进展更新", "source_file": "industry/k819_synthetic_biology_2026_update.md"},
         {"kcode": "k827", "title": "生物制造 2026深化调查", "source_file": "industry/k827_biomanufacturing_deep_dive_2026.md"},
@@ -85,7 +85,7 @@ SECTOR_KB_CODES: dict[str, list[dict[str, str]]] = {
         {"kcode": "k917", "title": "低空经济 四小龙取证决胜 2026", "source_file": "industry/k917_low_altitude_economy_four_dragon_TC_2026.md"},
     ],
     "量子计算": [
-        {"kcode": "k729", "title": "量子计算2026进展与实用化", "source_file": "k729_quantum_computing.md"},
+        {"kcode": "k729", "title": "量子计算2026进展与实用化", "source_file": "theory/k729_quantum_computing.md"},
         {"kcode": "k786", "title": "量子深化——容错量子计算 2026 进展与路线图", "source_file": "theory/k786_容错量子计算2026进展.md"},
         {"kcode": "k821", "title": "中国量子计算 2026 深度调查", "source_file": "industry/k821_quantum_computing_2026.md"},
         {"kcode": "k849", "title": "量子计算 2026深化调查", "source_file": "industry/k849_quantum_computing_deep_dive_2026.md"},
@@ -131,7 +131,7 @@ SECTOR_KB_CODES: dict[str, list[dict[str, str]]] = {
     ],
     "周期/资源": [
         {"kcode": "k088", "title": "大宗商品系统框架", "source_file": "theory/k088-commodity-systematic-framework.md"},
-        {"kcode": "k742", "title": "AI×材料科学交叉知识体系", "source_file": "k742_materials_science_ai.md"},
+        {"kcode": "k742", "title": "AI×材料科学交叉知识体系", "source_file": "industry/k742_materials_science_ai.md"},
         {"kcode": "k814", "title": "中国稀土永磁材料行业 2026 深度调查", "source_file": "industry/k814_rare_earth_magnets_2026.md"},
         {"kcode": "k833", "title": "中国新材料 2026 深度调查", "source_file": "industry/k833_advanced_materials_2026.md"},
         {"kcode": "k962", "title": "外汇储备结构真相与黄金困境", "source_file": "theory/k962_外汇储备结构真相与黄金困境.md"},
