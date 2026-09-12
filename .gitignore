@@ -69,4 +69,8 @@ data/*.tmp
 data/predictions/
 data/etf_close_report_latest.md
 data/multi_dimension_alert_latest.md
+# 补漏 (2026-09-12 #104): 以下 cron 运行时产物原漏列, 致永久 ?? 噪声 + 误 git add 风险
+data/position_history.jsonl
+data/investment_learnings.md
+data/reports/
 # 继续跟踪: data/kb_registry.json / data/sector_flow_map.json 等配置语义文件
