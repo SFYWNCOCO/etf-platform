@@ -28,7 +28,9 @@ from ..config_loader import load_etfs, load_delisted_codes, load_backtest
 logger = logging.getLogger(__name__)
 
 BASE = Path(__file__).resolve().parent.parent.parent.parent
-BACKTEST_CACHE = BASE / "etf-platform" / "data_cache" / "backtest_results.json"
+# 2026-09-16 审核: 同上, 原路径落到 etf-platform/etf-platform/data_cache/,
+# 与本文件文档头声称的 data_cache/backtest_results.json 不符。
+BACKTEST_CACHE = BASE / "data_cache" / "backtest_results.json"
 
 # v9.0: 交易成本和cutoff日期从 config/backtest.yaml 加载,带默认回退
 try:
@@ -78,10 +80,11 @@ def _fetch_history(code, force_refresh=False):
         import akshare as ak
         pfx = "sh" if code.startswith("51") else "sz"
         # 修复: 优先用 qfq 前复权(与 data/kline.py 一致),旧版 akshare 不支持 adjust 则回退
+        from ..utils.thread_timeout import run_with_timeout
         try:
-            df = ak.fund_etf_hist_sina(symbol=pfx+code, adjust="qfq")
+            df = run_with_timeout(ak.fund_etf_hist_sina, symbol=pfx+code, adjust="qfq", timeout=30)
         except TypeError:
-            df = ak.fund_etf_hist_sina(symbol=pfx+code)
+            df = run_with_timeout(ak.fund_etf_hist_sina, symbol=pfx+code, timeout=30)
         if df is None or len(df)==0: return []
         data = [{"date":str(r.get("date","")),"close":float(r.get("close",0))} for _,r in df.iterrows()]
         with _CACHE_LOCK:

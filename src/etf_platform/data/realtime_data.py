@@ -64,7 +64,8 @@ def fetch_realtime_etf_data() -> pd.DataFrame:
     """
     try:
         import akshare as ak
-        df = ak.fund_etf_spot_em()
+        from ..utils.thread_timeout import run_with_timeout
+        df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
         if df is None or df.empty:
             logger.warning("[realtime] akshare返回空数据")
             return pd.DataFrame()

@@ -17,6 +17,7 @@ import logging
 from pathlib import Path
 
 from ..utils.thread_timeout import run_with_timeout
+from ..utils.net_guard import call_v8
 
 logger = logging.getLogger(__name__)
 
@@ -126,10 +127,13 @@ def _get_sector_momentum(sector: str) -> float:
         import akshare as ak
         from datetime import datetime
         # symbol=sector 取该行业日线; 默认 end_date 停在 20240108, 必须动态传当前日期
-        df = run_with_timeout(
+        # 2026-09-16 审核 P0-1: 该 THS 接口底层是 py_mini_racer(V8)，非线程安全。
+        # 原 run_with_timeout 超时后遗弃线程 -> 下一线程并发初始化 V8 -> 进程 abort。
+        # 改用 call_v8: 全局串行 + 超时即进程内熔断，降级为「当日该数据源失效」。
+        ok, df = call_v8(
             ak.stock_board_industry_index_ths,
             symbol=sector, end_date=datetime.now().strftime("%Y%m%d"), timeout=30)
-        if df is None or len(df) < 21:
+        if not ok or df is None or len(df) < 21:
             return 0.0
         closes = df["收盘价"].tail(21).astype(float)
         pct = (closes.iloc[-1] / closes.iloc[0] - 1) * 100

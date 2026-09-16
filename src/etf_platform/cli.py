@@ -824,7 +824,10 @@ def app():
         name = code
         try:
             import akshare as ak
-            spot_df = ak.fund_etf_spot_em()
+            from etf_platform.utils.thread_timeout import run_with_timeout
+            spot_df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
+            if spot_df is None or spot_df.empty:
+                raise RuntimeError("实时行情超时或为空")
             etf_row = spot_df[spot_df['代码'].astype(str) == code]
             if not etf_row.empty:
                 r = etf_row.iloc[0]

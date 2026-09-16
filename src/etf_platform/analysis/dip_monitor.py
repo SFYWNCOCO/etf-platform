@@ -15,7 +15,10 @@ import logging
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, date
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:  # 仅类型检查期可见: 运行时保持「无 pandas 也能 import 本模块」
+    import pandas as pd
 # ponytail: pandas 只在 DIPMonitor 类方法内用，score_dip_layer(pipeline 唯一调用点)纯逻辑不依赖。
 # 顶层不 import，避免 Hermes venv 无 pandas 时整个模块不可导入→L24 静默死层。
 
@@ -74,7 +77,11 @@ class DIPMonitor:
         import pandas as pd
         try:
             import akshare as ak
-            df = ak.fund_etf_spot_em()
+            from ..utils.thread_timeout import run_with_timeout
+            df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
+            if df is None or df.empty:
+                logger.error("[DIP] 实时行情超时或为空")
+                return pd.DataFrame()
             logger.info(f"[DIP] 获取到 {len(df)} 只ETF实时行情")
             return df
         except ImportError:

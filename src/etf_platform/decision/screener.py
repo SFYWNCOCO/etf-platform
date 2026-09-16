@@ -216,13 +216,17 @@ def _premium_penalty(code: str, spot_df=None) -> dict:
     """
     try:
         import akshare as ak
+        from ..utils.thread_timeout import run_with_timeout
     except ImportError:
         return {"premium_pct": 0, "penalty": 0, "signal": "akshare_not_available"}
 
     try:
         # 方法1: 用IOPV实时计算折溢价(盘中可用)
         try:
-            spot = spot_df if spot_df is not None else ak.fund_etf_spot_em()
+            spot = spot_df if spot_df is not None else run_with_timeout(
+                ak.fund_etf_spot_em, timeout=30)
+            if spot is None:
+                return {"premium_pct": 0, "penalty": 0, "signal": "no_data"}
             row = spot[spot["代码"] == code]
             if not row.empty:
                 r = row.iloc[0]
@@ -232,7 +236,9 @@ def _premium_penalty(code: str, spot_df=None) -> dict:
                     premium = (price / float(iopv) - 1) * 100
                 else:
                     # 回退到日末数据
-                    df = ak.fund_etf_fund_daily_em()
+                    df = run_with_timeout(ak.fund_etf_fund_daily_em, timeout=30)
+                    if df is None or df.empty:
+                        return {"premium_pct": 0, "penalty": 0, "signal": "no_data"}
                     frow = df[df["基金代码"] == code]
                     if not frow.empty:
                         raw = frow.iloc[0].get("折价率", 0)
@@ -387,7 +393,10 @@ def _get_liquid_codes(etf_dict):
     liquid = set()
     try:
         import akshare as ak
-        df = ak.fund_etf_spot_em()
+        from ..utils.thread_timeout import run_with_timeout
+        df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
+        if df is None or df.empty:
+            raise RuntimeError("spot data unavailable")
         for _, row in df.iterrows():
             code = str(row.get("代码", ""))
             amount = float(row.get("成交额", 0) or 0)
@@ -546,7 +555,8 @@ def screen(limit: int = None, profile: str = "均衡", top_n: int = 10, codes: l
     spot_df = None
     try:
         import akshare as ak
-        spot_df = ak.fund_etf_spot_em()
+        from ..utils.thread_timeout import run_with_timeout
+        spot_df = run_with_timeout(ak.fund_etf_spot_em, timeout=30)
         print("  获取实时数据(行情+折溢价)+趋势+新闻动态评分...")
     except Exception:
         spot_df = None

@@ -23,7 +23,8 @@ class AKShareSource(PriceSource):
             return None
         try:
             # Use akshare's ETF realtime function - fund_etf_spot_em provides real-time trading data
-            df = akshare.fund_etf_spot_em()
+            from ..utils.thread_timeout import run_with_timeout
+            df = run_with_timeout(akshare.fund_etf_spot_em, timeout=30)
             if df is None or df.empty:
                 return None
             row = df[df["代码"] == code]

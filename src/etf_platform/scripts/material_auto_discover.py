@@ -32,7 +32,10 @@ _NON_MATERIAL = {
 def fetch_futures_products():
     """拉取全市场期货合约, 按品种去重."""
     import akshare as ak
-    df = ak.futures_comm_info()
+    from ..utils.thread_timeout import run_with_timeout
+    df = run_with_timeout(ak.futures_comm_info, timeout=30)
+    if df is None or df.empty:
+        return []
     products = set()
     for raw in df["合约名称"].astype(str):
         name = re.sub(r"\d{3,4}", "", raw).strip()  # 去合约月份 "黄金2608"→"黄金"

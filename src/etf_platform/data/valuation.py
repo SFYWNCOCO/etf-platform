@@ -70,8 +70,9 @@ def get_fund_snapshot(code: str) -> Optional[FundSnapshot]:
     try:
         import akshare
         import warnings
+        from ..utils.thread_timeout import run_with_timeout
         warnings.filterwarnings("ignore")
-        df = akshare.fund_etf_fund_daily_em()
+        df = run_with_timeout(akshare.fund_etf_fund_daily_em, timeout=30)
         row = df[df.iloc[:, 0].astype(str) == code]
         if not row.empty:
             r = row.iloc[0]

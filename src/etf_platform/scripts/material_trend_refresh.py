@@ -37,7 +37,8 @@ def calc_trend(symbol: str, days: int = 60) -> str | None:
     """主力连续 60 日涨跌 → 趋势描述. 数据不足返回 None."""
     try:
         import akshare as ak
-        df = ak.futures_main_sina(symbol=symbol)
+        from ..utils.thread_timeout import run_with_timeout
+        df = run_with_timeout(ak.futures_main_sina, symbol=symbol, timeout=30)
         if df is None or len(df) < 20:
             return None
         closes = df["收盘价"].astype(float)

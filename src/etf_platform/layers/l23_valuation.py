@@ -218,7 +218,8 @@ def _fetch_industry_board_PE_PB(board_name: str) -> dict | None:
     """
     try:
         import akshare as ak
-        df = ak.stock_board_industry_cons_em(symbol=board_name)
+        from ..utils.thread_timeout import run_with_timeout
+        df = run_with_timeout(ak.stock_board_industry_cons_em, symbol=board_name, timeout=30)
         if df is None or len(df) == 0:
             return None
         entry = _parse_industry_board(df)
@@ -247,7 +248,8 @@ def _cached_industry_board(board_name: str) -> dict | None:
 
     try:
         import akshare as ak
-        df = ak.stock_board_industry_cons_em(symbol=board_name)
+        from ..utils.thread_timeout import run_with_timeout
+        df = run_with_timeout(ak.stock_board_industry_cons_em, symbol=board_name, timeout=30)
         if df is not None and len(df) > 0:
             entry = _parse_industry_board(df)
             if entry:

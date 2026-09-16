@@ -81,7 +81,9 @@ class RankingManager:
         """获取指数型基金数据"""
         try:
             import akshare as ak
-            df = ak.fund_info_index_em(symbol="全部", indicator="被动指数型")
+            from ..utils.thread_timeout import run_with_timeout
+            df = run_with_timeout(
+                ak.fund_info_index_em, symbol="全部", indicator="被动指数型", timeout=30)
             logger.info(f"[RANK] 获取到 {len(df)} 只指数型基金")
             return df
         except Exception as e:
