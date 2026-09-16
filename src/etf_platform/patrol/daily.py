@@ -7,7 +7,9 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 BASE = Path(__file__).resolve().parent.parent.parent.parent
-PATROL_OUT = BASE / "etf-platform" / "data" / "patrol_latest.json"
+# 2026-09-16 审核: BASE 已是项目根, 再拼 "etf-platform" 会写到 etf-platform/etf-platform/,
+# 而无人从该处读取(顶层 data/patrol_latest.json 一直缺失)。修正为与 FEISHU_OUT 同级。
+PATROL_OUT = BASE / "data" / "patrol_latest.json"
 FEISHU_OUT = BASE / "data" / "etf_patrol_feishu.md"
 
 

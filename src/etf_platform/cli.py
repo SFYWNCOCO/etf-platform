@@ -161,16 +161,11 @@ def app():
     import threading as _t
     def _pre_warm():
         run_full("159995", live=False)  # pipeline layers (~2s)
-        try:  # spot data for screen() — saves ~22s on first scan
-            import akshare as ak
-            df = ak.fund_etf_spot_em()
-            from src.etf_platform.decision.screener import _spot_cache, _SPOT_CACHE_LOCK
-            import time as _time
-            with _SPOT_CACHE_LOCK:
-                _spot_cache["df"] = df
-                _spot_cache["ts"] = _time.time()
-        except (ImportError, KeyError, ValueError, TypeError, AttributeError, OSError, IndexError, StopIteration):
-            pass  # silent catch — pre-warm is non-critical
+        # 2026-09-16 audit: the old "spot pre-warm" wrote screener._spot_cache /
+        # _SPOT_CACHE_LOCK, but screener never defined those symbols -> ImportError
+        # was swallowed by the except below, so the pre-warm never worked (dead code).
+        # Removed; to restore this optimization, implement a real module-level spot
+        # cache inside screener first.
     _t.Thread(target=_pre_warm, name="etf-pre-warm", daemon=True).start()
 
     if not args or args[0] in ("-h", "--help"):
